@@ -1,0 +1,51 @@
+// launch.json is Node.j config used for to launch an app for Debugging.
+//
+/***************/
+/* Debug React */
+/***************/
+// run (from cmd): node app.js
+// run (from the Terminal): npm start
+// close the opened browser.
+// make sure Allow CORS: Access-Control-Allow-Origin Extension is turned on.
+// run Debug.
+// browse to: http://localhost:3000/?title=aryeh5
+//
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}
+
+/*****************/
+/* Debug Node.js */
+/*****************/
+// run Debug.
+// run: npm start
+// browse to: http://localhost:3000/comments/?title=aryeh5
+// {
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "type": "node",
+//       "request": "launch",
+//       "name": "Launch Program",
+//       "program": "${workspaceFolder}/app.js",
+//       "skipFiles": ["<node_internals>/**"]
+//     },
+
+//     {
+//       "type": "node",
+//       "request": "launch",
+//       "name": "Launch Program",
+//       "skipFiles": ["<node_internals>/**"],
+//       "program": "${workspaceFolder}\\start"
+//     }
+//   ]
+// }
