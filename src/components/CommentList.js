@@ -22,7 +22,6 @@ export default function CommentList(props) {
             />
           ))
         : {}}
-      ;
     </div>
   );
 }

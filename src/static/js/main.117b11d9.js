@@ -8418,7 +8418,7 @@ module.exports = (string, separator) => {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Comment__ = __webpack_require__(86);
-function CommentList(props){return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div",{className:"commentList"},__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("h5",{className:"text-muted mb-4"},__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("span",{className:"badge badge-success"},props.comments.length)," ","Comment",props.comments.length>0?"s":""),props.comments.length===0&&!props.loading?__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div",{className:"alert text-center alert-info"},"Be the first to comment"):null,props.comments.map!=undefined?props.comments.map(function(comment,index){return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__Comment__["a" /* default */],{key:index,comment:comment,comments_app:props.comments_app});}):{},";");}
+function CommentList(props){return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div",{className:"commentList"},__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("h5",{className:"text-muted mb-4"},__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("span",{className:"badge badge-success"},props.comments.length)," ","Comment",props.comments.length>0?"s":""),props.comments.length===0&&!props.loading?__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div",{className:"alert text-center alert-info"},"Be the first to comment"):null,props.comments.map!=undefined?props.comments.map(function(comment,index){return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__Comment__["a" /* default */],{key:index,comment:comment,comments_app:props.comments_app});}):{});}
 
 /***/ }),
 /* 86 */
@@ -23521,4 +23521,4 @@ registerValidSW(swUrl);}}).catch(function(){console.log('No internet connection 
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=main.608eb0cd.js.map
+//# sourceMappingURL=main.117b11d9.js.map
