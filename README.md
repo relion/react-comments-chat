@@ -1,6 +1,6 @@
 ## React Advanced Comment
 
-Full stack React and Node.js Comments rooms. Implemented with WebSockets.
+Full stack React and Node.js Comments rooms App. Implemented with WebSockets.
 A comment can be: Added, Removed, Edited. all reflected on other browsers in the same url.
 
 ### Installation
@@ -16,6 +16,8 @@ Aryeh Tuchfeld (relion)
 
 based on [QCode.in](http://www.qcode.in)
 [MIT license](http://opensource.org/licenses/MIT).
+checkout the tutorial on [QCode.in](https://www.qcode.in/learn-react-by-creating-a-comment-app)
+![react comments](https://i2.wp.com/www.qcode.in/wp-content/uploads/2018/07/react-comment-app.png?resize=1200%2C811&ssl=1)
 
 bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
