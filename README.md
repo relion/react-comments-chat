@@ -10,6 +10,8 @@ A comment can be: Added, Removed, Edited. all reflected on other browsers in the
 3.  run `npm start`
 4.  Use the link with a title: http://localhost/comments/?title=test_room
 
+<img src="images/advance_react_comments_room_snapshot.png" title="Advance react comments room snapshot">
+
 ### Author
 
 Aryeh Tuchfeld (relion)
