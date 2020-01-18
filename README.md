@@ -21,7 +21,7 @@ Based on [QCode.in](https://www.qcode.in/learn-react-by-creating-a-comment-app) 
 
 ### Keywords
 
-chat, room, comments, solved, simple, working, full-stack, react, node.js, websocket.
+chat, room, comments, solved, working, full-stack, react, node.js, websocket.
 
 ### Configure AWS WebSocekt
 
