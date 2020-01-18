@@ -27,4 +27,5 @@ chat room comments solved simple working full-stack react node.js websocket
 
 1. Notice the file: \.ebextensions\enable-websockets.config
 2. The WebSocket Server is set to port: 3030 (you can choose a differnt number).
-3. See my video instructions on How to Configure the Node.js with WebSocket on AWS Elastic Beanstalk: [![](http://img.youtube.com/vi/E_-mBnRHsYc/0.jpg)](http://www.youtube.com/watch?v=E_-mBnRHsYc "Configuring Node.js Server with WebSocket on AWS Elastic Beanstalk")
+3. See my video instructions on How to Configure the Node.js with WebSocket on AWS Elastic Beanstalk:
+   [![](http://img.youtube.com/vi/E_-mBnRHsYc/0.jpg)](http://www.youtube.com/watch?v=E_-mBnRHsYc "Configuring Node.js Server with WebSocket on AWS Elastic Beanstalk")
