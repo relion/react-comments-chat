@@ -16,8 +16,7 @@ Comments can be added, removed and edited all being reflected in real-time in al
 
 Aryeh Tuchfeld (relion)
 
-Based on [QCode.in](https://www.qcode.in/learn-react-by-creating-a-comment-app) tutorial
-![react comments](https://i2.wp.com/www.qcode.in/wp-content/uploads/2018/07/react-comment-app.png?resize=1200%2C811&ssl=1)
+based on [QCode.in](https://www.qcode.in/learn-react-by-creating-a-comment-app) tutorial.
 
 ### Keywords
 
