@@ -10,7 +10,7 @@ Comments can be added, removed and edited all being reflected in real-time in al
 3.  Run `npm start`
 4.  Use the link with a title: http://localhost/comments/?title=test_room
 
-<img src="images/react_comments_room_snapshot.png" title="Advance react comments room snapshot">
+<img src="images/react_comments_room_snapshot.png" title="React comments room snapshot">
 
 ### Author
 
