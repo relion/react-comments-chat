@@ -33,20 +33,12 @@ class App extends Component {
     // loading
   }
 
-  /**
-   * Add new comment
-   * @param {Object} comment
-   */
   addComment(comment) {
     this.setState({
       loading: false,
       comments: [...this.state.comments, comment]
     });
   }
-
-  // onNameChanged(name) {
-  //   this.setState({ name: name });
-  // }
 
   editSaveComment(new_message, comment) {
     comment.message = new_message;
@@ -125,7 +117,6 @@ class App extends Component {
   }
 
   handleWebsocketReceivedData(msg) {
-    //alert("here");
     if (
       //msg.op == undefined) {
       !msg.includes("op")
@@ -227,7 +218,6 @@ class App extends Component {
             </h6>
             <CommentForm
               addComment={this.addComment}
-              onNameChanged={this.onNameChanged}
               comments_app={this}
               browser_id={this.state.browser_id}
             />
@@ -250,10 +240,7 @@ class App extends Component {
 if (window.Notification && Notification.permission !== "granted") {
   Notification.requestPermission(function(status) {
     if (Notification.permission !== "granted") {
-      //alert("Notification.permission was NOT granted.");
-      //Notification.permission = status;
-    } else {
-      //alert("Notification.permission was granted!");
+      alert("Notification.permission was NOT granted.");
     }
   });
 }
