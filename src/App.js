@@ -130,18 +130,17 @@ class App extends Component {
       //msg.op == undefined) {
       !msg.includes("op")
     ) {
-      // lilo
+      // lilo: todo: msg should be always a json: { op: "ws_connected", browser_id: "" }
       this.setState({
         browser_id: msg
       });
       this.setState({ loading: true });
 
-      // get all the comments
       fetch(
         global.server_url +
           "?" +
           window.location.title_arg +
-          "op=comment_read" +
+          "op=get_all_comments" +
           "&browser_id=" +
           this.state.browser_id
       )
@@ -195,22 +194,12 @@ class App extends Component {
           }
           break;
       }
+      showNotification("MY_TITLE", "MY_MESSAGE", "/images/notification.png");
     }
-
-    // json_str
-
-    // var new_comment_json = JSON.parse(json_str);
-    // //console.log("got a Message from the Server: " + message);
-    // var new_comments = [...this.state.comments, new_comment_json];
-    // // new_comments[0].message = json.message;
-    // this.setState({
-    //   loading: false,
-    //   comments: new_comments
-    // });
   }
 
   render() {
-    var port = ":3030"; //":8080";
+    var port = ":3030";
     const loadingSpin = this.state.loading ? "App-logo Spin" : "App-logo";
     return (
       <div className="App container bg-light shadow">
@@ -255,6 +244,27 @@ class App extends Component {
       </div>
     );
   }
+}
+
+// chrome://settings/content/notifications
+if (window.Notification && Notification.permission !== "granted") {
+  Notification.requestPermission(function(status) {
+    if (Notification.permission !== "granted") {
+      //alert("Notification.permission was NOT granted.");
+      //Notification.permission = status;
+    } else {
+      //alert("Notification.permission was granted!");
+    }
+  });
+}
+
+function showNotification(title, body, icon) {
+  new Notification(title, {
+    body: body,
+    icon: icon,
+    vibrate: [200, 100, 200, 100, 200, 100, 200],
+    tag: "vibration-sample"
+  });
 }
 
 export default App;

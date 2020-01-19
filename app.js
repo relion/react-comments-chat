@@ -3,6 +3,7 @@
 const url = require("url");
 const express = require("express");
 express.static("/static");
+express.static("/images");
 const app = express();
 app.set("port", process.env.PORT || 80);
 app.use("/", express.static("src"));
@@ -132,7 +133,7 @@ function handle_request(req, res) {
     comments_json_ar.push(comment_json);
     fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
     res.write(JSON.stringify(comment_json));
-  } else if (op == "comment_read") {
+  } else if (op == "get_all_comments") {
     if (browsers_ids_by_title[page_title] == undefined)
       browsers_ids_by_title[page_title] = [];
     browsers_ids_by_title[page_title].push(req.query.browser_id);
