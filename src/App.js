@@ -27,11 +27,10 @@ class App extends Component {
     if (global.title == undefined || global.title == "") {
       global.title = "ראשי";
     }
-    document.title = "WCC " + global.title;
   }
 
   componentDidMount() {
-    // loading
+    document.title = "WCC " + global.title;
   }
 
   addComment(comment) {
@@ -201,11 +200,11 @@ class App extends Component {
         />
         <header className="App-header">
           <img src={logo} className={loadingSpin} alt="logo" />
-          <h1 className="App-title" dir="rtl">
+          <h1 className="App-title" dir="ltr">
             <span className="px-2" role="img" aria-label="Chat">
               💬
             </span>
-            דף הערות <b>{global.title}</b>
+            Comments Room: <b>{global.title}</b>
             <span className="px-2" role="img" aria-label="Chat">
               💬
             </span>
