@@ -30,7 +30,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    document.title = "WCC " + global.title;
+    //document.title = "WCC " + global.title;
   }
 
   addComment(comment) {
