@@ -83,8 +83,8 @@ scheme
     app
   )
   .listen(app.get("port"), () => {
-  console.log("Server running at: http://localhost" + `:${app.get("port")}/`);
-});
+    console.log("Server running at: http://localhost" + `:${app.get("port")}/`);
+  });
 
 var browsers_ws_by_id = {};
 
@@ -104,15 +104,15 @@ function trans(page_title, by_browser_id, data) {
 }
 
 app.get("*", function(req, res, next) {
-  if (req.path == "/comments/" || "/comments/index.html") {
+  if (req.path == "/comments/" || req.path == "/comments/index.html") {
     const filePath = process.cwd() + "/src/comments/index.html";
     var data = fs.readFileSync(filePath, "utf8");
     var result = data.replace(
       /\$OG_TITLE/g,
       req.query.title + " Comments Room"
     );
-    // data.replace(/\$OG_DESCRIPTION/g, "About page description");
-    // data.replace(/\$OG_IMAGE/g, "https://i.imgur.com/V7irMl8.png");
+    // data = data.replace(/\$OG_DESCRIPTION/g, "About page description");
+    // result = data.replace(/\$OG_IMAGE/g, "https://i.imgur.com/V7irMl8.png");
     res.send(result);
     res.end();
     return;
