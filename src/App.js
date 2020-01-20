@@ -27,6 +27,7 @@ class App extends Component {
     if (global.title == undefined || global.title == "") {
       global.title = "ראשי";
     }
+    document.title = "WCC " + global.title;
   }
 
   componentDidMount() {

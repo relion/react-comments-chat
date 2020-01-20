@@ -69,7 +69,21 @@ wss.on("connection", function connection(ws) {
 //   });
 // });
 
-app.listen(app.get("port"), () => {
+var scheme = require("http"); // later: https
+
+// for https, use listen to port: 443
+// var privateKey = fs.readFileSync('privatekey.pem').toString();
+// var certificate = fs.readFileSync('certificate.pem').toString();
+
+scheme
+  .createServer(
+    {
+      key: "",
+      cert: ""
+    },
+    app
+  )
+  .listen(app.get("port"), () => {
   console.log("Server running at: http://localhost" + `:${app.get("port")}/`);
 });
 
