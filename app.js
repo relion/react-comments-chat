@@ -6,7 +6,6 @@ express.static("/static");
 express.static("/images");
 const app = express();
 app.set("port", process.env.PORT || 80);
-app.use("/", express.static("src"));
 const bodyParser = require("body-parser");
 app.use(bodyParser.text({ type: "text/html" }));
 const fs = require("fs");
@@ -102,13 +101,26 @@ function trans(page_title, by_browser_id, data) {
       }
     }
   });
-  // wss.clients.forEach(function each(client) {
-  //   if (client.readyState === WebSocket.OPEN) {
-  //     console.log("transing to..");
-  //     client.send('{ "_id": -1, "message": "Hello World2" }');
-  //   }
-  // });
 }
+
+app.get("*", function(req, res, next) {
+  if (req.path == "/comments/" || "/comments/index.html") {
+    const filePath = process.cwd() + "/src/comments/index.html";
+    var data = fs.readFileSync(filePath, "utf8");
+    var result = data.replace(
+      /\$OG_TITLE/g,
+      req.query.title + " Comments Room"
+    );
+    // data.replace(/\$OG_DESCRIPTION/g, "About page description");
+    // data.replace(/\$OG_IMAGE/g, "https://i.imgur.com/V7irMl8.png");
+    res.send(result);
+    res.end();
+    return;
+  }
+  next();
+});
+
+app.use("/", express.static("src"));
 
 app.post("/handle_comments", (req, res) => {
   handle_request(req, res);
