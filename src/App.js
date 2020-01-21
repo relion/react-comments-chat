@@ -198,13 +198,16 @@ class App extends Component {
           url={"ws://" + global.host + port + "/ws/"} // :8888 ?browser_id=" + this.state.browser_id
           onMessage={this.handleWebsocketReceivedData.bind(this)}
         />
+        {/* <button onClick={get_notifications_permission}>
+          get_notifications_permission
+        </button> */}
         <header className="App-header">
           <img src={logo} className={loadingSpin} alt="logo" />
           <h1 className="App-title" dir="ltr">
             <span className="px-2" role="img" aria-label="Chat">
               💬
             </span>
-            Comments Room: <b>{global.title}</b>
+            Dev Comments Room: <b>{global.title}</b>
             <span className="px-2" role="img" aria-label="Chat">
               💬
             </span>
@@ -237,13 +240,18 @@ class App extends Component {
 }
 
 // chrome://settings/content/notifications
-if (window.Notification && Notification.permission !== "granted") {
-  Notification.requestPermission(function(status) {
-    if (Notification.permission !== "granted") {
-      alert("Notification.permission was NOT granted.");
-    }
-  });
+// note: for testing the Notifications, you can enable: Insecure origins treated as secure in chrome://flags/
+function get_notifications_permission() {
+  if (window.Notification && Notification.permission !== "granted") {
+    Notification.requestPermission(function(status) {
+      if (Notification.permission !== "granted") {
+        alert("Notification.permission was NOT granted.");
+      }
+    });
+  }
 }
+
+get_notifications_permission();
 
 function showNotification(title, body, icon) {
   new Notification(title, {

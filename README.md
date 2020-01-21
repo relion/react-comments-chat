@@ -9,6 +9,7 @@ Comments can be added, removed and edited all being reflected in real-time in al
 2.  Run `node app.js`
 3.  Run `npm start`
 4.  Use the link with a title: http://localhost/comments/?title=test_room
+5.  Note: for testing the Notifications on real hostname, you can enable: Insecure origins treated as secure in chrome://flags/
 
 <img src="images/react_comments_room_snapshot.png" title="React comments room snapshot">
 
