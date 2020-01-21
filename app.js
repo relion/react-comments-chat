@@ -4,6 +4,7 @@ const url = require("url");
 const express = require("express");
 express.static("/static");
 express.static("/images");
+express.static("/audio");
 const app = express();
 app.set("port", process.env.PORT || 80);
 const bodyParser = require("body-parser");

@@ -262,12 +262,12 @@ function get_notifications_permission() {
 
 get_notifications_permission();
 
-function showNotification(body) {
+function showNotification(txt) {
   new Notification("Comments Test App", {
-    body: body,
+    body: txt,
     icon: "/images/notification.png",
-    vibrate: [200, 100, 200, 100, 200, 100, 200],
-    tag: "vibration-sample"
+    sound: "/audio/Frogger_Orig_Part_2.mp3",
+    vibrate: [200, 100, 200, 100, 200, 100, 200]
   });
 }
 
