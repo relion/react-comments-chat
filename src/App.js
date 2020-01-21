@@ -149,6 +149,7 @@ class App extends Component {
         });
     } else {
       var json = JSON.parse(msg);
+      var username = null;
       switch (json.op) {
         case "add":
         case "update":
@@ -167,12 +168,14 @@ class App extends Component {
           } else {
             this.setState({ comments: [...this.state.comments, json.comment] });
           }
+          username = json.comment.name;
           break;
         case "delete":
           var new_comments = [...this.state.comments];
           var found_i = -1;
           for (var i = 0; i < new_comments.length; i++) {
             if (new_comments[i]._id == json._id) {
+              username = new_comments[i].name;
               found_i = i;
               break;
             }
@@ -185,7 +188,13 @@ class App extends Component {
           }
           break;
       }
-      showNotification("MY_TITLE", "MY_MESSAGE", "/images/notification.png");
+      showNotification(
+        username +
+          " " +
+          json.op +
+          (json.op == "add" ? "e" : "") +
+          "d a comment."
+      );
     }
   }
 
@@ -240,7 +249,7 @@ class App extends Component {
 }
 
 // chrome://settings/content/notifications
-// note: for testing the Notifications, you can enable: Insecure origins treated as secure in chrome://flags/
+// Note: for testing the Notifications on real host, you can enable: Insecure origins treated as secure in chrome://flags/
 function get_notifications_permission() {
   if (window.Notification && Notification.permission !== "granted") {
     Notification.requestPermission(function(status) {
@@ -253,10 +262,10 @@ function get_notifications_permission() {
 
 get_notifications_permission();
 
-function showNotification(title, body, icon) {
-  new Notification(title, {
+function showNotification(body) {
+  new Notification("Comments Test App", {
     body: body,
-    icon: icon,
+    icon: "/images/notification.png",
     vibrate: [200, 100, 200, 100, 200, 100, 200],
     tag: "vibration-sample"
   });
