@@ -29,3 +29,7 @@ chat, room, comments, solved, working, full-stack, react, node.js, websocket.
 2. See my video instructions on How to Configure the Node.js with WebSocket on AWS Elastic Beanstalk:
 
    [![](http://img.youtube.com/vi/E_-mBnRHsYc/0.jpg)](http://www.youtube.com/watch?v=E_-mBnRHsYc "Configuring Node.js Server with WebSocket on AWS Elastic Beanstalk")
+
+## Live Demo
+
+[visit this link](http://watchcastcomments-env.ij3bbu3yth.us-east-2.elasticbeanstalk.com/comments/?title=public_room)
