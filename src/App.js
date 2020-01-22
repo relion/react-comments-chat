@@ -15,7 +15,8 @@ class App extends Component {
 
     this.state = {
       comments: [],
-      loading: false
+      loading: false,
+      show_permit_button: true
     };
 
     this.addComment = this.addComment.bind(this);
@@ -25,7 +26,7 @@ class App extends Component {
     window.location.title_arg = title_arg;
     global.title = queryString.parse(window.location.search).title;
     if (global.title == undefined || global.title == "") {
-      global.title = "ראשי";
+      global.title = "Root";
     }
   }
 
@@ -189,6 +190,7 @@ class App extends Component {
           break;
       }
       showNotification(
+        "Comments Room: " + global.title,
         username +
           " " +
           json.op +
@@ -207,9 +209,13 @@ class App extends Component {
           url={"ws://" + global.host + port + "/ws/"} // :8888 ?browser_id=" + this.state.browser_id
           onMessage={this.handleWebsocketReceivedData.bind(this)}
         />
-        {/* <button onClick={get_notifications_permission}>
-          get_notifications_permission
-        </button> */}
+        {this.state.show_permit_button ? (
+          <button onClick={this.handleUserPermitClick.bind(this)}>
+            click here to anable Audio Notifications from this page
+          </button>
+        ) : (
+          ""
+        )}
         <header className="App-header">
           <img src={logo} className={loadingSpin} alt="logo" />
           <h1 className="App-title" dir="ltr">
@@ -246,6 +252,11 @@ class App extends Component {
       </div>
     );
   }
+
+  handleUserPermitClick() {
+    new Audio("/audio/chimes.mp3").play();
+    this.setState({ show_permit_button: false });
+  }
 }
 
 // chrome://settings/content/notifications
@@ -262,13 +273,15 @@ function get_notifications_permission() {
 
 get_notifications_permission();
 
-function showNotification(txt) {
-  new Notification("Comments Test App", {
+function showNotification(title, txt) {
+  new Notification(title, {
     body: txt,
     icon: "/images/notification.png",
     sound: "/audio/Frogger_Orig_Part_2.mp3",
     vibrate: [200, 100, 200, 100, 200, 100, 200]
   });
+  new Audio("/audio/Frogger_Orig_Part_2.mp3").play();
+  console.log("showNotification done..");
 }
 
 export default App;
