@@ -16,13 +16,23 @@ const WebSocket = require("ws");
 
 const wss = new WebSocket.Server({ port: 3030 });
 wss.on("error", error => {
-  var x = "handle error";
+  console.log("WebSocket.Server Error.");
 });
+
+browsers_id_by_ws = {};
 
 wss.on("connection", function connection(ws) {
   console.log(`got connection from: :${ws}/`);
   var browser_id = uuidv1();
+  browsers_id_by_ws[ws] = browser_id;
   browsers_ws_by_id[browser_id] = ws;
+  ws.on("close", function() {
+    var browser_id = browsers_id_by_ws[this];
+    var page_title = get_page_title_by_browser_id(browser_id);
+    delete browsers_id_by_ws[ws];
+    delete browsers_ws_by_id[browser_id];
+    trans(page_title, browser_id, { op: "client_left", _id: browser_id });
+  });
   ws.send(browser_id);
   // browsers_ws_by_id[ws.query.browser_id] = ws;
   // ws.on("message", function incoming(data) {
@@ -33,6 +43,15 @@ wss.on("connection", function connection(ws) {
   //   });
   // });
 });
+
+function get_page_title_by_browser_id(browser_id) {
+  for (var title in browsers_ids_by_title) {
+    for (var i = 0; i < browsers_ids_by_title[title].length; i++) {
+      if (browsers_ids_by_title[title][i] == browser_id) return title;
+    }
+  }
+  return null;
+}
 
 // var expressWs = require("express-ws")(app);
 
@@ -180,12 +199,12 @@ function handle_request(req, res) {
       res.write("{ browser_id: '" + req.query.browser_id + "', comments: [] }");
     }
   } else if (op == "comment_delete") {
-    var _id = req.body;
+    var comment_id = req.body;
     var data = fs.readFileSync(comment_file);
     var comments_json_ar = JSON.parse(data);
     var found_i = -1;
     for (var i = 0; i < comments_json_ar.length; i++) {
-      if (comments_json_ar[i]._id == _id) {
+      if (comments_json_ar[i]._id == comment_id) {
         found_i = i;
         break;
       }
@@ -197,7 +216,10 @@ function handle_request(req, res) {
       var comments_json_ar_str = JSON.stringify(comments_json_ar);
       fs.writeFileSync(comment_file, comments_json_ar_str);
       res.write(comments_json_ar_str);
-      trans(page_title, req.query.browser_id, { op: "delete", _id: _id });
+      trans(page_title, req.query.browser_id, {
+        op: "delete",
+        _id: comment_id
+      });
     }
   } else if (op == "comment_update") {
     var updated_comment = JSON.parse(req.body);
