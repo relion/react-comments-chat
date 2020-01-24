@@ -19,39 +19,30 @@ wss.on("error", error => {
   console.log("WebSocket.Server Error.");
 });
 
-browsers_id_by_ws = {};
+var ws_by_id = {};
 
 wss.on("connection", function connection(ws) {
   console.log(`got connection from: :${ws}/`);
   var browser_id = uuidv1();
-  browsers_id_by_ws[ws] = browser_id;
-  browsers_ws_by_id[browser_id] = ws;
+  ws.browser_id = browser_id;
+  var ws_connected_json_data = {
+    op: "ws_connected",
+    browser_id: browser_id,
+    participants: Object.keys(ws_by_id)
+  };
+  ws.send(JSON.stringify(ws_connected_json_data));
+  ws_by_id[browser_id] = ws;
   ws.on("close", function() {
-    var browser_id = browsers_id_by_ws[this];
-    var page_title = get_page_title_by_browser_id(browser_id);
-    delete browsers_id_by_ws[ws];
-    delete browsers_ws_by_id[browser_id];
-    trans(page_title, browser_id, { op: "client_left", _id: browser_id });
+    console.log(
+      "page_title: " +
+        ws.page_title +
+        " WebSocket Client disconnected: " +
+        ws.browsers_id
+    );
+    delete ws_by_id[browser_id];
+    trans(ws.page_title, browser_id, { op: "client_left", _id: browser_id });
   });
-  ws.send(browser_id);
-  // browsers_ws_by_id[ws.query.browser_id] = ws;
-  // ws.on("message", function incoming(data) {
-  //   wss.clients.forEach(function each(client) {
-  //     if (client !== ws && client.readyState === WebSocket.OPEN) {
-  //       client.send(data);
-  //     }
-  //   });
-  // });
 });
-
-function get_page_title_by_browser_id(browser_id) {
-  for (var title in browsers_ids_by_title) {
-    for (var i = 0; i < browsers_ids_by_title[title].length; i++) {
-      if (browsers_ids_by_title[title][i] == browser_id) return title;
-    }
-  }
-  return null;
-}
 
 // var expressWs = require("express-ws")(app);
 
@@ -106,16 +97,14 @@ scheme
     console.log("Server running at: http://localhost" + `:${app.get("port")}/`);
   });
 
-var browsers_ws_by_id = {};
-
 function trans(page_title, by_browser_id, data) {
   console.log("in trans..");
   var bids = browsers_ids_by_title[page_title];
   bids.forEach(id => {
     if (id != undefined && id != by_browser_id) {
       // lilo
-      var client = browsers_ws_by_id[id];
-      if (client.readyState === 1) {
+      var client = ws_by_id[id];
+      if (client != undefined && client.readyState === 1) {
         console.log("transing to..");
         client.send(JSON.stringify(data)); // '{ "_id": -1, "message": "Hello World2" }'
       }
@@ -131,8 +120,8 @@ app.get("*", function(req, res, next) {
       /\$OG_TITLE/g,
       req.query.title + " Comments Room"
     );
-    // data = data.replace(/\$OG_DESCRIPTION/g, "About page description");
-    // result = data.replace(/\$OG_IMAGE/g, "https://i.imgur.com/V7irMl8.png");
+    result = result.replace(/\$OG_DESCRIPTION/g, "About page description");
+    result = result.replace(/\$OG_IMAGE/g, "https://i.imgur.com/V7irMl8.png");
     res.send(result);
     res.end();
     return;
@@ -150,7 +139,7 @@ app.get("/handle_comments", (req, res) => {
   handle_request(req, res);
 });
 
-var browsers_ids_by_title = {};
+var browsers_ids_by_title = [];
 
 function handle_request(req, res) {
   var dir = "/src/DATA/";
@@ -180,9 +169,15 @@ function handle_request(req, res) {
     fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
     res.write(JSON.stringify(comment_json));
   } else if (op == "get_all_comments") {
+    ws_by_id[req.query.browser_id].page_title = page_title;
     if (browsers_ids_by_title[page_title] == undefined)
       browsers_ids_by_title[page_title] = [];
     browsers_ids_by_title[page_title].push(req.query.browser_id);
+    trans(page_title, req.query.browser_id, {
+      op: "client_joined",
+      _id: req.query.browser_id
+    });
+
     if (fs.existsSync(comment_file)) {
       var comments_json_str = fs.readFileSync(comment_file);
       res.write(comments_json_str);
@@ -198,6 +193,8 @@ function handle_request(req, res) {
       //console.log("in comment_read. browser_id: " + browser_id);
       res.write("{ browser_id: '" + req.query.browser_id + "', comments: [] }");
     }
+    res.end();
+    return;
   } else if (op == "comment_delete") {
     var comment_id = req.body;
     var data = fs.readFileSync(comment_file);

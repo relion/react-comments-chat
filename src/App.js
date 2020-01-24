@@ -5,6 +5,7 @@ import "./App.css";
 import "./global.js";
 import Websocket from "react-websocket";
 import queryString from "query-string";
+import { ListGroup, ListGroupItem, ListGroupItemText } from "reactstrap";
 
 import CommentList from "./components/CommentList";
 import CommentForm from "./components/CommentForm";
@@ -15,6 +16,7 @@ class App extends Component {
 
     this.state = {
       comments: [],
+      participants: [],
       loading: false,
       show_permit_button: true
     };
@@ -118,86 +120,104 @@ class App extends Component {
   }
 
   handleWebsocketReceivedData(msg) {
-    if (
-      //msg.op == undefined) {
-      !msg.includes("op")
-    ) {
-      // lilo: todo: msg should be always a json: { op: "ws_connected", browser_id: "" }
-      this.setState({
-        browser_id: msg
-      });
-      this.setState({ loading: true });
-
-      fetch(
-        global.server_url +
-          "?" +
-          window.location.title_arg +
-          "op=get_all_comments" +
-          "&browser_id=" +
-          this.state.browser_id
-      )
-        .then(res => res.json())
-        .then(res => {
-          // console.log("my browser_id is: " + res.browser_id);
-          this.setState({
-            comments: res, // .comments
-            loading: false
-            // browser_id: res.browser_id
-          });
-        })
-        .catch(err => {
-          this.setState({ loading: false });
+    var json = JSON.parse(msg);
+    var username = null;
+    switch (json.op) {
+      case "ws_connected":
+        this.setState({
+          browser_id: json.browser_id,
+          participants: json.participants
         });
-    } else {
-      var json = JSON.parse(msg);
-      var username = null;
-      switch (json.op) {
-        case "add":
-        case "update":
-          var new_comments = [...this.state.comments];
-          var found = false;
-          new_comments.forEach(c => {
-            // lilo
-            if (c._id == json.comment._id) {
-              if (json.op != "update") throw "unexpected json.op: " + json.op;
-              c.message = json.comment.message;
-              found = true;
-            }
+        this.setState({ loading: true });
+
+        fetch(
+          global.server_url +
+            "?" +
+            window.location.title_arg +
+            "op=get_all_comments" +
+            "&browser_id=" +
+            this.state.browser_id
+        )
+          .then(res => res.json())
+          .then(res => {
+            // console.log("my browser_id is: " + res.browser_id);
+            this.setState({
+              comments: res, // .comments
+              loading: false
+              // browser_id: res.browser_id
+            });
+          })
+          .catch(err => {
+            this.setState({ loading: false });
           });
-          if (found) {
-            this.setState({ comments: new_comments });
-          } else {
-            this.setState({ comments: [...this.state.comments, json.comment] });
+        return;
+      case "client_joined":
+        var p = [...this.state.participants];
+        p.push(json._id);
+        this.setState({
+          participants: p
+        });
+        showNotification(
+          "Comments Room: " + global.title,
+          "Client joined: " + json._id
+        );
+        return;
+      case "client_left":
+        console.log("client_left: " + json._id);
+        var p = [...this.state.participants];
+        for (var i = 0; i < p.length; i++) {
+          if (p[i] == json._id) {
+            p.splice(i, 1);
+            this.setState({ participants: p });
+            break;
           }
-          username = json.comment.name;
-          break;
-        case "delete":
-          var new_comments = [...this.state.comments];
-          var found_i = -1;
-          for (var i = 0; i < new_comments.length; i++) {
-            if (new_comments[i]._id == json._id) {
-              username = new_comments[i].name;
-              found_i = i;
-              break;
-            }
+        }
+        showNotification(
+          "Comments Room: " + global.title,
+          "Client left: " + json._id
+        );
+        return;
+      case "add":
+      case "update":
+        var new_comments = [...this.state.comments];
+        var found = false;
+        new_comments.forEach(c => {
+          // lilo
+          if (c._id == json.comment._id) {
+            if (json.op != "update") throw "unexpected json.op: " + json.op;
+            c.message = json.comment.message;
+            found = true;
           }
-          if (found_i == -1) {
-            throw '{ "error": "comment._id not found." }';
-          } else {
-            new_comments.splice(found_i, 1);
-            this.setState({ comments: new_comments });
+        });
+        if (found) {
+          this.setState({ comments: new_comments });
+        } else {
+          this.setState({ comments: [...this.state.comments, json.comment] });
+        }
+        username = json.comment.name;
+        break;
+      case "delete":
+        var new_comments = [...this.state.comments];
+        var found_i = -1;
+        for (var i = 0; i < new_comments.length; i++) {
+          if (new_comments[i]._id == json._id) {
+            username = new_comments[i].name;
+            found_i = i;
+            break;
           }
-          break;
-      }
-      showNotification(
-        "Comments Room: " + global.title,
-        username +
-          " " +
-          json.op +
-          (json.op == "add" ? "e" : "") +
-          "d a comment."
-      );
+        }
+        if (found_i == -1) {
+          throw '{ "error": "comment._id not found." }';
+        } else {
+          new_comments.splice(found_i, 1);
+          this.setState({ comments: new_comments });
+        }
+        break;
     }
+    showNotification(
+      "Comments Room: " + global.title,
+      username + " " + json.op + (json.op == "add" ? "e" : "") + "d a comment."
+    );
   }
 
   render() {
@@ -228,6 +248,18 @@ class App extends Component {
             </span>
           </h1>
         </header>
+        {this.state.participants.length == 0 ? (
+          "No Participants"
+        ) : (
+          <span>
+            Participants:
+            <ListGroup horizontal>
+              {this.state.participants.map((participant, index) => (
+                <ListGroupItem>{participant}</ListGroupItem>
+              ))}
+            </ListGroup>
+          </span>
+        )}
         <div className="row">
           <div className="col-4  pt-3 border-right">
             <h6>Say something about anything...</h6>
