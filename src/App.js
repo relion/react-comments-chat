@@ -248,20 +248,30 @@ class App extends Component {
             </span>
           </h1>
         </header>
-        {this.state.participants.length == 0 ? (
-          "No Participants"
-        ) : (
-          <div className="participants_div_style">
-            Participants:
-            <ul style={{ padding: 0 }}>
-              {this.state.participants.map((participant, index) => (
-                <li className="participants_li_style">{participant}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="participants_div_style">
+          {this.state.participants.length == 0 ? (
+            "No Participants"
+          ) : (
+            <span>
+              Participants:
+              <ul style={{ padding: 0 }}>
+                {this.state.participants.map((participant, index) => (
+                  <li className="participants_li_style">{participant}</li>
+                ))}
+              </ul>
+            </span>
+          )}
+        </div>
         <div className="row">
-          <div className="col-4  pt-3 border-right">
+          <div className="col-md pt-3 bg-white">
+            <CommentList
+              loading={this.state.loading}
+              comments={this.state.comments}
+              form_name={this.state.form_name}
+              comments_app={this}
+            />
+          </div>
+          <div className="col-md-auto pt-3 border-right">
             <h6>Say something about anything...</h6>
             <h6 className="text-danger ">
               <strong>{this.state.error}</strong>
@@ -270,14 +280,6 @@ class App extends Component {
               addComment={this.addComment}
               comments_app={this}
               browser_id={this.state.browser_id}
-            />
-          </div>
-          <div className="col-8  pt-3 bg-white">
-            <CommentList
-              loading={this.state.loading}
-              comments={this.state.comments}
-              form_name={this.state.form_name}
-              comments_app={this}
             />
           </div>
         </div>
