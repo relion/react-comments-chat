@@ -251,24 +251,14 @@ class App extends Component {
         {this.state.participants.length == 0 ? (
           "No Participants"
         ) : (
-          <span>
+          <div className="participants_div_style">
             Participants:
             <ul style={{ padding: 0 }}>
               {this.state.participants.map((participant, index) => (
-                <li
-                  style={{
-                    display: "inline-block",
-                    margin: "5px",
-                    padding: "0 4px 0 4px",
-                    backgroundColor: "pink",
-                    border: "solid 1px gray"
-                  }}
-                >
-                  {participant}
-                </li>
+                <li className="participants_li_style">{participant}</li>
               ))}
             </ul>
-          </span>
+          </div>
         )}
         <div className="row">
           <div className="col-4  pt-3 border-right">
