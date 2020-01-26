@@ -253,11 +253,21 @@ class App extends Component {
         ) : (
           <span>
             Participants:
-            <ListGroup horizontal>
+            <ul style={{ padding: 0 }}>
               {this.state.participants.map((participant, index) => (
-                <ListGroupItem>{participant}</ListGroupItem>
+                <li
+                  style={{
+                    display: "inline-block",
+                    margin: "5px",
+                    padding: "0 4px 0 4px",
+                    backgroundColor: "pink",
+                    border: "solid 1px gray"
+                  }}
+                >
+                  {participant}
+                </li>
               ))}
-            </ListGroup>
+            </ul>
           </span>
         )}
         <div className="row">
