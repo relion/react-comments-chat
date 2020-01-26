@@ -1,16 +1,11 @@
-//const PORT = process.env.PORT || 8080;
-//const http = require("http");
 const url = require("url");
 const express = require("express");
-express.static("/static");
-express.static("/images");
-express.static("/audio");
 const app = express();
 app.set("port", process.env.PORT || 80);
 const bodyParser = require("body-parser");
 app.use(bodyParser.text({ type: "text/html" }));
 const fs = require("fs");
-const uuidv1 = require("uuid/v1"); // npm install uuid
+const uuidv1 = require("uuid/v1");
 
 const WebSocket = require("ws");
 
@@ -43,41 +38,6 @@ wss.on("connection", function connection(ws) {
     trans(ws.page_title, browser_id, { op: "client_left", _id: browser_id });
   });
 });
-
-// var expressWs = require("express-ws")(app);
-
-// expressWs.getWss().on("connection", function(ws) {
-//   console.log(`got connection from: :${ws}/`);
-//   var browser_id = uuidv1();
-//   browsers_ws_by_id[browser_id] = ws;
-//   ws.send(browser_id);
-// });
-// app.ws("/ws", function(ws, req) {
-//   console.log(`got to app.ws..`);
-//   ws.on("message", function(msg) {
-//     //ws.send(msg);
-//   });
-
-//   ws.on("error", error => {
-//     var x = "handle error";
-//   });
-
-//   ws.on("connection", function connection(ws) {
-//     var x = 1;
-//     // browsers_ws_by_id[ws.query.browser_id] = ws;
-//     // ws.on("message", function incoming(data) {
-//     //   wss.clients.forEach(function each(client) {
-//     //     if (client !== ws && client.readyState === WebSocket.OPEN) {
-//     //       client.send(data);
-//     //     }
-//     //   });
-//     // });
-//     ws.on("close", function(data) {
-//       console.log("browser disconnected!");
-//       // browsers_ids_by_title.forEach(t =>)
-//     });
-//   });
-// });
 
 var scheme = require("http"); // later: https
 
@@ -142,7 +102,7 @@ app.get("/handle_comments", (req, res) => {
 var browsers_ids_by_title = [];
 
 function handle_request(req, res) {
-  var dir = "/src/DATA/";
+  var dir = "/DATA/";
   var q = url.parse(req.url, true);
   var op = q.query.op;
   var page_title = q.query.title;
@@ -181,16 +141,8 @@ function handle_request(req, res) {
     if (fs.existsSync(comment_file)) {
       var comments_json_str = fs.readFileSync(comment_file);
       res.write(comments_json_str);
-      // var comments_json = JSON.parse(comments_json_str);
-      // var comment_read_res_json = {
-      //   browser_id: browser_id,
-      //   comments: comments_json
-      // };
-      // var comment_read_res_json_str = JSON.stringify(comment_read_res_json);
-      // res.write(comment_read_res_json_str);
     } else {
       fs.writeFileSync(comment_file, "[]");
-      //console.log("in comment_read. browser_id: " + browser_id);
       res.write("{ browser_id: '" + req.query.browser_id + "', comments: [] }");
     }
     res.end();
