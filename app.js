@@ -32,7 +32,7 @@ wss.on("connection", function connection(ws) {
       "page_title: " +
         ws.page_title +
         " WebSocket Client disconnected: " +
-        ws.browsers_id
+        ws.browser_id
     );
     delete ws_by_id[browser_id];
     trans(ws.page_title, browser_id, { op: "client_left", _id: browser_id });
