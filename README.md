@@ -37,4 +37,4 @@ chat, room, comments, solved, working, full-stack, react, node.js, websocket.
 
 ## Live Demo
 
-<a href="http://watchcastcomments-env.ij3bbu3yth.us-east-2.elasticbeanstalk.com/comments/?title=public_room" target="_blank">visit this link</a>
+[visit this link](http://watchcastcomments-env.ij3bbu3yth.us-east-2.elasticbeanstalk.com/comments/?title=public_room){:target="\_blank"}
