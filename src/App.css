@@ -42,8 +42,8 @@ h6 {
 
 .participants_span_style {
   display: inline-block;
-  margin: 4px 6px 0px 0;
-  padding: 0 4px 0 4px;
+  margin: 4px 6px 0 0;
+  padding: 0px 4px 0 4px;
   background-color: pink;
   border: solid 1px gray;
   border-radius: 4px;

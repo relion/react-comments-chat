@@ -152,10 +152,10 @@ class App extends Component {
           });
         return;
       case "client_joined":
-        var p = [...this.state.participants];
-        p.push(json._id);
+        var participants = [...this.state.participants];
+        participants.push(json._id);
         this.setState({
-          participants: p
+          participants: participants
         });
         showNotification(
           "Comments Room: " + global.title,
@@ -164,11 +164,11 @@ class App extends Component {
         return;
       case "client_left":
         console.log("client_left: " + json._id);
-        var p = [...this.state.participants];
-        for (var i = 0; i < p.length; i++) {
-          if (p[i] == json._id) {
-            p.splice(i, 1);
-            this.setState({ participants: p });
+        var participants = [...this.state.participants];
+        for (var i = 0; i < participants.length; i++) {
+          if (participants[i] == json._id) {
+            participants.splice(i, 1);
+            this.setState({ participants: participants });
             break;
           }
         }
@@ -250,10 +250,10 @@ class App extends Component {
         </header>
         <div className="participants_div_style">
           {this.state.participants.length == 0 ? (
-            "No Other Participants"
+            <b>No Other Participants</b>
           ) : (
             <span>
-              Participants:{" "}
+              <b>Participants: </b>
               {this.state.participants.map((participant, index) => (
                 <span className="participants_span_style">{participant}</span>
               ))}
