@@ -40,9 +40,9 @@ h6 {
   margin-bottom: 20px;
 }
 
-.participants_li_style {
+.participants_span_style {
   display: inline-block;
-  margin: 0 6px 6px 0;
+  margin: 4px 6px 0px 0;
   padding: 0 4px 0 4px;
   background-color: pink;
   border: solid 1px gray;
@@ -51,7 +51,7 @@ h6 {
 
 .participants_div_style {
   background-color: lightgreen;
-  margin: 4px 0 4px 0;
-  padding: 0 0 0 4px;
+  margin: 4px 0 0 0;
+  padding: 0 0 4px 4px;
   border-radius: 0.3rem;
 }
