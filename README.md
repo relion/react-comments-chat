@@ -14,6 +14,8 @@ Comments can be added, removed and edited all being reflected in real-time in al
 
 <img src="images/enable_notifications_in_chrome.png" title="Enable Notifications in Chrome">
 
+<img src="images/always_allow_sound_in_chrome.png" title="Always allow Sound in Chrome">
+
 ## App snapshot
 
 <img src="images/react_comments_room_snapshot.png" title="React Comments Room snapshot">
