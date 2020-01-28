@@ -15,18 +15,47 @@ wss.on("error", error => {
 });
 
 var ws_by_id = {};
+var participants = {};
 
 wss.on("connection", function connection(ws) {
-  console.log(`got connection from: :${ws}/`);
+  console.log(
+    `got connection from: ${ws._socket.remoteAddress}:${ws._socket.remotePort}`
+  );
   var browser_id = uuidv1();
   ws.browser_id = browser_id;
   var ws_connected_json_data = {
     op: "ws_connected",
     browser_id: browser_id,
-    participants: Object.keys(ws_by_id)
+    participants: participants // Object.keys(ws_by_id)
   };
   ws.send(JSON.stringify(ws_connected_json_data));
   ws_by_id[browser_id] = ws;
+  participants[browser_id] = {};
+  ws.on("message", function(msg) {
+    var json = JSON.parse(msg);
+    switch (json.op) {
+      case "client_changed_name":
+        participants[browser_id]["name"] = json.name;
+        trans(ws.page_title, ws.browser_id, {
+          op: json.op,
+          browser_id: ws.browser_id,
+          name: json.name
+        });
+        console.log(
+          "got msg from browser_id: " +
+            ws.browser_id +
+            " title: " +
+            ws.page_title +
+            " msg.op: " +
+            json.op +
+            " msg.name: " +
+            json.name
+        );
+        break;
+      default:
+        throw "websocket received an unsupported message op: " + json.op;
+    }
+  });
   ws.on("close", function() {
     console.log(
       "page_title: " +
@@ -35,6 +64,7 @@ wss.on("connection", function connection(ws) {
         ws.browser_id
     );
     delete ws_by_id[browser_id];
+    delete participants[browser_id];
     trans(ws.page_title, browser_id, { op: "client_left", _id: browser_id });
   });
 });
@@ -63,10 +93,10 @@ function trans(page_title, by_browser_id, data) {
   bids.forEach(id => {
     if (id != undefined && id != by_browser_id) {
       // lilo
-      var client = ws_by_id[id];
-      if (client != undefined && client.readyState === 1) {
+      var ws = ws_by_id[id];
+      if (ws != undefined && ws.readyState === 1) {
         console.log("transing to..");
-        client.send(JSON.stringify(data)); // '{ "_id": -1, "message": "Hello World2" }'
+        ws.send(JSON.stringify(data)); // '{ "_id": -1, "message": "Hello World2" }'
       }
     }
   });

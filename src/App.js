@@ -16,7 +16,7 @@ class App extends Component {
 
     this.state = {
       comments: [],
-      participants: [],
+      participants: {},
       loading: false,
       show_permit_button: true
     };
@@ -156,8 +156,8 @@ class App extends Component {
           });
         return;
       case "client_joined":
-        var participants = [...this.comments_app.state.participants];
-        participants.push(json._id);
+        var participants = { ...this.comments_app.state.participants };
+        participants[json._id] = {}; // still no name
         this.comments_app.setState({
           participants: participants
         });
@@ -168,9 +168,9 @@ class App extends Component {
         return;
       case "client_left":
         console.log("client_left: " + json._id);
-        var participants = [...this.comments_app.state.participants];
-        for (var i = 0; i < participants.length; i++) {
-          if (participants[i] == json._id) {
+        var participants = { ...this.comments_app.state.participants };
+        for (var participant in Object.keys(participants)) {
+          if (participants[participant] == json._id) {
             participants.splice(i, 1);
             this.comments_app.setState({ participants: participants });
             break;
@@ -179,6 +179,23 @@ class App extends Component {
         showNotification(
           "Comments Room: " + global.title,
           "Client left: " + json._id
+        );
+        return;
+      case "client_changed_name":
+        var participants = { ...this.comments_app.state.participants };
+        participants[json.browser_id].name = json.name;
+        this.comments_app.setState({
+          participants: participants
+        });
+        // console.log(
+        //   "Client_changed_name.. browser_id: " +
+        //     this.comments_app.state.browser_id +
+        //     " name: " +
+        //     json.name
+        // );
+        showNotification(
+          "Comments Room: " + global.title,
+          "Client changed his name to: " + json.name
         );
         return;
       case "add":
@@ -250,14 +267,20 @@ class App extends Component {
           </h1>
         </header>
         <div className="participants_div_style">
-          {this.state.participants.length == 0 ? (
+          {Object.keys(this.state.participants).length == 0 ? (
             <b>No Other Participants</b>
           ) : (
             <span>
               <b>Participants: </b>
-              {this.state.participants.map((participant, index) => (
-                <span className="participants_span_style">{participant}</span>
-              ))}
+              {Object.keys(this.state.participants).map(function(browser_id) {
+                return (
+                  <span className="participants_span_style">
+                    {this.state.participants[browser_id].name != undefined
+                      ? this.state.participants[browser_id].name
+                      : browser_id}
+                  </span>
+                );
+              }, this)}
             </span>
           )}
         </div>

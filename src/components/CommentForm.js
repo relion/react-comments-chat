@@ -20,6 +20,9 @@ export default class CommentForm extends Component {
   }
 
   ws_send_user_changed_name(name) {
+    this.props.comments_app.ws.send(
+      JSON.stringify({ op: "client_changed_name", name: name })
+    );
     //alert("name changed to: " + name);
   }
 
