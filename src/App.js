@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import logo from "./logo.svg";
+import logo from "./images/logo.svg";
+import edit_image from "./images/edit.gif";
 import "bootstrap/dist/css/bootstrap.css";
 import "./App.css";
 import "./global.js";
@@ -198,6 +199,28 @@ class App extends Component {
           "Client changed his name to: " + json.name
         );
         return;
+      case "client_message_changed":
+        console.log("got client_message_changed");
+        var participants = { ...this.comments_app.state.participants };
+        participants[json.browser_id].is_typing = true;
+        this.comments_app.setState({
+          participants: participants
+        });
+        if (this.comments_app.state.is_typing_timeout != undefined) {
+          clearInterval(this.comments_app.state.is_typing_timeout);
+        }
+        this.comments_app.state.is_typing_timeout = setTimeout(
+          function(c) {
+            var participants = { ...c.comments_app.state.participants };
+            participants[json.browser_id].is_typing = false;
+            c.comments_app.setState({
+              participants: participants
+            });
+          },
+          3000,
+          this
+        );
+        break;
       case "add":
       case "update":
         var new_comments = [...this.comments_app.state.comments];
@@ -244,7 +267,6 @@ class App extends Component {
   }
 
   render() {
-    const loadingSpin = this.state.loading ? "App-logo Spin" : "App-logo";
     return (
       <div className="App container bg-light shadow">
         {this.state.show_permit_button ? (
@@ -255,7 +277,11 @@ class App extends Component {
           ""
         )}
         <header className="App-header">
-          <img src={logo} className={loadingSpin} alt="logo" />
+          <img
+            src={logo}
+            className={this.state.loading ? "App-logo Spin" : "App-logo"}
+            alt="logo"
+          />
           <h1 className="App-title" dir="ltr">
             <span className="px-2" role="img" aria-label="Chat">
               💬
@@ -273,11 +299,20 @@ class App extends Component {
             <span>
               <b>Participants: </b>
               {Object.keys(this.state.participants).map(function(browser_id) {
+                var participant = this.state.participants[browser_id];
                 return (
                   <span className="participants_span_style">
-                    {this.state.participants[browser_id].name != undefined
-                      ? this.state.participants[browser_id].name
+                    {participant.name != undefined
+                      ? participant.name
                       : browser_id}
+                    {participant.is_typing ? (
+                      <img
+                        src={edit_image}
+                        className={"Edit-animation infinite 2s linear"}
+                      />
+                    ) : (
+                      ""
+                    )}
                   </span>
                 );
               }, this)}

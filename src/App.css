@@ -11,6 +11,13 @@
   animation: App-logo-spin infinite 2s linear;
 }
 
+.Edit-animation {
+  height: 18px;
+  position: relative;
+  top: -2px;
+  padding-left: 3px;
+}
+
 .App-header {
   text-align: center;
   background-color: var(--secondary);

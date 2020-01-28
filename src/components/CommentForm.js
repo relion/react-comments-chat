@@ -33,10 +33,10 @@ export default class CommentForm extends Component {
     const { value, name } = event.target;
     if (name === "name") {
       this.props.comments_app.setState({ form_name: value });
-      if (this.props.comments_app.state.timer != undefined) {
-        clearInterval(this.props.comments_app.state.timer);
+      if (this.props.comments_app.state.name_changed_timer != undefined) {
+        clearInterval(this.props.comments_app.state.name_changed_timer);
       }
-      this.props.comments_app.state.timer = setInterval(
+      this.props.comments_app.state.name_changed_timer = setInterval(
         function(c) {
           if (c.state.last_sent_user_name != value) {
             c.ws_send_user_changed_name(value);
@@ -46,7 +46,22 @@ export default class CommentForm extends Component {
         5000,
         this
       );
+    } else if (name === "message") {
+      var state = this.props.comments_app.state;
+      var current_time = new Date().getTime();
+      if (
+        state.last_time_sent_message_changed == undefined ||
+        state.last_time_sent_message_changed < current_time - 2000
+      ) {
+        this.props.comments_app.ws.send(
+          JSON.stringify({ op: "client_message_changed" })
+        );
+        state.last_time_sent_message_changed = current_time;
+      }
+    } else {
+      throw "unrecognized name: " + name;
     }
+
     //
     var new_state = { ...this.state };
     new_state.comment[name] = value;
