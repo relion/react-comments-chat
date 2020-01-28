@@ -1,7 +1,7 @@
 ## React Advanced Comment
 
 This is a simple fully working example, AWS compatible, Websockets based chat application written in Node.js and React.
-Comments can be added, removed and edited all being reflected in real-time in all participant browsers using the same application URL.
+Comments can be added, removed and edited, all being reflected in real-time in all participant browsers using the same application URL.
 
 ### Installation
 

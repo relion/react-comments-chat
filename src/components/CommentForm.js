@@ -31,10 +31,6 @@ export default class CommentForm extends Component {
    */
   handleFieldChange = event => {
     const { value, name } = event.target;
-    if (name !== "name") {
-      throw "unexpected: name = " + name;
-    }
-
     if (name === "name") {
       this.props.comments_app.setState({ form_name: value });
       if (this.props.comments_app.state.timer != undefined) {
@@ -51,19 +47,10 @@ export default class CommentForm extends Component {
         this
       );
     }
+    //
     var new_state = { ...this.state };
     new_state.comment[name] = value;
     this.setState(new_state);
-    //this.state.comment.form_name = value;
-    //this.setState(this.state);
-
-    // this.setState({
-    //   ...this.state,
-    //   comment: {
-    //     ...this.state.comment,
-    //     [name]: value
-    //   }
-    // });
   };
 
   /**
