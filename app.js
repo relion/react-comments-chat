@@ -35,7 +35,7 @@ wss.on("connection", function connection(ws) {
     var json = JSON.parse(msg);
     switch (json.op) {
       case "client_changed_name":
-        participants[browser_id]["name"] = json.name;
+        participants[browser_id].name = json.name;
         trans(ws.page_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id,
@@ -51,6 +51,12 @@ wss.on("connection", function connection(ws) {
             " msg.name: " +
             json.name
         );
+        break;
+      case "client_message_changed":
+        trans(ws.page_title, ws.browser_id, {
+          op: json.op,
+          browser_id: ws.browser_id
+        });
         break;
       default:
         throw "websocket received an unsupported message op: " + json.op;
