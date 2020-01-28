@@ -33,7 +33,10 @@ class App extends Component {
   }
 
   componentDidMount() {
-    //document.title = "WCC " + global.title;
+    const ws_port = ":3030";
+    this.ws = new WebSocket("ws://" + global.host + ws_port + "/ws/");
+    this.ws.comments_app = this;
+    this.ws.onmessage = this.handleWebsocketReceivedData;
   }
 
   addComment(comment) {
@@ -120,15 +123,16 @@ class App extends Component {
   }
 
   handleWebsocketReceivedData(msg) {
-    var json = JSON.parse(msg);
+    console.log("in handleWebsocketReceivedData");
+    var json = JSON.parse(msg.data);
     var username = null;
     switch (json.op) {
       case "ws_connected":
-        this.setState({
+        this.comments_app.setState({
           browser_id: json.browser_id,
           participants: json.participants
         });
-        this.setState({ loading: true });
+        this.comments_app.setState({ loading: true });
 
         fetch(
           global.server_url +
@@ -136,25 +140,25 @@ class App extends Component {
             window.location.title_arg +
             "op=get_all_comments" +
             "&browser_id=" +
-            this.state.browser_id
+            this.comments_app.state.browser_id
         )
           .then(res => res.json())
           .then(res => {
             // console.log("my browser_id is: " + res.browser_id);
-            this.setState({
+            this.comments_app.setState({
               comments: res, // .comments
               loading: false
               // browser_id: res.browser_id
             });
           })
           .catch(err => {
-            this.setState({ loading: false });
+            this.comments_app.setState({ loading: false });
           });
         return;
       case "client_joined":
-        var participants = [...this.state.participants];
+        var participants = [...this.comments_app.state.participants];
         participants.push(json._id);
-        this.setState({
+        this.comments_app.setState({
           participants: participants
         });
         showNotification(
@@ -164,11 +168,11 @@ class App extends Component {
         return;
       case "client_left":
         console.log("client_left: " + json._id);
-        var participants = [...this.state.participants];
+        var participants = [...this.comments_app.state.participants];
         for (var i = 0; i < participants.length; i++) {
           if (participants[i] == json._id) {
             participants.splice(i, 1);
-            this.setState({ participants: participants });
+            this.comments_app.setState({ participants: participants });
             break;
           }
         }
@@ -179,7 +183,7 @@ class App extends Component {
         return;
       case "add":
       case "update":
-        var new_comments = [...this.state.comments];
+        var new_comments = [...this.comments_app.state.comments];
         var found = false;
         new_comments.forEach(c => {
           // lilo
@@ -190,9 +194,11 @@ class App extends Component {
           }
         });
         if (found) {
-          this.setState({ comments: new_comments });
+          this.comments_app.setState({ comments: new_comments });
         } else {
-          this.setState({ comments: [...this.state.comments, json.comment] });
+          this.comments_app.setState({
+            comments: [...this.comments_app.state.comments, json.comment]
+          });
         }
         username = json.comment.name;
         break;
@@ -210,7 +216,7 @@ class App extends Component {
           throw '{ "error": "comment._id not found." }';
         } else {
           new_comments.splice(found_i, 1);
-          this.setState({ comments: new_comments });
+          this.comments_app.setState({ comments: new_comments });
         }
         break;
     }
@@ -221,14 +227,9 @@ class App extends Component {
   }
 
   render() {
-    var port = ":3030";
     const loadingSpin = this.state.loading ? "App-logo Spin" : "App-logo";
     return (
       <div className="App container bg-light shadow">
-        <Websocket
-          url={"ws://" + global.host + port + "/ws/"} // :8888 ?browser_id=" + this.state.browser_id
-          onMessage={this.handleWebsocketReceivedData.bind(this)}
-        />
         {this.state.show_permit_button ? (
           <button onClick={this.handleUserPermitClick.bind(this)}>
             click here to anable Audio Notifications from this page

@@ -19,13 +19,34 @@ export default class CommentForm extends Component {
     this.onSubmit = this.onSubmit.bind(this);
   }
 
+  ws_send_user_changed_name(name) {
+    //alert("name changed to: " + name);
+  }
+
   /**
    * Handle form input field changes & update the state
    */
   handleFieldChange = event => {
     const { value, name } = event.target;
+    if (name !== "name") {
+      throw "unexpected: name = " + name;
+    }
+
     if (name === "name") {
       this.props.comments_app.setState({ form_name: value });
+      if (this.props.comments_app.state.timer != undefined) {
+        clearInterval(this.props.comments_app.state.timer);
+      }
+      this.props.comments_app.state.timer = setInterval(
+        function(c) {
+          if (c.state.last_sent_user_name != value) {
+            c.ws_send_user_changed_name(value);
+            c.state.last_sent_user_name = value;
+          }
+        },
+        5000,
+        this
+      );
     }
     var new_state = { ...this.state };
     new_state.comment[name] = value;
