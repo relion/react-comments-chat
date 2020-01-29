@@ -170,13 +170,10 @@ class App extends Component {
       case "client_left":
         console.log("client_left: " + json._id);
         var participants = { ...this.comments_app.state.participants };
-        for (var participant in Object.keys(participants)) {
-          if (participants[participant] == json._id) {
-            participants.splice(i, 1);
-            this.comments_app.setState({ participants: participants });
-            break;
-          }
-        }
+        delete participants[json._id];
+        this.comments_app.setState({
+          participants: participants
+        });
         showNotification(
           "Comments Room: " + global.title,
           "Client left: " + json._id

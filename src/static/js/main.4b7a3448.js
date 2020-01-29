@@ -6711,7 +6711,7 @@ var _createClass=function(){function defineProperties(target,props){for(var i=0;
 _this4.comments_app.setState({comments:res,// .comments
 loading:false// browser_id: res.browser_id
 });}).catch(function(err){_this4.comments_app.setState({loading:false});});return;case"client_joined":var participants=Object.assign({},this.comments_app.state.participants);participants[json._id]={};// still no name
-this.comments_app.setState({participants:participants});showNotification("Comments Room: "+global.title,"Client joined: "+json._id);return;case"client_left":console.log("client_left: "+json._id);var participants=Object.assign({},this.comments_app.state.participants);for(var participant in Object.keys(participants)){if(participants[participant]==json._id){participants.splice(i,1);this.comments_app.setState({participants:participants});break;}}showNotification("Comments Room: "+global.title,"Client left: "+json._id);return;case"client_changed_name":var participants=Object.assign({},this.comments_app.state.participants);participants[json.browser_id].name=json.name;this.comments_app.setState({participants:participants});// console.log(
+this.comments_app.setState({participants:participants});showNotification("Comments Room: "+global.title,"Client joined: "+json._id);return;case"client_left":console.log("client_left: "+json._id);var participants=Object.assign({},this.comments_app.state.participants);delete participants[json._id];this.comments_app.setState({participants:participants});showNotification("Comments Room: "+global.title,"Client left: "+json._id);return;case"client_changed_name":var participants=Object.assign({},this.comments_app.state.participants);participants[json.browser_id].name=json.name;this.comments_app.setState({participants:participants});// console.log(
 //   "Client_changed_name.. browser_id: " +
 //     this.comments_app.state.browser_id +
 //     " name: " +
@@ -22885,4 +22885,4 @@ registerValidSW(swUrl);}}).catch(function(){console.log('No internet connection 
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=main.93c3ea47.js.map
+//# sourceMappingURL=main.4b7a3448.js.map
