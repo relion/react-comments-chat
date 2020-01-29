@@ -56,6 +56,9 @@ h6 {
   border-radius: 4px;
 }
 
+.participants_just_wrote_style {
+  background-color: coral;
+}
 .participants_div_style {
   background-color: lightgreen;
   margin: 4px 0 0 0;

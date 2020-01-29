@@ -208,10 +208,10 @@ class App extends Component {
           clearInterval(this.comments_app.state.is_typing_timeout);
         }
         this.comments_app.state.is_typing_timeout = setTimeout(
-          function(c) {
-            var participants = { ...c.comments_app.state.participants };
+          function(comments) {
+            var participants = { ...comments.comments_app.state.participants };
             participants[json.browser_id].is_typing = false;
-            c.comments_app.setState({
+            comments.comments_app.setState({
               participants: participants
             });
           },
@@ -221,13 +221,32 @@ class App extends Component {
         break;
       case "add":
       case "update":
+        var participants = { ...this.comments_app.state.participants };
+        var participant = participants[json.comment.browser_id];
+        participant.just_wrote_a_message = true;
+        participant.is_typing = false;
+        if (participant.just_wrote_a_message_timer != undefined) {
+          clearInterval(participant.just_wrote_a_message_timer);
+        }
+        participant.just_wrote_a_message_timer = setInterval(
+          function(comments, browser_id) {
+            var participants = { ...comments.comments_app.state.participants };
+            participants[browser_id].just_wrote_a_message = false;
+            comments.comments_app.setState({ participants: participants });
+          },
+          5000,
+          this,
+          json.comment.browser_id
+        );
+        this.comments_app.setState({ participants: participants });
+        //
         var new_comments = [...this.comments_app.state.comments];
         var found = false;
-        new_comments.forEach(c => {
+        new_comments.forEach(comment => {
           // lilo
-          if (c._id == json.comment._id) {
+          if (comment._id == json.comment._id) {
             if (json.op != "update") throw "unexpected json.op: " + json.op;
-            c.message = json.comment.message;
+            comment.message = json.comment.message;
             found = true;
           }
         });
@@ -298,8 +317,13 @@ class App extends Component {
               <b>Participants: </b>
               {Object.keys(this.state.participants).map(function(browser_id) {
                 var participant = this.state.participants[browser_id];
+                var participant_span_className =
+                  "participants_span_style" +
+                  (participant.just_wrote_a_message
+                    ? " participants_just_wrote_style"
+                    : "");
                 return (
-                  <span className="participants_span_style">
+                  <span className={participant_span_className}>
                     {participant.name != undefined
                       ? participant.name
                       : browser_id}
