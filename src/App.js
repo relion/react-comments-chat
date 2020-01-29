@@ -217,10 +217,10 @@ class App extends Component {
           3000,
           this
         );
-        showNotification(
-          "Comments Room: " + global.title,
-          participants[json.browser_id].name + " message entered changed."
-        );
+        // showNotification(
+        //   "Comments Room: " + global.title,
+        //   participants[json.browser_id].name + " message entered changed."
+        // );
         return;
       case "add":
       case "update":
