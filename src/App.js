@@ -197,8 +197,7 @@ class App extends Component {
           "Client changed his name to: " + json.name
         );
         return;
-      case "client_message_changed":
-        console.log("got client_message_changed");
+      case "client_message_entered_changed":
         var participants = { ...this.comments_app.state.participants };
         participants[json.browser_id].is_typing = true;
         this.comments_app.setState({
@@ -218,7 +217,11 @@ class App extends Component {
           3000,
           this
         );
-        break;
+        showNotification(
+          "Comments Room: " + global.title,
+          participants[json.browser_id].name + " message entered changed."
+        );
+        return;
       case "add":
       case "update":
         var participants = { ...this.comments_app.state.participants };

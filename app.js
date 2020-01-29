@@ -52,7 +52,7 @@ wss.on("connection", function connection(ws) {
             json.name
         );
         break;
-      case "client_message_changed":
+      case "client_message_entered_changed":
         trans(ws.page_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id

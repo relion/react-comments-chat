@@ -54,7 +54,7 @@ export default class CommentForm extends Component {
         state.last_time_sent_message_changed < current_time - 2000
       ) {
         this.props.comments_app.ws.send(
-          JSON.stringify({ op: "client_message_changed" })
+          JSON.stringify({ op: "client_message_entered_changed" })
         );
         state.last_time_sent_message_changed = current_time;
       }
