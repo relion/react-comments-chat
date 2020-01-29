@@ -240,9 +240,9 @@ class App extends Component {
         );
         this.comments_app.setState({ participants: participants });
         //
-        var new_comments = [...this.comments_app.state.comments];
+        var comments = [...this.comments_app.state.comments];
         var found = false;
-        new_comments.forEach(comment => {
+        comments.forEach(comment => {
           // lilo
           if (comment._id == json.comment._id) {
             if (json.op != "update") throw "unexpected json.op: " + json.op;
@@ -251,7 +251,7 @@ class App extends Component {
           }
         });
         if (found) {
-          this.comments_app.setState({ comments: new_comments });
+          this.comments_app.setState({ comments: comments });
         } else {
           this.comments_app.setState({
             comments: [...this.comments_app.state.comments, json.comment]
@@ -260,11 +260,11 @@ class App extends Component {
         username = json.comment.name;
         break;
       case "delete":
-        var new_comments = [...this.state.comments];
+        var comments = [...this.comments_app.state.comments];
         var found_i = -1;
-        for (var i = 0; i < new_comments.length; i++) {
-          if (new_comments[i]._id == json._id) {
-            username = new_comments[i].name;
+        for (var i = 0; i < comments.length; i++) {
+          if (comments[i]._id == json._id) {
+            username = comments[i].name;
             found_i = i;
             break;
           }
@@ -272,8 +272,8 @@ class App extends Component {
         if (found_i == -1) {
           throw '{ "error": "comment._id not found." }';
         } else {
-          new_comments.splice(found_i, 1);
-          this.comments_app.setState({ comments: new_comments });
+          comments.splice(found_i, 1);
+          this.comments_app.setState({ comments: comments });
         }
         break;
     }
