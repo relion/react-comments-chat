@@ -170,13 +170,14 @@ class App extends Component {
       case "client_left":
         console.log("client_left: " + json._id);
         var participants = { ...this.comments_app.state.participants };
+        var name = participants[json._id].name;
         delete participants[json._id];
         this.comments_app.setState({
           participants: participants
         });
         showNotification(
           "Comments Room: " + global.title,
-          "Client left: " + json._id
+          "Client left: " + (name != undefined ? name : json._id)
         );
         return;
       case "client_changed_name":
