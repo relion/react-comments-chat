@@ -153,6 +153,7 @@ function handle_request(req, res) {
     comment_json._id = uuidv1();
     comment_json.time = new Date().toUTCString();
     comment_json.user_ip = req.headers.host;
+    comment_json.browser_id = req.query.browser_id;
     //
     trans(page_title, req.query.browser_id, {
       op: "add",
