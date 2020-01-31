@@ -321,6 +321,13 @@ class App extends Component {
   };
 
   render() {
+    var me_participating_style = {
+      display: "table",
+      width: "100%",
+      padding: "4px"
+    };
+    me_participating_style.backgroundColor =
+      this.state.my_comment.name != "" ? "pink" : "chocolate";
     return (
       <div className="App container bg-light shadow">
         {this.state.show_permit_button ? (
@@ -346,10 +353,7 @@ class App extends Component {
             </span>
           </h1>
         </header>
-        <div
-          className="row my_name_div_style"
-          style={{ display: "table", width: "100%", padding: "4px" }}
-        >
+        <div className="row my_name_div_style" style={me_participating_style}>
           <span
             className="col"
             style={{ paddingRight: "8px", paddingLeft: "6px" }}
