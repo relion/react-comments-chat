@@ -84,9 +84,12 @@ export default class CommentForm extends Component {
           this.props.addComment(comment);
 
           // clear the message box
-          this.setState({
+          this.props.comments_app.setState({
             loading: false,
-            comment: { ...comment, message: "" }
+            my_comment: {
+              ...this.props.comments_app.state.my_comment,
+              message: ""
+            }
           });
         }
       })
@@ -129,6 +132,7 @@ export default class CommentForm extends Component {
             ></span>
             <input
               className=""
+              value={this.props.comments_app.state.my_comment.message}
               onChange={this.handle_message_field_changed}
               style={{
                 margin: "2px",
@@ -139,13 +143,13 @@ export default class CommentForm extends Component {
               placeholder="♥️ Your Comment"
               name="message"
             />
-            {/* <button
+            <button
               style={{ marginLeft: "8px", minWidth: "120px" }}
               className="btn btn-primary"
               disabled={this.state.loading}
             >
               Comment &#10148;
-            </button> */}
+            </button>
           </div>
           {this.renderError()}
         </form>
