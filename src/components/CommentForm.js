@@ -20,6 +20,7 @@ export default class CommentForm extends Component {
    * Handle form input field changes & update the state
    */
   handle_message_field_changed = event => {
+    console.log("in handle_message_field_changed.");
     const { value, name } = event.target;
     if (name === "message") {
       var state = this.props.comments_app.state;
@@ -46,6 +47,7 @@ export default class CommentForm extends Component {
    * Form submit handler
    */
   onSubmit(e) {
+    console.log("in onSubmit.");
     // prevent default form submission
     e.preventDefault();
 
@@ -82,10 +84,10 @@ export default class CommentForm extends Component {
           comment.time = res.time;
           comment.user_ip = res.user_ip;
           this.props.addComment(comment);
-
+          //
+          this.setState({ loading: false });
           // clear the message box
           this.props.comments_app.setState({
-            loading: false,
             my_comment: {
               ...this.props.comments_app.state.my_comment,
               message: ""
@@ -126,10 +128,6 @@ export default class CommentForm extends Component {
         </h5> */}
         <form method="post" onSubmit={this.onSubmit}>
           <div className="d-flex flex-row">
-            <span
-              className=""
-              style={{ verticalAlign: "top", whiteSpace: "nowrap" }}
-            ></span>
             <input
               className=""
               value={this.props.comments_app.state.my_comment.message}
