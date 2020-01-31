@@ -1,6 +1,6 @@
 .App {
-  padding-top: 1rem;
-  margin: 2rem auto;
+  /* padding-top: 1rem; */
+  /* margin: 2rem auto; */
 }
 
 .App-logo {
@@ -59,11 +59,15 @@ h6 {
 .participants_just_wrote_style {
   background-color: coral;
 }
-.participants_div_style {
+.participants_div_style,
+.my_comment_form_style {
   background-color: lightgreen;
   margin: 4px 0 0 0;
   padding: 0 0 4px 4px;
   border-radius: 0.3rem;
+  max-height: 95px;
+  overflow: auto;
+  flex: none;
 }
 .my_name_div_style {
   margin: 4px 0 0 0;

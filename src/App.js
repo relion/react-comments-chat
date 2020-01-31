@@ -331,7 +331,7 @@ class App extends Component {
       input_style.backgroundColor = "pink";
     }
     return (
-      <div className="App container bg-light shadow">
+      <div className="App d-flex flex-column h-100 container bg-light shadow">
         {this.state.show_permit_button ? (
           <button onClick={this.handleUserPermitClick.bind(this)}>
             click here to anable Audio Notifications from this page
@@ -408,25 +408,27 @@ class App extends Component {
             </span>
           )}
         </div>
-        <div className="row">
-          <div className="col-md pt-3 bg-white">
-            <CommentList
-              loading={this.state.loading}
-              comments={this.state.comments}
-              comments_app={this}
-            />
-          </div>
-          <div className="col-md-auto pt-3 border-right">
-            <h6>Say something about anything...</h6>
+        <div style={{ maxHeight: "100%", overflow: "auto" }}>
+          <CommentList
+            loading={this.state.loading}
+            comments={this.state.comments}
+            comments_app={this}
+          />
+        </div>
+        <div
+          className="my_comment_form_style"
+          style={{ flex: "none", padding: "8px" }}
+        >
+          <CommentForm
+            addComment={this.addComment}
+            comments_app={this}
+            browser_id={this.state.browser_id}
+          />
+          {this.state.error ? (
             <h6 className="text-danger ">
               <strong>{this.state.error}</strong>
             </h6>
-            <CommentForm
-              addComment={this.addComment}
-              comments_app={this}
-              browser_id={this.state.browser_id}
-            />
-          </div>
+          ) : null}
         </div>
       </div>
     );

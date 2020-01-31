@@ -122,23 +122,34 @@ export default class CommentForm extends Component {
           {this.state.comment.name.length + this.state.comment.message.length}
         </h5> */}
         <form method="post" onSubmit={this.onSubmit}>
-          <div className="form-group">
-            <textarea
+          <div className="d-flex flex-row">
+            <span
+              className=""
+              style={{ verticalAlign: "top", whiteSpace: "nowrap" }}
+            >
+              Write your Comment:{" "}
+            </span>
+            <input
+              className=""
               onChange={this.handle_message_field_changed}
-              className="form-control"
+              style={{
+                marginLeft: "8px",
+                borderRadius: "0.3rem",
+                width: "100%",
+                paddingLeft: "6px"
+              }}
               placeholder="♥️ Your Comment"
               name="message"
-              rows="5"
             />
-          </div>
-
-          {this.renderError()}
-
-          <div className="form-group">
-            <button disabled={this.state.loading} className="btn btn-primary">
+            <button
+              style={{ marginLeft: "8px", minWidth: "120px" }}
+              className="btn btn-primary"
+              disabled={this.state.loading}
+            >
               Comment &#10148;
             </button>
           </div>
+          {this.renderError()}
         </form>
       </React.Fragment>
     );
