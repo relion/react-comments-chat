@@ -126,14 +126,12 @@ export default class CommentForm extends Component {
             <span
               className=""
               style={{ verticalAlign: "top", whiteSpace: "nowrap" }}
-            >
-              <b>Comment: </b>
-            </span>
+            ></span>
             <input
               className=""
               onChange={this.handle_message_field_changed}
               style={{
-                marginLeft: "8px",
+                margin: "2px",
                 borderRadius: "0.3rem",
                 width: "100%",
                 paddingLeft: "6px"
@@ -141,13 +139,13 @@ export default class CommentForm extends Component {
               placeholder="♥️ Your Comment"
               name="message"
             />
-            <button
+            {/* <button
               style={{ marginLeft: "8px", minWidth: "120px" }}
               className="btn btn-primary"
               disabled={this.state.loading}
             >
               Comment &#10148;
-            </button>
+            </button> */}
           </div>
           {this.renderError()}
         </form>
