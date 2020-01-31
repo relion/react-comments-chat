@@ -315,9 +315,9 @@ class App extends Component {
       throw "unrecognized name: " + name;
     }
     //
-    var new_state = { ...this.state };
-    new_state.my_comment[name] = value;
-    this.setState(new_state);
+    var my_comment = { ...this.state.my_comment };
+    my_comment[name] = value;
+    this.setState({ my_comment: my_comment });
   };
 
   render() {
