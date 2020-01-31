@@ -321,13 +321,15 @@ class App extends Component {
   };
 
   render() {
-    var me_participating_style = {
-      display: "table",
-      width: "100%",
-      padding: "4px"
-    };
+    var me_participating_style = {};
     me_participating_style.backgroundColor =
-      this.state.my_comment.name != "" ? "pink" : "chocolate";
+      this.state.my_comment.name != "" ? "white" : "chocolate";
+    var input_style = {
+      borderRadius: "0.3rem"
+    };
+    if (this.state.my_comment.name != "") {
+      input_style.backgroundColor = "pink";
+    }
     return (
       <div className="App container bg-light shadow">
         {this.state.show_permit_button ? (
@@ -356,7 +358,7 @@ class App extends Component {
         <div className="row my_name_div_style" style={me_participating_style}>
           <span
             className="col"
-            style={{ paddingRight: "8px", paddingLeft: "6px" }}
+            style={{ paddingRight: "4px", paddingLeft: "6px" }}
           >
             <b>
               {this.state.my_comment.name == "" ? "Please Enter " : ""}Your Name
@@ -367,9 +369,7 @@ class App extends Component {
           <input
             onChange={this.handle_name_field_changed}
             className="col-6 grow"
-            style={{
-              borderRadius: "0.3rem"
-            }}
+            style={input_style}
             placeholder="👤 Your Name"
             name="name"
             type="text"
