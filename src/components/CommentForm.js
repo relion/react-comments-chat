@@ -127,7 +127,7 @@ export default class CommentForm extends Component {
               className=""
               style={{ verticalAlign: "top", whiteSpace: "nowrap" }}
             >
-              Write your Comment:{" "}
+              <b>Comment: </b>
             </span>
             <input
               className=""
