@@ -19,7 +19,11 @@ class App extends Component {
       comments: [],
       participants: {},
       loading: false,
-      show_permit_button: true
+      show_permit_button: true,
+      my_comment: {
+        name: "",
+        message: ""
+      }
     };
 
     this.addComment = this.addComment.bind(this);
@@ -286,6 +290,36 @@ class App extends Component {
     );
   }
 
+  ws_send_user_changed_name(name) {
+    this.ws.send(JSON.stringify({ op: "client_changed_name", name: name }));
+    //alert("name changed to: " + name);
+  }
+
+  handle_name_field_changed = event => {
+    const { value, name } = event.target;
+    if (name === "name") {
+      if (this.state.name_changed_timer != undefined) {
+        clearInterval(this.state.name_changed_timer);
+      }
+      this.state.name_changed_timer = setInterval(
+        function(c) {
+          if (c.state.last_sent_user_name != value) {
+            c.ws_send_user_changed_name(value);
+            c.state.last_sent_user_name = value;
+          }
+        },
+        5000,
+        this
+      );
+    } else {
+      throw "unrecognized name: " + name;
+    }
+    //
+    var new_state = { ...this.state };
+    new_state.my_comment[name] = value;
+    this.setState(new_state);
+  };
+
   render() {
     return (
       <div className="App container bg-light shadow">
@@ -312,11 +346,37 @@ class App extends Component {
             </span>
           </h1>
         </header>
+        <div
+          className="row my_name_div_style"
+          style={{ display: "table", width: "100%", padding: "4px" }}
+        >
+          <span
+            className="col"
+            style={{ paddingRight: "8px", paddingLeft: "6px" }}
+          >
+            <b>
+              {this.state.my_comment.name == "" ? "Please Enter " : ""}Your Name
+              {this.state.my_comment.name == "" ? "" : " is"}
+              {": "}
+            </b>
+          </span>
+          <input
+            onChange={this.handle_name_field_changed}
+            className="col-6 grow"
+            style={{
+              borderRadius: "0.3rem"
+            }}
+            placeholder="👤 Your Name"
+            name="name"
+            type="text"
+          />
+        </div>
+
         <div className="participants_div_style">
           {Object.keys(this.state.participants).length == 0 ? (
             <b>No Other Participants</b>
           ) : (
-            <span>
+            <span style={{ paddingLeft: "6px" }}>
               <b>Participants: </b>
               {Object.keys(this.state.participants).map(function(browser_id) {
                 var participant = this.state.participants[browser_id];
@@ -349,7 +409,6 @@ class App extends Component {
             <CommentList
               loading={this.state.loading}
               comments={this.state.comments}
-              form_name={this.state.form_name}
               comments_app={this}
             />
           </div>

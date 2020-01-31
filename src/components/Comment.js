@@ -40,10 +40,19 @@ export default class Comment extends Component {
       "\n",
       (match, i) => "<br />"
     );
-    var form_name = this.props.comments_app.state.form_name;
-    var is_owner = name === form_name;
+    var is_owner = name === this.props.comments_app.state.my_comment.name;
+    var div_class_name = "";
+    var p = this.props.comments_app.state.participants;
+    var ttt = {};
+    var is_participating = false;
+    for (var pp in p) {
+      if (p[pp].name == name) {
+        ttt = { borderWidth: "4px", borderStyle: "dashed" };
+        break;
+      }
+    }
     return (
-      <div className="media mb-3">
+      <div className="media mb-3" style={ttt}>
         <div className="row">
           <div className="col-sm-3 mr-2">
             <img

@@ -6,47 +6,22 @@ export default class CommentForm extends Component {
     super(props);
     this.state = {
       loading: false,
-      error: "",
-
-      comment: {
-        name: "",
-        message: ""
-      }
+      error: ""
     };
 
     // bind context to methods
-    this.handleFieldChange = this.handleFieldChange.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
-  }
-
-  ws_send_user_changed_name(name) {
-    this.props.comments_app.ws.send(
-      JSON.stringify({ op: "client_changed_name", name: name })
+    this.handle_message_field_changed = this.handle_message_field_changed.bind(
+      this
     );
-    //alert("name changed to: " + name);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   /**
    * Handle form input field changes & update the state
    */
-  handleFieldChange = event => {
+  handle_message_field_changed = event => {
     const { value, name } = event.target;
-    if (name === "name") {
-      this.props.comments_app.setState({ form_name: value });
-      if (this.props.comments_app.state.name_changed_timer != undefined) {
-        clearInterval(this.props.comments_app.state.name_changed_timer);
-      }
-      this.props.comments_app.state.name_changed_timer = setInterval(
-        function(c) {
-          if (c.state.last_sent_user_name != value) {
-            c.ws_send_user_changed_name(value);
-            c.state.last_sent_user_name = value;
-          }
-        },
-        5000,
-        this
-      );
-    } else if (name === "message") {
+    if (name === "message") {
       var state = this.props.comments_app.state;
       var current_time = new Date().getTime();
       if (
@@ -61,11 +36,10 @@ export default class CommentForm extends Component {
     } else {
       throw "unrecognized name: " + name;
     }
-
     //
-    var new_state = { ...this.state };
-    new_state.comment[name] = value;
-    this.setState(new_state);
+    var new_state = { ...this.props.comments_app.state };
+    new_state.my_comment[name] = value;
+    this.props.comments_app.setState(new_state);
   };
 
   /**
@@ -84,7 +58,7 @@ export default class CommentForm extends Component {
     this.setState({ error: "", loading: true });
 
     // persist the comments on server
-    let { comment } = this.state;
+    let comment = this.props.comments_app.state.my_comment;
     fetch(
       global.server_url +
         "?" +
@@ -129,7 +103,8 @@ export default class CommentForm extends Component {
    */
   isFormValid() {
     return (
-      this.state.comment.form_name !== "" && this.state.comment.message !== ""
+      this.props.comments_app.state.my_comment.name !== "" &&
+      this.props.comments_app.state.my_comment.message !== ""
     );
   }
 
@@ -148,20 +123,8 @@ export default class CommentForm extends Component {
         </h5> */}
         <form method="post" onSubmit={this.onSubmit}>
           <div className="form-group">
-            <input
-              onChange={this.handleFieldChange}
-              value={this.state.comment.form_name}
-              className="form-control"
-              placeholder="👤 Your Name"
-              name="name"
-              type="text"
-            />
-          </div>
-
-          <div className="form-group">
             <textarea
-              onChange={this.handleFieldChange}
-              value={this.state.comment.message}
+              onChange={this.handle_message_field_changed}
               className="form-control"
               placeholder="♥️ Your Comment"
               name="message"
