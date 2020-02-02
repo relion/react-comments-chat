@@ -117,7 +117,10 @@ app.get("*", function(req, res, next) {
       req.query.title + " Comments Room"
     );
     result = result.replace(/\$OG_DESCRIPTION/g, "Please click this Link");
-    result = result.replace(/\$OG_IMAGE/g, "/images/notification.png");
+    result = result.replace(
+      /\$OG_IMAGE/g,
+      "http://www.thevcard.net/DATA/VCard_Logo.png"
+    );
     res.send(result);
     res.end();
     return;
