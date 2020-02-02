@@ -116,8 +116,8 @@ app.get("*", function(req, res, next) {
       /\$OG_TITLE/g,
       req.query.title + " Comments Room"
     );
-    result = result.replace(/\$OG_DESCRIPTION/g, "About page description");
-    result = result.replace(/\$OG_IMAGE/g, "https://i.imgur.com/V7irMl8.png");
+    result = result.replace(/\$OG_DESCRIPTION/g, "Please click this Link");
+    result = result.replace(/\$OG_IMAGE/g, "/images/notification.png");
     res.send(result);
     res.end();
     return;
