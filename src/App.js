@@ -374,6 +374,12 @@ class App extends Component {
               💬
             </span>
           </h1>
+          <h5>
+            <span className="badge badge-success">
+              {this.state.comments.length}
+            </span>{" "}
+            Comment{this.state.comments.length != 1 ? "s" : ""}
+          </h5>
         </header>
         <div className="row my_name_div_style" style={me_participating_style}>
           <span

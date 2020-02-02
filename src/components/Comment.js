@@ -52,7 +52,7 @@ export default class Comment extends Component {
       }
     }
     return (
-      <div ref={this.props.ref_id} className="media mb-3" style={ttt}>
+      <div ref={this.props.ref_id} className="media mb-1" style={ttt}>
         <div className="row">
           <div className="col-sm-3 mr-2">
             <img
