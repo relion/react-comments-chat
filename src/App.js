@@ -138,6 +138,7 @@ class App extends Component {
     console.log("in handleWebsocketReceivedData");
     var json = JSON.parse(msg.data);
     var username = null;
+    var audio = "Frogger_Orig_Part_2.mp3";
     switch (json.op) {
       case "ws_connected":
         this.comments_app.setState({
@@ -178,7 +179,8 @@ class App extends Component {
         });
         showNotification(
           "Comments Room: " + global.title,
-          "Client joined: " + json._id
+          "Client joined: " + json._id,
+          "new_client.mp3"
         );
         return;
       case "client_left":
@@ -191,7 +193,8 @@ class App extends Component {
         });
         showNotification(
           "Comments Room: " + global.title,
-          "Client left: " + (name != undefined ? name : json._id)
+          "Client left: " + (name != undefined ? name : json._id),
+          "client_left.mp3"
         );
         return;
       case "client_changed_name":
@@ -208,7 +211,8 @@ class App extends Component {
         // );
         showNotification(
           "Comments Room: " + global.title,
-          "Client changed his name to: " + json.name
+          "Client changed his name to: " + json.name,
+          "new_client.mp3"
         );
         return;
       case "client_message_entered_changed":
@@ -305,7 +309,8 @@ class App extends Component {
     }
     showNotification(
       "Comments Room: " + global.title,
-      username + " " + json.op
+      username + " " + json.op,
+      "message.mp3"
     );
   }
 
@@ -481,14 +486,14 @@ function get_notifications_permission() {
 
 get_notifications_permission();
 
-function showNotification(title, txt) {
+function showNotification(title, txt, audio) {
   new Notification(title, {
     body: txt,
     icon: "/images/notification.png",
-    sound: "/audio/Frogger_Orig_Part_2.mp3",
+    sound: "/audio/" + audio, // get more here: https://www.zedge.net/find/notification
     vibrate: [200, 100, 200, 100, 200, 100, 200]
   });
-  new Audio("/audio/Frogger_Orig_Part_2.mp3").play();
+  new Audio("/audio/" + audio).play();
   console.log("showNotification done..");
 }
 
