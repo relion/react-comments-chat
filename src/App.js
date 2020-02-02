@@ -340,9 +340,13 @@ class App extends Component {
   };
 
   render() {
-    var me_participating_style = {};
-    me_participating_style.backgroundColor =
-      this.state.my_comment.name != "" ? "white" : "chocolate";
+    var me_participating_style = {
+      backgroundColor: "chocolate"
+    };
+    if (this.state.my_comment.name != "") {
+      me_participating_style.backgroundColor = "white";
+      me_participating_style.padding = 0;
+    }
     var input_style = {
       borderRadius: "0.3rem",
       paddingLeft: "6px"
