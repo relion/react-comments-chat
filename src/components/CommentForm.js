@@ -65,7 +65,7 @@ export default class CommentForm extends Component {
       global.server_url +
         "?" +
         window.location.title_arg +
-        "op=comment_write" +
+        "op=comment_added" +
         "&browser_id=" +
         this.props.browser_id,
       {

@@ -53,9 +53,16 @@ class App extends Component {
 
   editSaveComment(new_message, comment) {
     comment.message = new_message;
-    var comment_str = JSON.stringify(comment);
+    var comment_to_send = { ...comment };
+    delete comment_to_send.ref; // lilo: needless and cannot be sent anyway.
+    var comment_str = JSON.stringify(comment_to_send);
     fetch(
-      global.server_url + "?" + window.location.title_arg + "op=comment_update",
+      global.server_url +
+        "?" +
+        window.location.title_arg +
+        "op=comment_update&browser_id=" +
+        this.state.browser_id,
+
       {
         method: "post",
         headers: { "Content-Type": "text/html" },
@@ -150,6 +157,9 @@ class App extends Component {
           .then(res => res.json())
           .then(res => {
             // console.log("my browser_id is: " + res.browser_id);
+            res.forEach(c => {
+              c.ref = React.createRef();
+            });
             this.comments_app.setState({
               comments: res, // .comments
               loading: false
@@ -226,10 +236,10 @@ class App extends Component {
         //   participants[json.browser_id].name + " message entered changed."
         // );
         return;
-      case "add":
-      case "update":
+      case "comment_added":
+      case "comment_updated":
         var participants = { ...this.comments_app.state.participants };
-        var participant = participants[json.comment.browser_id];
+        var participant = participants[json.browser_id];
         participant.just_wrote_a_message = true;
         participant.is_typing = false;
         if (participant.just_wrote_a_message_timer != undefined) {
@@ -243,27 +253,36 @@ class App extends Component {
           },
           5000,
           this,
-          json.comment.browser_id
+          json.browser_id
         );
         this.comments_app.setState({ participants: participants });
         //
         var comments = [...this.comments_app.state.comments];
         var found = false;
-        comments.forEach(comment => {
+        var comment;
+        for (var i = 0; i < comments.length; i++) {
           // lilo
+          comment = comments[i];
           if (comment._id == json.comment._id) {
-            if (json.op != "update") throw "unexpected json.op: " + json.op;
+            if (json.op != "comment_updated")
+              throw "unexpected json.op: " + json.op;
             comment.message = json.comment.message;
             found = true;
+            this.comments_app.setState({ comments: comments });
+            break;
           }
-        });
-        if (found) {
-          this.comments_app.setState({ comments: comments });
-        } else {
+        }
+        if (!found) {
+          comment = json.comment;
+          comment.ref = React.createRef();
           this.comments_app.setState({
             comments: [...this.comments_app.state.comments, json.comment]
           });
         }
+        comment.ref.current.scrollIntoView({
+          block: "end",
+          behavior: "smooth"
+        });
         username = json.comment.name;
         break;
       case "delete":
@@ -286,7 +305,7 @@ class App extends Component {
     }
     showNotification(
       "Comments Room: " + global.title,
-      username + " " + json.op + (json.op == "add" ? "e" : "") + "d a comment."
+      username + " " + json.op
     );
   }
 

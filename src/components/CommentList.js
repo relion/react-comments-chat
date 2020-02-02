@@ -19,6 +19,7 @@ export default function CommentList(props) {
               key={index}
               comment={comment}
               comments_app={props.comments_app}
+              ref_id={comment.ref}
             />
           ))
         : {}}

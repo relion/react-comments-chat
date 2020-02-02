@@ -148,7 +148,7 @@ function handle_request(req, res) {
     (page_title != null ? page_title + "_" : "") +
     "comment.json";
   //
-  if (op == "comment_write") {
+  if (op == "comment_added") {
     var comment_json = JSON.parse(req.body);
     comment_json._id = uuidv1();
     comment_json.time = new Date().toUTCString();
@@ -156,7 +156,8 @@ function handle_request(req, res) {
     comment_json.browser_id = req.query.browser_id;
     //
     trans(page_title, req.query.browser_id, {
-      op: "add",
+      op: op,
+      browser_id: req.query.browser_id,
       comment: comment_json
     });
     //
@@ -223,7 +224,8 @@ function handle_request(req, res) {
       comments_json_ar[found_i].message = updated_comment.message;
       fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
       trans(page_title, req.query.browser_id, {
-        op: "update",
+        op: "comment_updated",
+        browser_id: req.query.browser_id,
         comment: comments_json_ar[found_i]
       });
     }
