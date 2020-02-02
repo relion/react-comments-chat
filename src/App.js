@@ -344,7 +344,8 @@ class App extends Component {
     me_participating_style.backgroundColor =
       this.state.my_comment.name != "" ? "white" : "chocolate";
     var input_style = {
-      borderRadius: "0.3rem"
+      borderRadius: "0.3rem",
+      paddingLeft: "6px"
     };
     if (this.state.my_comment.name != "") {
       input_style.backgroundColor = "pink";
@@ -434,10 +435,7 @@ class App extends Component {
             comments_app={this}
           />
         </div>
-        <div
-          className="my_comment_form_style"
-          style={{ flex: "none", padding: "8px" }}
-        >
+        <div className="my_comment_form_style" style={{ flex: "none" }}>
           <CommentForm
             addComment={this.addComment}
             comments_app={this}

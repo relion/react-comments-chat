@@ -133,7 +133,7 @@ export default class CommentForm extends Component {
               value={this.props.comments_app.state.my_comment.message}
               onChange={this.handle_message_field_changed}
               style={{
-                margin: "2px",
+                margin: 0,
                 borderRadius: "0.3rem",
                 width: "100%",
                 paddingLeft: "6px"
@@ -142,7 +142,7 @@ export default class CommentForm extends Component {
               name="message"
             />
             <button
-              style={{ marginLeft: "8px", minWidth: "120px" }}
+              style={{ marginLeft: "8px", minWidth: "120px", padding: 0 }}
               className="btn btn-primary"
               disabled={this.state.loading}
             >
