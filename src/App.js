@@ -45,6 +45,11 @@ class App extends Component {
   }
 
   addComment(comment) {
+    if (comment.ref == undefined) {
+      comment.ref = React.createRef();
+    } else {
+      throw "in addComment() comment.ref already defined. check this.";
+    }
     this.setState({
       loading: false,
       comments: [...this.state.comments, comment]

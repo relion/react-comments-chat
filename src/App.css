@@ -62,7 +62,7 @@ h6 {
 .participants_div_style,
 .my_comment_form_style {
   background-color: lightgreen;
-  margin: 4px 4px 4px 0;
+  margin: 4px 0 4px 0;
   padding: 6px;
   border-radius: 0.3rem;
   max-height: 95px;

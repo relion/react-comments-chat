@@ -128,6 +128,16 @@ app.get("*", function(req, res, next) {
   next();
 });
 
+// usefull for running React Debugger in port 3000 to access the running Node.js:
+// app.use(function(req, res, next) {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// });
+
 app.use("/", express.static("src"));
 
 app.post("/handle_comments", (req, res) => {

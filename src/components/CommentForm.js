@@ -60,7 +60,8 @@ export default class CommentForm extends Component {
     this.setState({ error: "", loading: true });
 
     // persist the comments on server
-    let comment = this.props.comments_app.state.my_comment;
+    let my_comment = { ...this.props.comments_app.state.my_comment };
+    my_comment.ref = undefined;
     fetch(
       global.server_url +
         "?" +
@@ -71,7 +72,7 @@ export default class CommentForm extends Component {
       {
         method: "post",
         headers: { "Content-Type": "text/html" },
-        body: JSON.stringify(comment)
+        body: JSON.stringify(my_comment)
       }
     )
       .then(res => res.json())
@@ -80,18 +81,22 @@ export default class CommentForm extends Component {
           this.setState({ loading: false, error: res.error });
         } else {
           // add time return from api and push comment to parent state
-          comment._id = res._id;
-          comment.time = res.time;
-          comment.user_ip = res.user_ip;
-          this.props.addComment(comment);
+          my_comment._id = res._id;
+          my_comment.time = res.time;
+          my_comment.user_ip = res.user_ip;
+          this.props.addComment(my_comment);
           //
           this.setState({ loading: false });
           // clear the message box
           this.props.comments_app.setState({
             my_comment: {
-              ...this.props.comments_app.state.my_comment,
+              ...my_comment,
               message: ""
             }
+          });
+          my_comment.ref.current.scrollIntoView({
+            block: "end",
+            behavior: "smooth"
           });
         }
       })
