@@ -198,7 +198,7 @@ function handle_request(req, res) {
     }
     res.end();
     return;
-  } else if (op == "comment_delete") {
+  } else if (op == "comment_deleted") {
     var comment_id = req.body;
     var data = fs.readFileSync(comment_file);
     var comments_json_ar = JSON.parse(data);
@@ -217,11 +217,11 @@ function handle_request(req, res) {
       fs.writeFileSync(comment_file, comments_json_ar_str);
       res.write(comments_json_ar_str);
       trans(page_title, req.query.browser_id, {
-        op: "delete",
+        op: "comment_deleted",
         _id: comment_id
       });
     }
-  } else if (op == "comment_update") {
+  } else if (op == "comment_updated") {
     var updated_comment = JSON.parse(req.body);
     var comments_json_ar = JSON.parse(fs.readFileSync(comment_file));
     var found_i = -1;

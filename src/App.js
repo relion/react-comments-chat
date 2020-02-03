@@ -65,7 +65,7 @@ class App extends Component {
       global.server_url +
         "?" +
         window.location.title_arg +
-        "op=comment_update&browser_id=" +
+        "op=comment_updated&browser_id=" +
         this.state.browser_id,
 
       {
@@ -110,7 +110,7 @@ class App extends Component {
       global.server_url +
         "?" +
         window.location.title_arg +
-        "op=comment_delete" +
+        "op=comment_deleted" +
         "&browser_id=" +
         this.state.browser_id,
       {
@@ -294,7 +294,7 @@ class App extends Component {
         });
         username = json.comment.name;
         break;
-      case "delete":
+      case "comment_deleted":
         var comments = [...this.comments_app.state.comments];
         var found_i = -1;
         for (var i = 0; i < comments.length; i++) {
