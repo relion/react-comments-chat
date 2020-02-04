@@ -147,11 +147,11 @@ export default class CommentForm extends Component {
               name="message"
             />
             <button
-              style={{ marginLeft: "8px", minWidth: "120px", padding: 0 }}
+              style={{ marginLeft: "8px", padding: "0 5px 0 6px" }}
               className="btn btn-primary"
               disabled={this.state.loading}
             >
-              Comment &#10148;
+              &#10148;
             </button>
           </div>
           {this.renderError()}

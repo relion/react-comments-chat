@@ -6,7 +6,7 @@ import "./App.css";
 import "./global.js";
 import Websocket from "react-websocket";
 import queryString from "query-string";
-import { ListGroup, ListGroupItem, ListGroupItemText } from "reactstrap";
+import AutosizeInput from "react-input-autosize";
 
 import CommentList from "./components/CommentList";
 import CommentForm from "./components/CommentForm";
@@ -45,11 +45,7 @@ class App extends Component {
   }
 
   addComment(comment) {
-    if (comment.ref == undefined) {
-      comment.ref = React.createRef();
-    } else {
-      throw "in addComment() comment.ref already defined. check this.";
-    }
+    comment.ref = React.createRef();
     this.setState({
       loading: false,
       comments: [...this.state.comments, comment]
@@ -257,10 +253,12 @@ class App extends Component {
         participant.just_wrote_a_message_timer = setInterval(
           function(comments, browser_id) {
             var participants = { ...comments.comments_app.state.participants };
-            participants[browser_id].just_wrote_a_message = false;
-            comments.comments_app.setState({ participants: participants });
+            if (participants[browser_id] != undefined) {
+              participants[browser_id].just_wrote_a_message = false;
+              comments.comments_app.setState({ participants: participants });
+            }
           },
-          5000,
+          4000,
           this,
           json.browser_id
         );
@@ -373,49 +371,67 @@ class App extends Component {
         ) : (
           ""
         )}
-        <header className="App-header">
-          <img
-            src={logo}
-            className={this.state.loading ? "App-logo Spin" : "App-logo"}
-            alt="logo"
-          />
-          <h1 className="App-title" dir="ltr">
-            <span className="px-2" role="img" aria-label="Chat">
-              💬
-            </span>
-            Dev Comments Room: <b>{global.title}</b>
-            <span className="px-2" role="img" aria-label="Chat">
-              💬
-            </span>
-          </h1>
-          <h5>
-            <span className="badge badge-success">
-              {this.state.comments.length}
-            </span>{" "}
-            Comment{this.state.comments.length != 1 ? "s" : ""}
-          </h5>
-        </header>
-        <div className="row my_name_div_style" style={me_participating_style}>
-          <span
-            className="col"
-            style={{ paddingRight: "4px", paddingLeft: "6px" }}
-          >
-            <b>
-              {this.state.my_comment.name == "" ? "Please Enter " : ""}Your Name
-              {this.state.my_comment.name == "" ? "" : " is"}
-              {": "}
-            </b>
-          </span>
-          <input
+        <table className="App-header">
+          <tr>
+            <td>
+              <img
+                src={logo}
+                className={this.state.loading ? "App-logo Spin" : "App-logo"}
+                alt="logo"
+              />
+            </td>
+            <td style={{ width: "100%" }}>
+              <table>
+                <tr>
+                  <td>
+                    <h1 className="App-title" dir="ltr">
+                      <span className="px-2" role="img" aria-label="Chat">
+                        💬
+                      </span>
+                      Title: <b>{global.title}</b>
+                      <span className="px-2" role="img" aria-label="Chat">
+                        💬
+                      </span>
+                    </h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h5>
+                      <span className="badge badge-success">
+                        {this.state.comments.length}
+                      </span>{" "}
+                      Comment{this.state.comments.length != 1 ? "s" : ""}
+                    </h5>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        <div
+          style={{
+            background: "rgb(238, 238, 238)",
+            borderRadius: "5px",
+            padding: "3px",
+            margin: "0",
+            display: "inline-block"
+          }}
+        >
+          {this.state.my_comment.name != "" ? <b>{"Your name: "}</b> : ""}
+          <AutosizeInput
             onChange={this.handle_name_field_changed}
-            className="col-6 grow"
-            style={input_style}
-            placeholder="👤 Your Name"
+            placeholder="👤 Please Enter Your Name"
             name="name"
             type="text"
+            value={this.state.my_comment.name}
+            style={{
+              border: "3px solid lightcoral",
+              borderRadius: "0.3rem",
+              padding: 0
+            }}
           />
         </div>
-
         <div className="participants_div_style">
           {Object.keys(this.state.participants).length == 0 ? (
             <b>No Other Participants</b>
