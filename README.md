@@ -31,7 +31,7 @@ or (when available) simpliy right click here:
 
 <img src="images/enable_notifications_in_chrome.png" title="Enable Notifications in Chrome">
 
-### Configure AWS WebSocekt
+### Configure on AWS WebSocekt
 
 1. The WebSocket Server is set to port: 3030 (you can choose a differnt number).
 2. See my video instructions on How to Configure the Node.js with WebSocket on AWS Elastic Beanstalk:
