@@ -40,4 +40,6 @@ or (when available) simpliy right click here:
 
 ## Live Demo
 
-visit [this link](http://watchcastcomments-env.ij3bbu3yth.us-east-2.elasticbeanstalk.com/comments/?title=public_room).
+1. visit [this link](http://watchcastcomments-env.ij3bbu3yth.us-east-2.elasticbeanstalk.com/comments/?title=public_room).
+
+2. see multiple usage at a different host [here](http://www.thevcard.net/cms/test_WatchCast.html).
