@@ -437,7 +437,7 @@ class App extends Component {
                 background: "rgb(238, 238, 238)",
                 borderRadius: "5px",
                 padding: "3px 3px 3px 6px",
-                margin: "4px 0 0 0",
+                margin: "4px 6px 0 0",
                 display: "inline-block"
               }}
             >

@@ -79,3 +79,6 @@ h6 {
   width: 100%;
   display: table;
 }
+input[name="name"] {
+  height: 18px;
+}
