@@ -425,33 +425,6 @@ class App extends Component {
             </td>
           </tr>
         </table>
-        {this.state.my_comment.pre_set_name ? (
-          ""
-        ) : (
-          <div
-            style={{
-              background: "rgb(238, 238, 238)",
-              borderRadius: "5px",
-              padding: "3px 3px 3px 6px",
-              margin: "4px 0 0 0",
-              display: "inline-block"
-            }}
-          >
-            {this.state.my_comment.name != "" ? <b>{"Your name: "}</b> : ""}
-            <AutosizeInput
-              onChange={this.handle_name_field_changed}
-              placeholder="👤 Please Enter Your Name"
-              name="name"
-              type="text"
-              value={this.state.my_comment.name}
-              style={{
-                border: "3px solid lightcoral",
-                borderRadius: "0.3rem",
-                padding: 0
-              }}
-            />
-          </div>
-        )}
         <div
           className="participants_div_style"
           style={{ padding: "0 6px 4px 6px" }}
@@ -459,7 +432,29 @@ class App extends Component {
           {this.state.my_comment.pre_set_name ? (
             <b>Hi {this.state.my_comment.name}, </b>
           ) : (
-            ""
+            <div
+              style={{
+                background: "rgb(238, 238, 238)",
+                borderRadius: "5px",
+                padding: "3px 3px 3px 6px",
+                margin: "4px 0 0 0",
+                display: "inline-block"
+              }}
+            >
+              {this.state.my_comment.name != "" ? <b>{"Your name: "}</b> : ""}
+              <AutosizeInput
+                onChange={this.handle_name_field_changed}
+                placeholder="👤 Please Enter Your Name"
+                name="name"
+                type="text"
+                value={this.state.my_comment.name}
+                style={{
+                  border: "3px solid lightcoral",
+                  borderRadius: "0.3rem",
+                  padding: 0
+                }}
+              />
+            </div>
           )}
           {Object.keys(this.state.participants).length == 0 ? (
             <b>No Other Participants</b>

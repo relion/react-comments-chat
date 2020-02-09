@@ -63,11 +63,13 @@ wss.on("connection", function connection(ws) {
     }
   });
   ws.on("close", function() {
+    var name = participants[ws.browser_id].name;
     console.log(
       "page_title: " +
         ws.page_title +
         " WebSocket Client disconnected: " +
-        ws.browser_id
+        ws.browser_id +
+        (name != undefined ? " (" + name + ") " : "")
     );
     delete ws_by_id[browser_id];
     delete participants[browser_id];

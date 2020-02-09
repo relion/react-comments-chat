@@ -41,18 +41,21 @@ export default class Comment extends Component {
       (match, i) => "<br />"
     );
     var is_owner = name === this.props.comments_app.state.my_comment.name;
-    var div_class_name = "";
-    var p = this.props.comments_app.state.participants;
-    var ttt = {};
+    var participants = this.props.comments_app.state.participants;
+    var div_container_style = {};
     var is_participating = false;
-    for (var pp in p) {
-      if (p[pp].name == name) {
-        ttt = { borderWidth: "4px", borderStyle: "dashed" };
+    for (var participant in participants) {
+      if (participants[participant].name == name) {
+        div_container_style = { borderWidth: "4px", borderStyle: "dashed" };
         break;
       }
     }
     return (
-      <div ref={this.props.ref_id} className="media mb-1" style={ttt}>
+      <div
+        ref={this.props.ref_id}
+        className="media mb-1"
+        style={div_container_style}
+      >
         <div className="row">
           <div className="col-sm-3 mr-2">
             <img
