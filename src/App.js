@@ -42,6 +42,12 @@ class App extends Component {
     this.ws = new WebSocket("ws://" + global.host + ws_port + "/ws/");
     this.ws.comments_app = this;
     this.ws.onmessage = this.handleWebsocketReceivedData;
+    //this.ws.onopen = function() {};
+    var name = queryString.parse(window.location.search).name;
+    this.state.my_comment.pre_set_name = name != undefined;
+    if (this.state.my_comment.pre_set_name) {
+      this.state.my_comment.name = name;
+    }
   }
 
   addComment(comment) {
@@ -167,6 +173,16 @@ class App extends Component {
               loading: false
               // browser_id: res.browser_id
             });
+
+            if (this.comments_app.state.my_comment.pre_set_name) {
+              this.send(
+                JSON.stringify({
+                  op: "client_changed_name",
+                  name: this.comments_app.state.my_comment.name
+                })
+              );
+              this.comments_app.state.last_sent_user_name = this.comments_app.state.my_comment.name;
+            }
           })
           .catch(err => {
             this.comments_app.setState({ loading: false });
@@ -409,30 +425,42 @@ class App extends Component {
             </td>
           </tr>
         </table>
-        <div
-          style={{
-            background: "rgb(238, 238, 238)",
-            borderRadius: "5px",
-            padding: "3px",
-            margin: "0",
-            display: "inline-block"
-          }}
-        >
-          {this.state.my_comment.name != "" ? <b>{"Your name: "}</b> : ""}
-          <AutosizeInput
-            onChange={this.handle_name_field_changed}
-            placeholder="👤 Please Enter Your Name"
-            name="name"
-            type="text"
-            value={this.state.my_comment.name}
+        {this.state.my_comment.pre_set_name ? (
+          ""
+        ) : (
+          <div
             style={{
-              border: "3px solid lightcoral",
-              borderRadius: "0.3rem",
-              padding: 0
+              background: "rgb(238, 238, 238)",
+              borderRadius: "5px",
+              padding: "3px 3px 3px 6px",
+              margin: "4px 0 0 0",
+              display: "inline-block"
             }}
-          />
-        </div>
-        <div className="participants_div_style">
+          >
+            {this.state.my_comment.name != "" ? <b>{"Your name: "}</b> : ""}
+            <AutosizeInput
+              onChange={this.handle_name_field_changed}
+              placeholder="👤 Please Enter Your Name"
+              name="name"
+              type="text"
+              value={this.state.my_comment.name}
+              style={{
+                border: "3px solid lightcoral",
+                borderRadius: "0.3rem",
+                padding: 0
+              }}
+            />
+          </div>
+        )}
+        <div
+          className="participants_div_style"
+          style={{ padding: "0 6px 4px 6px" }}
+        >
+          {this.state.my_comment.pre_set_name ? (
+            <b>Hi {this.state.my_comment.name}, </b>
+          ) : (
+            ""
+          )}
           {Object.keys(this.state.participants).length == 0 ? (
             <b>No Other Participants</b>
           ) : (
