@@ -452,7 +452,8 @@ class App extends Component {
                 style={{
                   border: "3px solid lightcoral",
                   borderRadius: "0.3rem",
-                  padding: "0"
+                  padding: "0",
+                  marginBottom: "4px"
                 }}
               />
             </div>
