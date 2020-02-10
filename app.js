@@ -15,7 +15,7 @@ wss.on("error", error => {
 });
 
 var ws_by_id = {};
-var participants = {};
+var all_participants = {};
 
 wss.on("connection", function connection(ws) {
   console.log(
@@ -25,17 +25,16 @@ wss.on("connection", function connection(ws) {
   ws.browser_id = browser_id;
   var ws_connected_json_data = {
     op: "ws_connected",
-    browser_id: browser_id,
-    participants: participants // Object.keys(ws_by_id)
+    browser_id: browser_id
   };
   ws.send(JSON.stringify(ws_connected_json_data));
   ws_by_id[browser_id] = ws;
-  participants[browser_id] = {};
+  all_participants[browser_id] = {};
   ws.on("message", function(msg) {
     var json = JSON.parse(msg);
     switch (json.op) {
       case "client_changed_name":
-        participants[browser_id].name = json.name;
+        all_participants[browser_id].name = json.name;
         trans(ws.page_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id,
@@ -63,7 +62,7 @@ wss.on("connection", function connection(ws) {
     }
   });
   ws.on("close", function() {
-    var name = participants[ws.browser_id].name;
+    var name = all_participants[ws.browser_id].name;
     console.log(
       "page_title: " +
         ws.page_title +
@@ -72,7 +71,7 @@ wss.on("connection", function connection(ws) {
         (name != undefined ? " (" + name + ") " : "")
     );
     delete ws_by_id[browser_id];
-    delete participants[browser_id];
+    delete all_participants[browser_id];
     trans(ws.page_title, browser_id, { op: "client_left", _id: browser_id });
   });
 });
@@ -99,10 +98,14 @@ function trans(page_title, by_browser_id, data) {
   console.log("in trans..");
   var bids = browsers_ids_by_title[page_title];
   bids.forEach(id => {
+    var ws = ws_by_id[id];
     if (id != undefined && id != by_browser_id) {
       // lilo
-      var ws = ws_by_id[id];
-      if (ws != undefined && ws.readyState === 1) {
+      if (
+        ws != undefined &&
+        ws.readyState === 1 &&
+        ws.page_title == page_title
+      ) {
         console.log("transing to..");
         ws.send(JSON.stringify(data)); // '{ "_id": -1, "message": "Hello World2" }'
       }
@@ -150,7 +153,7 @@ app.get("/handle_comments", (req, res) => {
   handle_request(req, res);
 });
 
-var browsers_ids_by_title = [];
+var browsers_ids_by_title = {};
 
 function handle_request(req, res) {
   var dir = "/DATA/";
@@ -191,13 +194,29 @@ function handle_request(req, res) {
       _id: req.query.browser_id
     });
 
+    var browser_id = req.query.browser_id;
+    var comments_json;
     if (fs.existsSync(comment_file)) {
-      var comments_json_str = fs.readFileSync(comment_file);
-      res.write(comments_json_str);
+      comments_json = JSON.parse(fs.readFileSync(comment_file));
     } else {
       fs.writeFileSync(comment_file, "[]");
-      res.write("{ browser_id: '" + req.query.browser_id + "', comments: [] }");
+      comments_json = [];
     }
+    var participants = {};
+    for (var i = 0; i < browsers_ids_by_title[page_title].length; i++) {
+      var browser_id = browsers_ids_by_title[page_title][i];
+      if (browser_id == req.query.browser_id) continue;
+      participants[browser_id] = {};
+      var participant_name = all_participants[browser_id].name;
+      if (participant_name != undefined) {
+        participants[browser_id].name = participant_name;
+      }
+    }
+    var to_send = JSON.stringify({
+      comments: comments_json,
+      participants: participants
+    });
+    res.write(to_send);
     res.end();
     return;
   } else if (op == "comment_deleted") {

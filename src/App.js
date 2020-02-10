@@ -149,10 +149,9 @@ class App extends Component {
     switch (json.op) {
       case "ws_connected":
         this.comments_app.setState({
-          browser_id: json.browser_id,
-          participants: json.participants
+          loading: true,
+          browser_id: json.browser_id
         });
-        this.comments_app.setState({ loading: true });
 
         fetch(
           global.server_url +
@@ -165,12 +164,14 @@ class App extends Component {
           .then(res => res.json())
           .then(res => {
             // console.log("my browser_id is: " + res.browser_id);
-            res.forEach(c => {
+
+            res.comments.forEach(c => {
               c.ref = React.createRef();
             });
             this.comments_app.setState({
-              comments: res, // .comments
-              loading: false
+              comments: res.comments, // .comments
+              loading: false,
+              participants: res.participants
               // browser_id: res.browser_id
             });
 
