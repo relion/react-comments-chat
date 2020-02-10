@@ -442,7 +442,13 @@ class App extends Component {
                 display: "inline-block"
               }}
             >
-              {this.state.my_comment.name != "" ? <b>{"Your name: "}</b> : ""}
+              {this.state.my_comment.name != "" ? (
+                <span style={{ marginLeft: "4px" }}>
+                  <b>{"Your name: "}</b>
+                </span>
+              ) : (
+                ""
+              )}
               <AutosizeInput
                 onChange={this.handle_name_field_changed}
                 placeholder="👤 Please Enter Your Name"
