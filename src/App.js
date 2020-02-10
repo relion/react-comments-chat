@@ -428,15 +428,16 @@ class App extends Component {
         </table>
         <div
           className="participants_div_style"
-          style={{ padding: "0 6px 0 0" }}
+          style={{ padding: "4px 6px 2px 2px" }}
         >
           {this.state.my_comment.pre_set_name ? (
-            <b>Hi {this.state.my_comment.name}, </b>
+            <span style={{ marginLeft: "4px" }}>
+              <b>Hi {this.state.my_comment.name}, </b>
+            </span>
           ) : (
             <div
               style={{
                 borderRadius: "5px",
-                padding: "4px",
                 margin: "0 2px 0 2px",
                 display: "inline-block"
               }}
@@ -457,9 +458,11 @@ class App extends Component {
             </div>
           )}
           {Object.keys(this.state.participants).length == 0 ? (
-            <b>No Other Participants</b>
+            <span style={{ marginLeft: "4px" }}>
+              <b>No Other Participants</b>
+            </span>
           ) : (
-            <span>
+            <span style={{ marginLeft: "4px" }}>
               <b>Participants: </b>
               {Object.keys(this.state.participants).map(function(browser_id) {
                 var participant = this.state.participants[browser_id];
