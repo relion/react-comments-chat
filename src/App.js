@@ -428,17 +428,16 @@ class App extends Component {
         </table>
         <div
           className="participants_div_style"
-          style={{ padding: "0 6px 4px 6px" }}
+          style={{ padding: "0 6px 0 0" }}
         >
           {this.state.my_comment.pre_set_name ? (
             <b>Hi {this.state.my_comment.name}, </b>
           ) : (
             <div
               style={{
-                background: "rgb(238, 238, 238)",
                 borderRadius: "5px",
-                padding: "3px 3px 3px 6px",
-                margin: "4px 6px 0 0",
+                padding: "4px",
+                margin: "0 2px 0 2px",
                 display: "inline-block"
               }}
             >
@@ -460,7 +459,7 @@ class App extends Component {
           {Object.keys(this.state.participants).length == 0 ? (
             <b>No Other Participants</b>
           ) : (
-            <span style={{ paddingLeft: "6px" }}>
+            <span>
               <b>Participants: </b>
               {Object.keys(this.state.participants).map(function(browser_id) {
                 var participant = this.state.participants[browser_id];
@@ -470,7 +469,10 @@ class App extends Component {
                     ? " participants_just_wrote_style"
                     : "");
                 return (
-                  <span className={participant_span_className}>
+                  <div
+                    className={participant_span_className}
+                    style={{ display: "inline-block" }}
+                  >
                     {participant.name != undefined
                       ? participant.name
                       : browser_id}
@@ -482,7 +484,7 @@ class App extends Component {
                     ) : (
                       ""
                     )}
-                  </span>
+                  </div>
                 );
               }, this)}
             </span>

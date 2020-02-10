@@ -207,10 +207,12 @@ function handle_request(req, res) {
       var browser_id = browsers_ids_by_title[page_title][i];
       if (browser_id == req.query.browser_id) continue;
       participants[browser_id] = {};
+      if (all_participants[browser_id] != undefined) {
       var participant_name = all_participants[browser_id].name;
       if (participant_name != undefined) {
         participants[browser_id].name = participant_name;
       }
+    }
     }
     var to_send = JSON.stringify({
       comments: comments_json,
