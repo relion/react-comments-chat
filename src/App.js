@@ -428,7 +428,7 @@ class App extends Component {
         </table>
         <div
           className="participants_div_style"
-          style={{ padding: "4px 6px 2px 2px" }}
+          style={{ padding: "4px 6px 0 2px" }}
         >
           {this.state.my_comment.pre_set_name ? (
             <span style={{ marginLeft: "4px" }}>
@@ -452,7 +452,7 @@ class App extends Component {
                 style={{
                   border: "3px solid lightcoral",
                   borderRadius: "0.3rem",
-                  padding: 0
+                  padding: "0 0 6px 0"
                 }}
               />
             </div>
