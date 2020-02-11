@@ -40,7 +40,10 @@ export default class CommentForm extends Component {
     //
     this.props.comments_app.setState({
       ...this.props.comments_app.state,
-      my_comment: { ...this.props.comments_app.state.my_comment, name: value }
+      my_comment: {
+        ...this.props.comments_app.state.my_comment,
+        message: value
+      }
     });
   };
 
