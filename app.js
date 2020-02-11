@@ -72,6 +72,7 @@ wss.on("connection", function connection(ws) {
     );
     delete ws_by_id[browser_id];
     delete all_participants[browser_id];
+    delete browsers_ids_by_title[ws.page_title][browser_id];
     trans(ws.page_title, browser_id, { op: "client_left", _id: browser_id });
   });
 });
@@ -97,7 +98,7 @@ scheme
 function trans(page_title, by_browser_id, data) {
   console.log("in trans..");
   var bids = browsers_ids_by_title[page_title];
-  bids.forEach(id => {
+  for (id in bids) {
     var ws = ws_by_id[id];
     if (id != undefined && id != by_browser_id) {
       // lilo
@@ -110,7 +111,7 @@ function trans(page_title, by_browser_id, data) {
         ws.send(JSON.stringify(data)); // '{ "_id": -1, "message": "Hello World2" }'
       }
     }
-  });
+  }
 }
 
 app.get("*", function(req, res, next) {
@@ -187,8 +188,8 @@ function handle_request(req, res) {
   } else if (op == "get_all_comments") {
     ws_by_id[req.query.browser_id].page_title = page_title;
     if (browsers_ids_by_title[page_title] == undefined)
-      browsers_ids_by_title[page_title] = [];
-    browsers_ids_by_title[page_title].push(req.query.browser_id);
+      browsers_ids_by_title[page_title] = {};
+    browsers_ids_by_title[page_title][req.query.browser_id] = null;
     trans(page_title, req.query.browser_id, {
       op: "client_joined",
       _id: req.query.browser_id
@@ -203,16 +204,15 @@ function handle_request(req, res) {
       comments_json = [];
     }
     var participants = {};
-    for (var i = 0; i < browsers_ids_by_title[page_title].length; i++) {
-      var browser_id = browsers_ids_by_title[page_title][i];
+    for (var browser_id in browsers_ids_by_title[page_title]) {
       if (browser_id == req.query.browser_id) continue;
       participants[browser_id] = {};
       if (all_participants[browser_id] != undefined) {
-      var participant_name = all_participants[browser_id].name;
-      if (participant_name != undefined) {
-        participants[browser_id].name = participant_name;
+        var participant_name = all_participants[browser_id].name;
+        if (participant_name != undefined) {
+          participants[browser_id].name = participant_name;
+        }
       }
-    }
     }
     var to_send = JSON.stringify({
       comments: comments_json,
