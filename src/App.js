@@ -19,7 +19,7 @@ class App extends Component {
       comments: [],
       participants: {},
       loading: false,
-      show_permit_button: true,
+      show_permit_button: false,
       my_comment: {
         name: "",
         message: ""
@@ -48,6 +48,7 @@ class App extends Component {
     if (this.state.my_comment.pre_set_name) {
       this.state.my_comment.name = name;
     }
+    this.check_playAudio();
   }
 
   addComment(comment) {
@@ -482,7 +483,7 @@ class App extends Component {
                     ? " participants_span_unknown_style"
                     : "");
                 return (
-                  <span
+                  <div
                     className={participant_span_className}
                     style={{ display: "inline-block" }}
                   >
@@ -497,7 +498,7 @@ class App extends Component {
                     ) : (
                       ""
                     )}
-                  </span>
+                  </div>
                 );
               }, this)}
             </span>
@@ -529,6 +530,15 @@ class App extends Component {
   handleUserPermitClick() {
     new Audio("/audio/chimes.mp3").play();
     this.setState({ show_permit_button: false });
+  }
+
+  check_playAudio() {
+    var audio = new Audio("/audio/chimes.mp3");
+    audio.t = this;
+    audio.onerror = function() {
+      this.t.setState({ show_permit_button: true });
+    };
+    audio.play();
   }
 }
 
