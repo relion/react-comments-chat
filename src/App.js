@@ -44,13 +44,13 @@ class App extends Component {
     this.ws.onmessage = this.handleWebsocketReceivedData;
     //this.ws.onopen = function() {};
     var name = queryString.parse(window.location.search).name;
-    var pre_set_name = name !== undefined;
     this.setState({
-      my_comment: { ...this.state.my_comment, pre_set_name: pre_set_name }
+      my_comment: {
+        ...this.state.my_comment,
+        pre_set_name: name !== undefined,
+        name: name
+      }
     });
-    if (pre_set_name) {
-      this.setState({ my_comment: { ...this.state.my_comment, name: name } });
-    }
     this.check_playAudio();
   }
 

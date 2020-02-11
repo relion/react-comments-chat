@@ -38,9 +38,10 @@ export default class CommentForm extends Component {
       throw "unrecognized name: " + name;
     }
     //
-    var new_state = { ...this.props.comments_app.state };
-    new_state.my_comment[name] = value;
-    this.props.comments_app.setState(new_state);
+    this.props.comments_app.setState({
+      ...this.props.comments_app.state,
+      my_comment: { ...this.props.comments_app.state.my_comment, name: value }
+    });
   };
 
   /**
