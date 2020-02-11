@@ -477,15 +477,18 @@ class App extends Component {
                   "participants_span_style" +
                   (participant.just_wrote_a_message
                     ? " participants_just_wrote_style"
+                    : "") +
+                  (participant.name == undefined
+                    ? " participants_span_unknown_style"
                     : "");
                 return (
-                  <div
+                  <span
                     className={participant_span_className}
                     style={{ display: "inline-block" }}
                   >
                     {participant.name != undefined
                       ? participant.name
-                      : browser_id}
+                      : "unknown"}
                     {participant.is_typing ? (
                       <img
                         src={edit_image}
@@ -494,7 +497,7 @@ class App extends Component {
                     ) : (
                       ""
                     )}
-                  </div>
+                  </span>
                 );
               }, this)}
             </span>

@@ -56,6 +56,10 @@ h6 {
   border-radius: 4px;
 }
 
+.participants_span_unknown_style {
+  background-color: #fcd4ff;
+}
+
 .participants_just_wrote_style {
   background-color: coral;
 }
@@ -65,7 +69,7 @@ h6 {
   margin: 4px 0 4px 0;
   padding: 6px;
   border-radius: 0.3rem;
-  max-height: 100px;
+  max-height: 72px;
   overflow: auto;
   flex: none;
 }
