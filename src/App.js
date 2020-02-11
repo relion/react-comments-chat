@@ -533,12 +533,16 @@ class App extends Component {
   }
 
   check_playAudio() {
-    var audio = new Audio("/audio/chimes.mp3");
-    audio.t = this;
-    audio.onerror = function() {
+    try {
+      var audio = new Audio("/audio/chimes.mp3");
+      audio.t = this;
+      audio.onerror = function() {
+        this.t.setState({ show_permit_button: true });
+      };
+      audio.play();
+    } catch (e) {
       this.t.setState({ show_permit_button: true });
-    };
-    audio.play();
+    }
   }
 }
 
