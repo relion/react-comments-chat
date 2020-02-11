@@ -9,7 +9,7 @@ export default function CommentList(props) {
           Be the first to comment
         </div>
       ) : null}
-      {props.comments.map != undefined
+      {props.comments.map !== undefined
         ? props.comments.map((comment, index) => (
             <Comment
               key={index}

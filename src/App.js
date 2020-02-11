@@ -4,7 +4,7 @@ import edit_image from "./images/edit.gif";
 import "bootstrap/dist/css/bootstrap.css";
 import "./App.css";
 import "./global.js";
-import Websocket from "react-websocket";
+//import Websocket from "react-websocket";
 import queryString from "query-string";
 import AutosizeInput from "react-input-autosize";
 
@@ -32,7 +32,7 @@ class App extends Component {
     if (title_arg !== "") title_arg = title_arg.substr(1) + "&";
     window.location.title_arg = title_arg;
     global.title = queryString.parse(window.location.search).title;
-    if (global.title == undefined || global.title == "") {
+    if (global.title === undefined || global.title === "") {
       global.title = "Root";
     }
   }
@@ -44,9 +44,12 @@ class App extends Component {
     this.ws.onmessage = this.handleWebsocketReceivedData;
     //this.ws.onopen = function() {};
     var name = queryString.parse(window.location.search).name;
-    this.state.my_comment.pre_set_name = name != undefined;
-    if (this.state.my_comment.pre_set_name) {
-      this.state.my_comment.name = name;
+    var pre_set_name = name !== undefined;
+    this.setState({
+      my_comment: { ...this.state.my_comment, pre_set_name: pre_set_name }
+    });
+    if (pre_set_name) {
+      this.setState({ my_comment: { ...this.state.my_comment, name: name } });
     }
     this.check_playAudio();
   }
@@ -212,7 +215,7 @@ class App extends Component {
         });
         showNotification(
           "Comments Room: " + global.title,
-          "Client left: " + (name != undefined ? name : json._id),
+          "Client left: " + (name !== undefined ? name : json._id),
           "client_left.mp3"
         );
         return;
@@ -240,7 +243,7 @@ class App extends Component {
         this.comments_app.setState({
           participants: participants
         });
-        if (this.comments_app.state.is_typing_timeout != undefined) {
+        if (this.comments_app.state.is_typing_timeout !== undefined) {
           clearInterval(this.comments_app.state.is_typing_timeout);
         }
         this.comments_app.state.is_typing_timeout = setTimeout(
@@ -265,13 +268,13 @@ class App extends Component {
         var participant = participants[json.browser_id];
         participant.just_wrote_a_message = true;
         participant.is_typing = false;
-        if (participant.just_wrote_a_message_timer != undefined) {
+        if (participant.just_wrote_a_message_timer !== undefined) {
           clearInterval(participant.just_wrote_a_message_timer);
         }
         participant.just_wrote_a_message_timer = setInterval(
           function(comments, browser_id) {
             var participants = { ...comments.comments_app.state.participants };
-            if (participants[browser_id] != undefined) {
+            if (participants[browser_id] !== undefined) {
               participants[browser_id].just_wrote_a_message = false;
               comments.comments_app.setState({ participants: participants });
             }
@@ -288,8 +291,8 @@ class App extends Component {
         for (var i = 0; i < comments.length; i++) {
           // lilo
           comment = comments[i];
-          if (comment._id == json.comment._id) {
-            if (json.op != "comment_updated")
+          if (comment._id === json.comment._id) {
+            if (json.op !== "comment_updated")
               throw "unexpected json.op: " + json.op;
             comment.message = json.comment.message;
             found = true;
@@ -314,13 +317,13 @@ class App extends Component {
         var comments = [...this.comments_app.state.comments];
         var found_i = -1;
         for (var i = 0; i < comments.length; i++) {
-          if (comments[i]._id == json._id) {
+          if (comments[i]._id === json._id) {
             username = comments[i].name;
             found_i = i;
             break;
           }
         }
-        if (found_i == -1) {
+        if (found_i === -1) {
           throw '{ "error": "comment._id not found." }';
         } else {
           comments.splice(found_i, 1);
@@ -343,19 +346,21 @@ class App extends Component {
   handle_name_field_changed = event => {
     const { value, name } = event.target;
     if (name === "name") {
-      if (this.state.name_changed_timer != undefined) {
+      if (this.state.name_changed_timer !== undefined) {
         clearInterval(this.state.name_changed_timer);
       }
-      this.state.name_changed_timer = setInterval(
-        function(c) {
-          if (c.state.last_sent_user_name != value) {
-            c.ws_send_user_changed_name(value);
-            c.state.last_sent_user_name = value;
-          }
-        },
-        5000,
-        this
-      );
+      this.setState({
+        name_changed_timer: setInterval(
+          function(c) {
+            if (c.state.last_sent_user_name !== value) {
+              c.ws_send_user_changed_name(value);
+              c.state.last_sent_user_name = value;
+            }
+          },
+          5000,
+          this
+        )
+      });
     } else {
       throw "unrecognized name: " + name;
     }
@@ -369,7 +374,7 @@ class App extends Component {
     var me_participating_style = {
       backgroundColor: "chocolate"
     };
-    if (this.state.my_comment.name != "") {
+    if (this.state.my_comment.name !== "") {
       me_participating_style.backgroundColor = "white";
       me_participating_style.padding = 0;
     }
@@ -377,7 +382,7 @@ class App extends Component {
       borderRadius: "0.3rem",
       paddingLeft: "6px"
     };
-    if (this.state.my_comment.name != "") {
+    if (this.state.my_comment.name !== "") {
       input_style.backgroundColor = "pink";
     }
     return (
@@ -419,7 +424,7 @@ class App extends Component {
                       <span className="badge badge-success">
                         {this.state.comments.length}
                       </span>{" "}
-                      Comment{this.state.comments.length != 1 ? "s" : ""}
+                      Comment{this.state.comments.length !== 1 ? "s" : ""}
                     </h5>
                   </td>
                 </tr>
@@ -443,7 +448,7 @@ class App extends Component {
                 display: "inline-block"
               }}
             >
-              {this.state.my_comment.name != "" ? (
+              {this.state.my_comment.name !== "" ? (
                 <span style={{ marginLeft: "4px" }}>
                   <b>{"Your name: "}</b>
                 </span>
@@ -465,7 +470,7 @@ class App extends Component {
               />
             </div>
           )}
-          {Object.keys(this.state.participants).length == 0 ? (
+          {Object.keys(this.state.participants).length === 0 ? (
             <span style={{ marginLeft: "4px" }}>
               <b>No Other Participants</b>
             </span>
@@ -479,7 +484,7 @@ class App extends Component {
                   (participant.just_wrote_a_message
                     ? " participants_just_wrote_style"
                     : "") +
-                  (participant.name == undefined
+                  (participant.name === undefined
                     ? " participants_span_unknown_style"
                     : "");
                 return (
@@ -487,13 +492,14 @@ class App extends Component {
                     className={participant_span_className}
                     style={{ display: "inline-block" }}
                   >
-                    {participant.name != undefined
+                    {participant.name !== undefined
                       ? participant.name
                       : "unknown"}
                     {participant.is_typing ? (
                       <img
                         src={edit_image}
                         className={"Edit-animation infinite 2s linear"}
+                        alt="participant is typing"
                       />
                     ) : (
                       ""
@@ -538,10 +544,13 @@ class App extends Component {
       audio.t = this;
       audio.onerror = function() {
         this.t.setState({ show_permit_button: true });
+        console.log("Can't play audio");
       };
       audio.play();
+      console.log("Can play audio");
     } catch (e) {
       this.t.setState({ show_permit_button: true });
+      console.log("Can't play audio");
     }
   }
 }

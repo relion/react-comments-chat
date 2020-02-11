@@ -43,9 +43,8 @@ export default class Comment extends Component {
     var is_owner = name === this.props.comments_app.state.my_comment.name;
     var participants = this.props.comments_app.state.participants;
     var div_container_style = {};
-    var is_participating = false;
     for (var participant in participants) {
-      if (participants[participant].name == name) {
+      if (participants[participant].name === name) {
         div_container_style = { borderWidth: "4px", borderStyle: "dashed" };
         break;
       }

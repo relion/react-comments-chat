@@ -26,7 +26,7 @@ export default class CommentForm extends Component {
       var state = this.props.comments_app.state;
       var current_time = new Date().getTime();
       if (
-        state.last_time_sent_message_changed == undefined ||
+        state.last_time_sent_message_changed === undefined ||
         state.last_time_sent_message_changed < current_time - 2000
       ) {
         this.props.comments_app.ws.send(
