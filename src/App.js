@@ -394,6 +394,40 @@ class App extends Component {
         ) : (
           ""
         )}
+        {this.state.my_comment.pre_set_name ? (
+          <span style={{ marginLeft: "4px" }}>
+            <b>Hi {this.state.my_comment.name}, </b>
+          </span>
+        ) : (
+          <div
+            style={{
+              borderRadius: "5px",
+              margin: "0 2px 0 2px",
+              display: "inline-block"
+            }}
+          >
+            {this.state.my_comment.name !== "" ? (
+              <span style={{ marginLeft: "4px" }}>
+                <b>{"Your name: "}</b>
+              </span>
+            ) : (
+              ""
+            )}
+            <AutosizeInput
+              onChange={this.handle_name_field_changed}
+              placeholder="👤 Please Enter Your Name"
+              name="name"
+              type="text"
+              value={this.state.my_comment.name}
+              style={{
+                border: "3px solid lightcoral",
+                borderRadius: "0.3rem",
+                padding: "0",
+                margin: "4px 0"
+              }}
+            />
+          </div>
+        )}
         <table className="App-header">
           <tr>
             <td>
@@ -436,40 +470,6 @@ class App extends Component {
           className="participants_div_style"
           style={{ padding: "4px 6px 0 2px" }}
         >
-          {this.state.my_comment.pre_set_name ? (
-            <span style={{ marginLeft: "4px" }}>
-              <b>Hi {this.state.my_comment.name}, </b>
-            </span>
-          ) : (
-            <div
-              style={{
-                borderRadius: "5px",
-                margin: "0 2px 0 2px",
-                display: "inline-block"
-              }}
-            >
-              {this.state.my_comment.name !== "" ? (
-                <span style={{ marginLeft: "4px" }}>
-                  <b>{"Your name: "}</b>
-                </span>
-              ) : (
-                ""
-              )}
-              <AutosizeInput
-                onChange={this.handle_name_field_changed}
-                placeholder="👤 Please Enter Your Name"
-                name="name"
-                type="text"
-                value={this.state.my_comment.name}
-                style={{
-                  border: "3px solid lightcoral",
-                  borderRadius: "0.3rem",
-                  padding: "0",
-                  marginBottom: "4px"
-                }}
-              />
-            </div>
-          )}
           {Object.keys(this.state.participants).length === 0 ? (
             <span style={{ marginLeft: "4px" }}>
               <b>No Other Participants</b>
