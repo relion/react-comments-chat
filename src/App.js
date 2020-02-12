@@ -501,10 +501,9 @@ class App extends Component {
 
   componentDidMount() {
     var name = queryString.parse(window.location.search).name;
-    this.setState({ my_name: name });
     this.setState({
       pre_set_name: name !== undefined,
-      my_name: name
+      my_name: name !== undefined ? name : ""
     });
     this.check_playAudio();
   }
