@@ -21,10 +21,6 @@ const StyledEdiText = styled(EdiText)`
 `;
 
 export default class Comment extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   onClickDelete(e) {
     this.comment.props.comments_app.deleteComment(this.comment.props.comment);
   }
@@ -40,7 +36,8 @@ export default class Comment extends Component {
       "\n",
       (match, i) => "<br />"
     );
-    var is_owner = name === this.props.comments_app.state.my_comment.name;
+    var is_owner =
+      name === this.props.comments_app.props.main_app.state.my_name;
     var participants = this.props.comments_app.state.participants;
     var div_container_style = {};
     for (var participant in participants) {

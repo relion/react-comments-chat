@@ -39,11 +39,7 @@ export default class CommentForm extends Component {
     }
     //
     this.props.comments_app.setState({
-      ...this.props.comments_app.state,
-      my_comment: {
-        ...this.props.comments_app.state.my_comment,
-        message: value
-      }
+      my_comment_message: value
     });
   };
 
@@ -64,8 +60,11 @@ export default class CommentForm extends Component {
     this.setState({ error: "", loading: true });
 
     // persist the comments on server
-    let my_comment = { ...this.props.comments_app.state.my_comment };
-    my_comment.ref = undefined;
+    let my_comment = {
+      name: this.props.comments_app.props.main_app.state.my_name,
+      message: this.props.comments_app.state.my_comment_message,
+      ref: undefined
+    };
     fetch(
       global.server_url +
         "?" +
@@ -93,10 +92,7 @@ export default class CommentForm extends Component {
           this.setState({ loading: false });
           // clear the message box
           this.props.comments_app.setState({
-            my_comment: {
-              ...my_comment,
-              message: ""
-            }
+            my_comment_message: ""
           });
           my_comment.ref.current.scrollIntoView({
             block: "end",
@@ -117,8 +113,8 @@ export default class CommentForm extends Component {
    */
   isFormValid() {
     return (
-      this.props.comments_app.state.my_comment.name !== "" &&
-      this.props.comments_app.state.my_comment.message !== ""
+      this.props.comments_app.props.main_app.state.my_name !== "" &&
+      this.props.comments_app.state.my_comment_message !== ""
     );
   }
 
@@ -139,7 +135,7 @@ export default class CommentForm extends Component {
           <div className="d-flex flex-row">
             <input
               className=""
-              value={this.props.comments_app.state.my_comment.message}
+              value={this.props.comments_app.state.my_comment_message}
               onChange={this.handle_message_field_changed}
               style={{
                 margin: 0,

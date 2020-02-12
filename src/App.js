@@ -11,19 +11,21 @@ import AutosizeInput from "react-input-autosize";
 import CommentList from "./components/CommentList";
 import CommentForm from "./components/CommentForm";
 
-class App extends Component {
+import ReactDOM from "react-dom";
+
+class CommentsApp extends Component {
   constructor(props) {
     super(props);
+
+    //props.main_app.setState({ my_name: "" });
 
     this.state = {
       comments: [],
       participants: {},
       loading: false,
-      show_permit_button: false,
-      my_comment: {
-        name: "",
-        message: ""
-      }
+      //show_permit_button: false,
+      //my_name: "",
+      my_comment_message: ""
     };
 
     this.addComment = this.addComment.bind(this);
@@ -43,15 +45,6 @@ class App extends Component {
     this.ws.comments_app = this;
     this.ws.onmessage = this.handleWebsocketReceivedData;
     //this.ws.onopen = function() {};
-    var name = queryString.parse(window.location.search).name;
-    this.setState({
-      my_comment: {
-        ...this.state.my_comment,
-        pre_set_name: name !== undefined,
-        name: name
-      }
-    });
-    this.check_playAudio();
   }
 
   addComment(comment) {
@@ -94,7 +87,7 @@ class App extends Component {
               break;
             }
           }
-          if (!found) throw "";
+          if (!found) throw "new_message not found.";
           this.setState({
             loading: false,
             comments: new_comments
@@ -149,7 +142,6 @@ class App extends Component {
     console.log("in handleWebsocketReceivedData");
     var json = JSON.parse(msg.data);
     var username = null;
-    var audio = "Frogger_Orig_Part_2.mp3";
     switch (json.op) {
       case "ws_connected":
         this.comments_app.setState({
@@ -179,14 +171,13 @@ class App extends Component {
               // browser_id: res.browser_id
             });
 
-            if (this.comments_app.state.my_comment.pre_set_name) {
+            if (this.comments_app.props.main_app.state.pre_set_name) {
               this.send(
                 JSON.stringify({
                   op: "client_changed_name",
-                  name: this.comments_app.state.my_comment.name
+                  name: this.comments_app.props.main_app.state.my_name
                 })
               );
-              this.comments_app.state.last_sent_user_name = this.comments_app.state.my_comment.name;
             }
           })
           .catch(err => {
@@ -207,7 +198,7 @@ class App extends Component {
         return;
       case "client_left":
         console.log("client_left: " + json._id);
-        var participants = { ...this.comments_app.state.participants };
+        participants = { ...this.comments_app.state.participants };
         var name = participants[json._id].name;
         delete participants[json._id];
         this.comments_app.setState({
@@ -220,7 +211,7 @@ class App extends Component {
         );
         return;
       case "client_changed_name":
-        var participants = { ...this.comments_app.state.participants };
+        participants = { ...this.comments_app.state.participants };
         participants[json.browser_id].name = json.name;
         this.comments_app.setState({
           participants: participants
@@ -238,7 +229,7 @@ class App extends Component {
         );
         return;
       case "client_message_entered_changed":
-        var participants = { ...this.comments_app.state.participants };
+        participants = { ...this.comments_app.state.participants };
         participants[json.browser_id].is_typing = true;
         this.comments_app.setState({
           participants: participants
@@ -248,7 +239,7 @@ class App extends Component {
         }
         this.comments_app.state.is_typing_timeout = setTimeout(
           function(comments) {
-            var participants = { ...comments.comments_app.state.participants };
+            participants = { ...comments.comments_app.state.participants };
             participants[json.browser_id].is_typing = false;
             comments.comments_app.setState({
               participants: participants
@@ -264,7 +255,7 @@ class App extends Component {
         return;
       case "comment_added":
       case "comment_updated":
-        var participants = { ...this.comments_app.state.participants };
+        participants = { ...this.comments_app.state.participants };
         var participant = participants[json.browser_id];
         participant.just_wrote_a_message = true;
         participant.is_typing = false;
@@ -314,7 +305,7 @@ class App extends Component {
         username = json.comment.name;
         break;
       case "comment_deleted":
-        var comments = [...this.comments_app.state.comments];
+        comments = [...this.comments_app.state.comments];
         var found_i = -1;
         for (var i = 0; i < comments.length; i++) {
           if (comments[i]._id === json._id) {
@@ -324,11 +315,14 @@ class App extends Component {
           }
         }
         if (found_i === -1) {
-          throw '{ "error": "comment._id not found." }';
+          throw "comment._id not found.";
         } else {
           comments.splice(found_i, 1);
           this.comments_app.setState({ comments: comments });
         }
+        break;
+      default:
+        throw "unrecognized json.op: " + json.op;
         break;
     }
     showNotification(
@@ -343,38 +337,11 @@ class App extends Component {
     //alert("name changed to: " + name);
   }
 
-  handle_name_field_changed = event => {
-    const { value, name } = event.target;
-    if (name === "name") {
-      if (this.state.name_changed_timer !== undefined) {
-        clearInterval(this.state.name_changed_timer);
-      }
-      this.setState({
-        name_changed_timer: setInterval(
-          function(c) {
-            if (c.state.last_sent_user_name !== value) {
-              c.ws_send_user_changed_name(value);
-              c.state.last_sent_user_name = value;
-            }
-          },
-          5000,
-          this
-        )
-      });
-    } else {
-      throw "unrecognized name: " + name;
-    }
-    //
-    var my_comment = { ...this.state.my_comment };
-    my_comment[name] = value;
-    this.setState({ my_comment: my_comment });
-  };
-
   render() {
     var me_participating_style = {
       backgroundColor: "chocolate"
     };
-    if (this.state.my_comment.name !== "") {
+    if (this.props.main_app.state.my_name !== "") {
       me_participating_style.backgroundColor = "white";
       me_participating_style.padding = 0;
     }
@@ -382,52 +349,11 @@ class App extends Component {
       borderRadius: "0.3rem",
       paddingLeft: "6px"
     };
-    if (this.state.my_comment.name !== "") {
+    if (this.props.main_app.state.my_name !== "") {
       input_style.backgroundColor = "pink";
     }
     return (
-      <div className="App d-flex flex-column h-100 container bg-light shadow">
-        {this.state.show_permit_button ? (
-          <button onClick={this.handleUserPermitClick.bind(this)}>
-            click here to anable Audio Notifications from this page
-          </button>
-        ) : (
-          ""
-        )}
-        {this.state.my_comment.pre_set_name ? (
-          <span style={{ marginLeft: "4px" }}>
-            <b>Hi {this.state.my_comment.name}, </b>
-          </span>
-        ) : (
-          <div
-            style={{
-              borderRadius: "5px",
-              margin: "0 2px 0 2px",
-              display: "inline-block"
-            }}
-          >
-            {this.state.my_comment.name !== "" ? (
-              <span style={{ marginLeft: "4px" }}>
-                <b>{"Your name: "}</b>
-              </span>
-            ) : (
-              ""
-            )}
-            <AutosizeInput
-              onChange={this.handle_name_field_changed}
-              placeholder="👤 Please Enter Your Name"
-              name="name"
-              type="text"
-              value={this.state.my_comment.name}
-              style={{
-                border: "3px solid lightcoral",
-                borderRadius: "0.3rem",
-                padding: "0",
-                margin: "4px 0"
-              }}
-            />
-          </div>
-        )}
+      <React.Fragment>
         <table className="App-header">
           <tr>
             <td>
@@ -529,29 +455,8 @@ class App extends Component {
             </h6>
           ) : null}
         </div>
-      </div>
+      </React.Fragment>
     );
-  }
-
-  handleUserPermitClick() {
-    new Audio("/audio/chimes.mp3").play();
-    this.setState({ show_permit_button: false });
-  }
-
-  check_playAudio() {
-    try {
-      var audio = new Audio("/audio/chimes.mp3");
-      audio.t = this;
-      audio.onerror = function() {
-        this.t.setState({ show_permit_button: true });
-        console.log("Can't play audio");
-      };
-      audio.play();
-      console.log("Can play audio");
-    } catch (e) {
-      this.t.setState({ show_permit_button: true });
-      console.log("Can't play audio");
-    }
   }
 }
 
@@ -578,6 +483,136 @@ function showNotification(title, txt, audio) {
   });
   new Audio("/audio/" + audio).play();
   console.log("showNotification done..");
+}
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+    // props.main_app = this;
+    this.state = {
+      //comments: [],
+      //participants: {},
+      //loading: false,
+      show_permit_button: false,
+      my_name: ""
+      //my_comment_message: ""
+    };
+  }
+
+  componentDidMount() {
+    var name = queryString.parse(window.location.search).name;
+    this.setState({ my_name: name });
+    this.setState({
+      pre_set_name: name !== undefined,
+      my_name: name
+    });
+    this.check_playAudio();
+  }
+
+  handle_name_field_changed = event => {
+    const { value, name } = event.target;
+    if (name === "name") {
+      if (this.state.name_changed_timer !== undefined) {
+        clearInterval(this.state.name_changed_timer);
+      }
+      this.setState({
+        name_changed_timer: setInterval(
+          function(app_main) {
+            for (var child in app_main.refs) {
+              if (child.startsWith("CommentsApp_")) {
+                console.log(child);
+                app_main.refs[child].ws_send_user_changed_name(value);
+              }
+            }
+          },
+          5000,
+          this
+        )
+      });
+    } else {
+      throw "unrecognized name: " + name;
+    }
+    //
+    this.setState({ my_name: value });
+  };
+
+  handleUserPermitClick() {
+    new Audio("/audio/chimes.mp3").play();
+    this.setState({ show_permit_button: false });
+  }
+
+  check_playAudio() {
+    try {
+      var audio = new Audio("/audio/chimes.mp3");
+      audio.t = this;
+      audio.onerror = function() {
+        this.t.setState({ show_permit_button: true });
+        console.log("Can't play audio");
+      };
+      audio.play();
+      console.log("Can play audio");
+    } catch (e) {
+      this.t.setState({ show_permit_button: true });
+      console.log("Can't play audio");
+    }
+  }
+
+  render() {
+    return (
+      <div className="App d-flex flex-column h-100 container bg-light shadow">
+        {this.state.show_permit_button ? (
+          <button onClick={this.handleUserPermitClick.bind(this)}>
+            click here to anable Audio Notifications from this page
+          </button>
+        ) : (
+          ""
+        )}
+        {this.state.pre_set_name ? (
+          <span style={{ marginLeft: "4px" }}>
+            <b>Hi {this.state.my_name}, </b>
+          </span>
+        ) : (
+          <div
+            style={{
+              borderRadius: "5px",
+              margin: "0 2px 0 2px",
+              display: "inline-block"
+            }}
+          >
+            {this.state.my_name !== "" ? (
+              <span style={{ marginLeft: "4px" }}>
+                <b>{"Your name: "}</b>
+              </span>
+            ) : (
+              ""
+            )}
+            <AutosizeInput
+              onChange={this.handle_name_field_changed}
+              placeholder="👤 Please Enter Your Name"
+              name="name"
+              type="text"
+              value={this.state.my_name}
+              style={{
+                border: "3px solid lightcoral",
+                borderRadius: "0.3rem",
+                padding: "0",
+                margin: "4px 0"
+              }}
+            />
+          </div>
+        )}
+        <CommentsApp
+          main_app={this}
+          ref={"CommentsApp_" + React.createRef()}
+        ></CommentsApp>
+        {/* <br></br>
+        <CommentsApp
+          main_app={this}
+          ref={"CommentsApp_" + React.createRef()}
+        ></CommentsApp> */}
+      </div>
+    );
+  }
 }
 
 export default App;
