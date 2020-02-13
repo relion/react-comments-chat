@@ -2,16 +2,11 @@ import React, { Component } from "react";
 import logo from "../images/logo.svg";
 import edit_image from "../images/edit.gif";
 import "bootstrap/dist/css/bootstrap.css";
-//import "./App.css";
 import "../global.js";
-//import Websocket from "react-websocket";
 import queryString from "query-string";
-import AutosizeInput from "react-input-autosize";
 
 import CommentList from "./CommentList";
 import CommentForm from "./CommentForm";
-
-import ReactDOM from "react-dom";
 
 // chrome://settings/content/notifications
 // Note: for testing the Notifications on real host, you can enable: Insecure origins treated as secure in chrome://flags/
@@ -190,7 +185,7 @@ class CommentsApp extends Component {
               c.ref = React.createRef();
             });
             this.comments_app.setState({
-              comments: res.comments, // .comments
+              comments: res.comments,
               loading: false,
               participants: res.participants
               // browser_id: res.browser_id
@@ -211,7 +206,7 @@ class CommentsApp extends Component {
         return;
       case "client_joined":
         var participants = { ...this.comments_app.state.participants };
-        participants[json._id] = {}; // still no name
+        participants[json._id] = {}; // still has no name
         this.comments_app.setState({
           participants: participants
         });
