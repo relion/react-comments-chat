@@ -463,18 +463,22 @@ class CommentsApp extends Component {
             comments_app={this}
           />
         </div>
-        <div className="my_comment_form_style" style={{ flex: "none" }}>
-          <CommentForm
-            addComment={this.addComment}
-            comments_app={this}
-            browser_id={this.state.browser_id}
-          />
-          {this.state.error ? (
-            <h6 className="text-danger ">
-              <strong>{this.state.error}</strong>
-            </h6>
-          ) : null}
-        </div>
+        {this.props.main_app.state.my_name == "" ? (
+          ""
+        ) : (
+          <div className="my_comment_form_style" style={{ flex: "none" }}>
+            <CommentForm
+              addComment={this.addComment}
+              comments_app={this}
+              browser_id={this.state.browser_id}
+            />
+            {this.state.error ? (
+              <h6 className="text-danger ">
+                <strong>{this.state.error}</strong>
+              </h6>
+            ) : null}
+          </div>
+        )}
       </React.Fragment>
     );
   }
