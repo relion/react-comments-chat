@@ -44,8 +44,8 @@ class App extends Component {
         clearInterval(this.state.name_changed_timer);
       }
       this.setState({
-        name_changed_timer: setInterval(
-          function(app_main) {
+        name_changed_timer: setTimeout(
+          app_main => {
             for (var ref in app_main.refs) {
               if (ref.startsWith("CommentsApp_")) {
                 app_main.refs[ref].ws_send_user_changed_name(value);

@@ -6691,7 +6691,8 @@ var _createClass=function(){function defineProperties(target,props){for(var i=0;
 var App=function(_Component){_inherits(App,_Component);function App(props){_classCallCheck(this,App);// props.main_app = this;
 var _this=_possibleConstructorReturn(this,(App.__proto__||Object.getPrototypeOf(App)).call(this,props));_this.handle_name_field_changed=function(event){var _event$target=event.target,value=_event$target.value,name=_event$target.name;if(name==="name"){// reset the timer, therefor only 5 seconds after the last key is pressed the name is published for each comments room to all it's participants.
 // todo: avoid sending unneccary repeating name_changed notification.
-if(_this.state.name_changed_timer!==undefined){clearInterval(_this.state.name_changed_timer);}_this.setState({name_changed_timer:setInterval(function(app_main){for(var ref in app_main.refs){if(ref.startsWith("CommentsApp_")){app_main.refs[ref].ws_send_user_changed_name(value);}}},5000,_this)});}else{throw"unrecognized name: "+name;}//
+if(_this.state.name_changed_timer!==undefined){clearInterval(_this.state.name_changed_timer);}_this.setState({name_changed_timer:setTimeout(function(app_main){for(var ref in app_main.refs){if(ref.startsWith("CommentsApp_")){app_main.refs[ref].ws_send_user_changed_name(value);}//clearInterval(app_main.state.name_changed_timer);
+}},4000,_this)});}else{throw"unrecognized name: "+name;}//
 _this.setState({my_name:value});};_this.state={//comments: [],
 //participants: {},
 //loading: false,
@@ -21851,4 +21852,4 @@ registerValidSW(swUrl);}}).catch(function(){console.log('No internet connection 
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=main.6ae7b0c7.js.map
+//# sourceMappingURL=main.d5891464.js.map
