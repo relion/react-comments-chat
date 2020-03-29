@@ -11,7 +11,10 @@ var tnc = require("./tnc.js");
 
 const WebSocket = require("ws");
 
-const wss = new WebSocket.Server({ port: 3030 });
+const ws_port = 3030;
+const wss = new WebSocket.Server({ port: ws_port });
+console.log("WebSocket.Server connected on port: " + ws_port);
+
 wss.on("error", error => {
   console.log("WebSocket.Server Error.");
 });
