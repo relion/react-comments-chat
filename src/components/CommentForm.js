@@ -20,6 +20,28 @@ export default class CommentForm extends Component {
   /**
    * Handle form input field changes & update the state
    */
+
+  do_my_comment_message(CommentForm_app, comments_app) {
+    clearInterval(
+      CommentForm_app.state.last_time_sent_message_changed_timeout_function
+    );
+    var current_time = new Date().getTime();
+    CommentForm_app.state.last_time_sent_message_changed = current_time;
+    //
+    comments_app.state.last_time_sent_message_changed_timeout_function = setTimeout(
+      function(comments_app) {
+        comments_app.ws.send(
+          JSON.stringify({
+            op: "client_message_entered_ceased",
+            entered_message: comments_app.state.my_comment_message
+          })
+        );
+      },
+      1000,
+      this.props.comments_app
+    );
+  }
+
   handle_message_field_changed = event => {
     console.log("in handle_message_field_changed.");
     const { value, name } = event.target;
@@ -41,21 +63,8 @@ export default class CommentForm extends Component {
         );
       }
       //
-      clearInterval(state.last_time_sent_message_changed_timeout_function);
-      state.last_time_sent_message_changed = current_time;
+      this.do_my_comment_message(this, this.props.comments_app);
       //
-      state.last_time_sent_message_changed_timeout_function = setTimeout(
-        function(comments_app) {
-          comments_app.ws.send(
-            JSON.stringify({
-              op: "client_message_entered_ceased",
-              entered_message: comments_app.state.my_comment_message
-            })
-          );
-        },
-        1000,
-        this.props.comments_app
-      );
     } else {
       throw "unrecognized name: " + name;
     }
@@ -112,6 +121,8 @@ export default class CommentForm extends Component {
           this.props.comments_app.setState({
             my_comment_message: ""
           });
+          this.do_my_comment_message(this, this.props.comments_app);
+          //
           my_comment.ref.current.scrollIntoView({
             block: "end",
             behavior: "smooth"
