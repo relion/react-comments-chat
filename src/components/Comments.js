@@ -58,6 +58,7 @@ class Comments extends Component {
     this.ws.comments_app = this;
     this.ws.onmessage = this.handleWebsocketReceivedData;
     this.ws.onerror = this.handleWebsocketError;
+    this.ws.onclose = this.handleWebsocketClose;
     //this.ws.onopen = function() {};
   }
 
@@ -153,6 +154,10 @@ class Comments extends Component {
   }
 
   handleWebsocketError(msg) {
+    console.log("Websocket Error: " + msg);
+  }
+
+  handleWebsocketClose(msg) {
     console.log("Websocket Error: " + msg);
   }
 
