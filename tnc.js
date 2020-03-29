@@ -2,11 +2,16 @@ var MongoClient = require("mongodb").MongoClient;
 var mongo_url = "mongodb://localhost:27017/";
 
 var books_dbo;
-MongoClient.connect(mongo_url, { useUnifiedTopology: true }, function(err, db) {
-  if (err) throw "Failed to connect to mongoDB: " + err;
-  books_dbo = db.db("BOOKS");
-  console.log("Connected to " + mongo_url);
-});
+if (false) {
+  MongoClient.connect(mongo_url, { useUnifiedTopology: true }, function(
+    err,
+    db
+  ) {
+    if (err) throw "Failed to connect to mongoDB: " + err;
+    books_dbo = db.db("BOOKS");
+    console.log("Connected to " + mongo_url);
+  });
+}
 
 function search_sorted(words, distance, data) {
   if (words.length == 0) {

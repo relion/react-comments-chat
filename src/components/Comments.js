@@ -54,12 +54,12 @@ class Comments extends Component {
   componentDidMount() {
     const ws_port = ":3030";
     this.ws = new WebSocket("ws://" + global.host + ws_port + "/Comments/");
-    console.log("opening WebSocket on port: " + ws_port);
+    console.log("opening WebSocket on port:" + ws_port);
     this.ws.comments_app = this;
     this.ws.onmessage = this.handleWebsocketReceivedData;
-    this.ws.onerror = this.handleWebsocketError;
+    this.ws.onopen = this.handleWebsocketOpen;
     this.ws.onclose = this.handleWebsocketClose;
-    //this.ws.onopen = function() {};
+    this.ws.onerror = this.handleWebsocketError;
   }
 
   addComment(comment) {
@@ -153,11 +153,15 @@ class Comments extends Component {
       });
   }
 
-  handleWebsocketError(msg) {
+  handleWebsocketOpen(msg) {
     console.log("Websocket Error: " + msg);
   }
 
   handleWebsocketClose(msg) {
+    console.log("Websocket Error: " + msg);
+  }
+
+  handleWebsocketError(msg) {
     console.log("Websocket Error: " + msg);
   }
 
