@@ -7,6 +7,8 @@ app.use(bodyParser.text({ type: "text/html" }));
 const fs = require("fs");
 const uuidv1 = require("uuid/v1");
 
+var tnc = require("./tnc.js");
+
 const WebSocket = require("ws");
 
 const wss = new WebSocket.Server({ port: 3030 });
@@ -17,9 +19,10 @@ wss.on("error", error => {
 var ws_by_id = {};
 var all_participants = {};
 
-wss.on("connection", function connection(ws) {
+wss.on("connection", function connection(ws, req) {
+  var app_name = req.url;
   console.log(
-    `got connection from: ${ws._socket.remoteAddress}:${ws._socket.remotePort}`
+    `got connection from: ${ws._socket.remoteAddress}:${ws._socket.remotePort} ${app_name}`
   );
   var browser_id = uuidv1();
   ws.browser_id = browser_id;
@@ -35,7 +38,7 @@ wss.on("connection", function connection(ws) {
     switch (json.op) {
       case "client_changed_name":
         all_participants[browser_id].name = json.name;
-        trans(ws.page_title, ws.browser_id, {
+        broadcast(ws.page_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id,
           name: json.name
@@ -52,9 +55,11 @@ wss.on("connection", function connection(ws) {
         );
         break;
       case "client_message_entered_changed":
-        trans(ws.page_title, ws.browser_id, {
+      case "client_message_entered_ceased":
+        broadcast(ws.page_title, ws.browser_id, {
           op: json.op,
-          browser_id: ws.browser_id
+          browser_id: ws.browser_id,
+          entered_message: json.entered_message
         });
         break;
       default:
@@ -73,7 +78,10 @@ wss.on("connection", function connection(ws) {
     delete ws_by_id[browser_id];
     delete all_participants[browser_id];
     delete browsers_ids_by_title[ws.page_title][browser_id];
-    trans(ws.page_title, browser_id, { op: "client_left", _id: browser_id });
+    broadcast(ws.page_title, browser_id, {
+      op: "client_left",
+      _id: browser_id
+    });
   });
 });
 
@@ -95,8 +103,8 @@ scheme
     console.log("Server running at: http://localhost" + `:${app.get("port")}/`);
   });
 
-function trans(page_title, by_browser_id, data) {
-  console.log("in trans..");
+function broadcast(page_title, by_browser_id, data) {
+  console.log("in broadcast..");
   var bids = browsers_ids_by_title[page_title];
   for (id in bids) {
     var ws = ws_by_id[id];
@@ -107,7 +115,7 @@ function trans(page_title, by_browser_id, data) {
         ws.readyState === 1 &&
         ws.page_title == page_title
       ) {
-        console.log("transing to..");
+        console.log("broadcasting to..");
         ws.send(JSON.stringify(data)); // '{ "_id": -1, "message": "Hello World2" }'
       }
     }
@@ -116,7 +124,7 @@ function trans(page_title, by_browser_id, data) {
 
 app.get("*", function(req, res, next) {
   if (req.path == "/comments/" || req.path == "/comments/index.html") {
-    const filePath = process.cwd() + "/src/comments/index.html";
+    const filePath = process.cwd() + "/src/comments/index.html"; // where the <div id="root"> is.
     var data = fs.readFileSync(filePath, "utf8");
     var result = data.replace(
       /\$OG_TITLE/g,
@@ -158,25 +166,25 @@ var browsers_ids_by_title = {};
 
 function handle_request(req, res) {
   var dir = "/DATA/";
-  var q = url.parse(req.url, true);
-  var op = q.query.op;
-  var page_title = q.query.title;
+  var op = req.query.op;
+  var page_title = req.query.title;
+  var browser_id = req.query.browser_id;
   var comment_file =
     process.cwd() +
     dir +
     (page_title != null ? page_title + "_" : "") +
     "comment.json";
-  //
+
   if (op == "comment_added") {
     var comment_json = JSON.parse(req.body);
     comment_json._id = uuidv1();
     comment_json.time = new Date().toUTCString();
     comment_json.user_ip = req.headers.host;
-    comment_json.browser_id = req.query.browser_id;
+    comment_json.browser_id = browser_id;
     //
-    trans(page_title, req.query.browser_id, {
+    broadcast(page_title, browser_id, {
       op: op,
-      browser_id: req.query.browser_id,
+      browser_id: browser_id,
       comment: comment_json
     });
     //
@@ -186,16 +194,12 @@ function handle_request(req, res) {
     fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
     res.write(JSON.stringify(comment_json));
   } else if (op == "get_all_comments") {
-    ws_by_id[req.query.browser_id].page_title = page_title;
-    if (browsers_ids_by_title[page_title] == undefined)
-      browsers_ids_by_title[page_title] = {};
-    browsers_ids_by_title[page_title][req.query.browser_id] = null;
-    trans(page_title, req.query.browser_id, {
+    handle_first_request(req);
+    broadcast(page_title, browser_id, {
       op: "client_joined",
-      _id: req.query.browser_id
+      _id: browser_id
     });
 
-    var browser_id = req.query.browser_id;
     var comments_json;
     if (fs.existsSync(comment_file)) {
       comments_json = JSON.parse(fs.readFileSync(comment_file));
@@ -204,13 +208,13 @@ function handle_request(req, res) {
       comments_json = [];
     }
     var participants = {};
-    for (var browser_id in browsers_ids_by_title[page_title]) {
-      if (browser_id == req.query.browser_id) continue;
-      participants[browser_id] = {};
-      if (all_participants[browser_id] != undefined) {
-        var participant_name = all_participants[browser_id].name;
+    for (var _browser_id in browsers_ids_by_title[page_title]) {
+      if (_browser_id == browser_id) continue;
+      participants[_browser_id] = {};
+      if (all_participants[_browser_id] != undefined) {
+        var participant_name = all_participants[_browser_id].name;
         if (participant_name != undefined) {
-          participants[browser_id].name = participant_name;
+          participants[_browser_id].name = participant_name;
         }
       }
     }
@@ -239,7 +243,7 @@ function handle_request(req, res) {
       var comments_json_ar_str = JSON.stringify(comments_json_ar);
       fs.writeFileSync(comment_file, comments_json_ar_str);
       res.write(comments_json_ar_str);
-      trans(page_title, req.query.browser_id, {
+      broadcast(page_title, browser_id, {
         op: "comment_deleted",
         _id: comment_id
       });
@@ -259,15 +263,54 @@ function handle_request(req, res) {
     } else {
       comments_json_ar[found_i].message = updated_comment.message;
       fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
-      trans(page_title, req.query.browser_id, {
+      broadcast(page_title, browser_id, {
         op: "comment_updated",
-        browser_id: req.query.browser_id,
+        browser_id: browser_id,
         comment: comments_json_ar[found_i]
       });
     }
+  } else if (op == "get_verses") {
+    handle_first_request(req);
+    //
+    var req_json = JSON.parse(req.body);
+    //
+    tnc.search_sorted(req_json.words, 0, {
+      max_distance: req_json.max_distance,
+      min_words: req_json.min_words,
+      stop_more_distance: req_json.stop_more_distance,
+      stop_less_words: req_json.stop_less_words,
+      //
+      res: res,
+      res_ar: [],
+      res_hash: {},
+      n_depth: 1,
+      re_hash: {},
+      last_update_time: new Date().getTime(),
+      last_reported_n_results: 0
+    });
+    return;
   } else {
     throw "op (" + op + ") not recognized.";
   }
   //
   res.end();
+}
+
+function handle_first_request(req) {
+  var browser_id = req.query.browser_id;
+  var page_title = req.query.title;
+  console.log(
+    "got first request from page_title: " +
+      page_title +
+      " browser_id: " +
+      browser_id
+  );
+  if (ws_by_id[browser_id] != undefined) {
+    ws_by_id[browser_id].page_title = page_title;
+    if (browsers_ids_by_title[page_title] == undefined)
+      browsers_ids_by_title[page_title] = {};
+    browsers_ids_by_title[page_title][browser_id] = null;
+  } else {
+    // lilo: Warning..
+  }
 }

@@ -6,6 +6,8 @@
     "body-parser": "^1.19.0",
     "bootstrap": "^4.4.1",
     "express-ws": "^4.0.0",
+    "mongodb": "^3.5.5",
+    "process": "^0.11.10",
     "query-string": "^6.10.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import "../global.js";
+import "./global.js";
+import Comments from "./Comments.js";
 
 export default class CommentForm extends Component {
   constructor(props) {
@@ -22,6 +23,9 @@ export default class CommentForm extends Component {
   handle_message_field_changed = event => {
     console.log("in handle_message_field_changed.");
     const { value, name } = event.target;
+    this.props.comments_app.setState({
+      my_comment_message: value
+    });
     if (name === "message") {
       var state = this.props.comments_app.state;
       var current_time = new Date().getTime();
@@ -30,17 +34,31 @@ export default class CommentForm extends Component {
         state.last_time_sent_message_changed < current_time - 2000
       ) {
         this.props.comments_app.ws.send(
-          JSON.stringify({ op: "client_message_entered_changed" })
+          JSON.stringify({
+            op: "client_message_entered_changed",
+            entered_message: value
+          })
         );
-        state.last_time_sent_message_changed = current_time;
       }
+      //
+      clearInterval(state.last_time_sent_message_changed_timeout_function);
+      state.last_time_sent_message_changed = current_time;
+      //
+      state.last_time_sent_message_changed_timeout_function = setTimeout(
+        function(comments_app) {
+          comments_app.ws.send(
+            JSON.stringify({
+              op: "client_message_entered_ceased",
+              entered_message: comments_app.state.my_comment_message
+            })
+          );
+        },
+        1000,
+        this.props.comments_app
+      );
     } else {
       throw "unrecognized name: " + name;
     }
-    //
-    this.props.comments_app.setState({
-      my_comment_message: value
-    });
   };
 
   /**
