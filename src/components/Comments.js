@@ -57,9 +57,9 @@ class Comments extends Component {
     console.log("opening WebSocket on port:" + ws_port);
     this.ws.comments_app = this;
     this.ws.onmessage = this.handleWebsocketReceivedData;
-    this.ws.onopen = this.handleWebsocketOpen;
-    this.ws.onclose = this.handleWebsocketClose;
-    this.ws.onerror = this.handleWebsocketError;
+    this.ws.onopen = this.handleWebsocketEvent;
+    this.ws.onclose = this.handleWebsocketEvent;
+    this.ws.onerror = this.handleWebsocketEvent;
   }
 
   addComment(comment) {
@@ -153,16 +153,8 @@ class Comments extends Component {
       });
   }
 
-  handleWebsocketOpen(msg) {
-    console.log("Websocket Error: " + msg);
-  }
-
-  handleWebsocketClose(msg) {
-    console.log("Websocket Error: " + msg);
-  }
-
-  handleWebsocketError(msg) {
-    console.log("Websocket Error: " + msg);
+  handleWebsocketEvent(event) {
+    console.log("Websocket " + event.type + " event.");
   }
 
   handleWebsocketReceivedData(msg) {
