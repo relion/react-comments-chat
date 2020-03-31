@@ -41,4 +41,4 @@ or (when available) simpliy right click here:
 
 ## Live Demo
 
-Currently unavailable. Hopefully soon I'll have my own Https domain for that.
+[![]()](http://reactcommentstest01-env.eba-fcswhsfk.us-east-2.elasticbeanstalk.com/comments/?title=public_room "Click here")
