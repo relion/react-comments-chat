@@ -41,4 +41,4 @@ or (when available) simpliy right click here:
 
 ## Live Demo
 
-[![]()](http://reactcommentstest01-env.eba-fcswhsfk.us-east-2.elasticbeanstalk.com/comments/?title=public_room "Click here")
+[Click here](http://reactcommentstest01-env.eba-fcswhsfk.us-east-2.elasticbeanstalk.com/comments/?title=public_room)
