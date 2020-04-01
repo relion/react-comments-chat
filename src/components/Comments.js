@@ -248,15 +248,16 @@ class Comments extends Component {
         );
         return;
       case "client_message_entered_changed":
+        if (this.comments_app.state.is_typing_timeout !== undefined) {
+          clearInterval(this.comments_app.state.is_typing_timeout);
+        }
+        //
         participants = { ...this.comments_app.state.participants };
         participants[json.browser_id].is_typing = true;
         participants[json.browser_id].entered_message = json.entered_message;
         this.comments_app.setState({
           participants: participants
         });
-        if (this.comments_app.state.is_typing_timeout !== undefined) {
-          clearInterval(this.comments_app.state.is_typing_timeout);
-        }
         // note: unccery because should recieve mesage: client_message_entered_ceased, ut anyway:
         this.comments_app.state.is_typing_timeout = setTimeout(
           function(comments) {
@@ -275,13 +276,13 @@ class Comments extends Component {
         // );
         return;
       case "client_message_entered_ceased":
+        clearInterval(this.comments_app.state.is_typing_timeout);
         participants = { ...this.comments_app.state.participants };
         participants[json.browser_id].is_typing = false;
         participants[json.browser_id].entered_message = json.entered_message;
         this.comments_app.setState({
           participants: participants
         });
-        clearInterval(this.comments_app.state.is_typing_timeout);
         return;
         break;
       case "comment_added":
@@ -301,7 +302,7 @@ class Comments extends Component {
               comments.comments_app.setState({ participants: participants });
             }
           },
-          4000,
+          5000,
           this,
           json.browser_id
         );

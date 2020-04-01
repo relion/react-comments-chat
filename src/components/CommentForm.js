@@ -70,9 +70,7 @@ export default class CommentForm extends Component {
           "ws.send op: " + op + " entered_message: " + entered_message
         );
         //
-      } else {
       }
-      //
       //
       this.props.comments_app.state.last_time_sent_message_changed_timeout_function = setTimeout(
         function(form_app) {
