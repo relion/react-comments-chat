@@ -22,16 +22,20 @@ export default class CommentForm extends Component {
    */
 
   do_my_comment_ceased_message(CommentForm_app, comments_app) {
+    console.log("in do_my_comment_ceased_message.");
     clearInterval(
       CommentForm_app.state.last_time_sent_message_changed_timeout_function
     );
     //
+    var op = "client_message_entered_ceased";
+    var entered_message = comments_app.state.my_comment_message;
     comments_app.ws.send(
       JSON.stringify({
-        op: "client_message_entered_ceased",
-        entered_message: comments_app.state.my_comment_message
+        op: op,
+        entered_message: entered_message
       })
     );
+    console.log("ws.send op: " + op + " entered_message: " + entered_message);
   }
 
   handle_message_field_changed = event => {
@@ -43,6 +47,10 @@ export default class CommentForm extends Component {
     if (name === "message") {
       var state = this.props.comments_app.state;
       var current_time = new Date().getTime();
+      clearInterval(
+        this.props.comments_app.state
+          .last_time_sent_message_changed_timeout_function
+      );
       if (
         state.last_time_sent_message_changed === undefined ||
         state.last_time_sent_message_changed < current_time - 2000
@@ -50,25 +58,33 @@ export default class CommentForm extends Component {
         this.props.comments_app.setState({
           last_time_sent_message_changed: current_time
         });
+        var op = "client_message_entered_changed";
+        var entered_message = value;
         this.props.comments_app.ws.send(
           JSON.stringify({
-            op: "client_message_entered_changed",
-            entered_message: value
+            op: op,
+            entered_message: entered_message
           })
         );
-        //
-        this.props.comments_app.state.last_time_sent_message_changed_timeout_function = setTimeout(
-          function(form_app) {
-            form_app.do_my_comment_ceased_message(
-              form_app,
-              form_app.props.comments_app
-            );
-          },
-          4000,
-          this
+        console.log(
+          "ws.send op: " + op + " entered_message: " + entered_message
         );
+        //
+      } else {
       }
       //
+      //
+      this.props.comments_app.state.last_time_sent_message_changed_timeout_function = setTimeout(
+        function(form_app) {
+          console.log("in last_time_sent_message_changed_timeout_function !!!");
+          form_app.do_my_comment_ceased_message(
+            form_app,
+            form_app.props.comments_app
+          );
+        },
+        value != "" ? 4000 : 1000,
+        this
+      );
       // this.do_my_comment_ceased_message(this, this.props.comments_app);
       // //
     } else {
