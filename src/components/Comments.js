@@ -190,7 +190,7 @@ class Comments extends Component {
               // browser_id: res.browser_id
             });
 
-            if (this.comments_app.props.main_app.state.pre_set_name) {
+            if (this.comments_app.props.main_app.state.my_name != undefined) {
               this.send(
                 JSON.stringify({
                   op: "client_changed_name",

@@ -5,6 +5,7 @@ import "./global.js";
 //import Websocket from "react-websocket";
 import queryString from "query-string";
 import AutosizeInput from "react-input-autosize";
+import cookie from "react-cookies";
 
 import Comments from "./Comments";
 
@@ -19,16 +20,24 @@ class CommentsApp extends Component {
       //participants: {},
       //loading: false,
       show_permit_button: false,
-      my_name: ""
+      my_name: undefined
       //my_comment_message: ""
     };
   }
 
   componentDidMount() {
-    var name = queryString.parse(window.location.search).name;
+    var name = "";
+    var name_coockie = cookie.load("my_name");
+    var name_query = queryString.parse(window.location.search).name;
+    if (name_coockie != undefined) {
+      name = name_coockie;
+    } else if (name == undefined) {
+      name = name_query;
+      cookie.save("my_name", name_query, { path: "/" });
+    }
     this.setState({
-      pre_set_name: name !== undefined,
-      my_name: name !== undefined ? name : ""
+      pre_set_name: name_query !== undefined,
+      my_name: name
     });
     this.check_playAudio();
   }
@@ -59,6 +68,7 @@ class CommentsApp extends Component {
     }
     //
     this.setState({ my_name: value });
+    cookie.save("my_name", value, { path: "/" });
   };
 
   handleUserPermitClick() {

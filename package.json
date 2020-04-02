@@ -10,6 +10,7 @@
     "process": "^0.11.10",
     "query-string": "^6.10.1",
     "react": "^16.12.0",
+    "react-cookies": "^0.1.1",
     "react-dom": "^16.12.0",
     "react-editext": "^3.12.1",
     "react-input-autosize": "^2.2.2",
