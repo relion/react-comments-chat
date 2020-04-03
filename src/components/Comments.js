@@ -232,6 +232,7 @@ class Comments extends Component {
       case "client_changed_name":
         participants = { ...this.comments_app.state.participants };
         participants[json.browser_id].name = json.name;
+        participants[json.browser_id].entered_message = json.entered_message;
         this.comments_app.setState({
           participants: participants
         });

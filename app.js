@@ -59,6 +59,7 @@ wss.on("connection", function connection(ws, req) {
         break;
       case "client_message_entered_changed":
       case "client_message_entered_ceased":
+        all_participants[browser_id].entered_message = json.entered_message;
         broadcast(ws.page_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id,
@@ -214,10 +215,12 @@ function handle_request(req, res) {
     for (var _browser_id in browsers_ids_by_title[page_title]) {
       if (_browser_id == browser_id) continue;
       participants[_browser_id] = {};
-      if (all_participants[_browser_id] != undefined) {
-        var participant_name = all_participants[_browser_id].name;
-        if (participant_name != undefined) {
-          participants[_browser_id].name = participant_name;
+      var all_participant = all_participants[_browser_id];
+      if (all_participant != undefined) {
+        if (all_participant.name != undefined) {
+          var participant = participants[_browser_id];
+          participant.name = all_participant.name;
+          participant.entered_message = all_participant.entered_message;
         }
       }
     }
