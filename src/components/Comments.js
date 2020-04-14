@@ -11,7 +11,7 @@ import CommentForm from "./CommentForm";
 // Note: for testing the Notifications on real host, you can enable: Insecure origins treated as secure in chrome://flags/
 function get_notifications_permission() {
   if (window.Notification && Notification.permission !== "granted") {
-    Notification.requestPermission(function(status) {
+    Notification.requestPermission(function (status) {
       if (Notification.permission !== "granted") {
         alert("Notification.permission was NOT granted.");
       }
@@ -26,7 +26,7 @@ function showNotification(title, txt, audio) {
     body: txt,
     icon: "/images/notification.png",
     sound: "/audio/" + audio, // get more here: https://www.zedge.net/find/notification
-    vibrate: [200, 100, 200, 100, 200, 100, 200]
+    vibrate: [200, 100, 200, 100, 200, 100, 200],
   });
   new Audio("/audio/" + audio).play();
   console.log("showNotification done..");
@@ -44,7 +44,7 @@ class Comments extends Component {
       loading: false,
       //show_permit_button: false,
       //my_name: "",
-      my_comment_message: ""
+      my_comment_message: "",
     };
 
     this.addComment = this.addComment.bind(this);
@@ -66,7 +66,7 @@ class Comments extends Component {
     comment.ref = React.createRef();
     this.setState({
       loading: false,
-      comments: [...this.state.comments, comment]
+      comments: [...this.state.comments, comment],
     });
   }
 
@@ -85,11 +85,11 @@ class Comments extends Component {
       {
         method: "post",
         headers: { "Content-Type": "text/html" },
-        body: comment_str
+        body: comment_str,
       }
     )
       //.then(res => res.json())
-      .then(res => {
+      .then((res) => {
         if (res.error) {
           this.setState({ loading: false, error: res.error });
         } else {
@@ -105,14 +105,14 @@ class Comments extends Component {
           if (!found) throw "new_message not found.";
           this.setState({
             loading: false,
-            comments: new_comments
+            comments: new_comments,
           });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           error: "Something went wrong in editSaveComment.",
-          loading: false
+          loading: false,
         });
       });
   }
@@ -130,25 +130,25 @@ class Comments extends Component {
       {
         method: "post",
         headers: { "Content-Type": "text/html" },
-        body: comment._id
+        body: comment._id,
       }
     )
-      .then(res => res.json())
-      .then(res => {
+      .then((res) => res.json())
+      .then((res) => {
         if (res.error) {
           this.setState({ loading: false, error: res.error });
         } else {
           this.setState({
             loading: false,
             error: "",
-            comments: this.state.comments.filter(e => e._id !== comment._id) // res
+            comments: this.state.comments.filter((e) => e._id !== comment._id), // res
           });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           error: "Something went wrong while deleting Comment.",
-          loading: false
+          loading: false,
         });
       });
   }
@@ -165,7 +165,7 @@ class Comments extends Component {
       case "ws_connected":
         this.comments_app.setState({
           loading: true,
-          browser_id: json.browser_id
+          browser_id: json.browser_id,
         });
 
         fetch(
@@ -176,17 +176,17 @@ class Comments extends Component {
             "&browser_id=" +
             this.comments_app.state.browser_id
         )
-          .then(res => res.json())
-          .then(res => {
+          .then((res) => res.json())
+          .then((res) => {
             // console.log("my browser_id is: " + res.browser_id);
 
-            res.comments.forEach(c => {
+            res.comments.forEach((c) => {
               c.ref = React.createRef();
             });
             this.comments_app.setState({
               comments: res.comments,
               loading: false,
-              participants: res.participants
+              participants: res.participants,
               // browser_id: res.browser_id
             });
 
@@ -194,12 +194,12 @@ class Comments extends Component {
               this.send(
                 JSON.stringify({
                   op: "client_changed_name",
-                  name: this.comments_app.props.main_app.state.my_name
+                  name: this.comments_app.props.main_app.state.my_name,
                 })
               );
             }
           })
-          .catch(err => {
+          .catch((err) => {
             this.comments_app.setState({ loading: false });
           });
         return;
@@ -207,7 +207,7 @@ class Comments extends Component {
         var participants = { ...this.comments_app.state.participants };
         participants[json._id] = {}; // still has no name
         this.comments_app.setState({
-          participants: participants
+          participants: participants,
         });
         showNotification(
           "Comments Room: " + global.title,
@@ -221,7 +221,7 @@ class Comments extends Component {
         var name = participants[json._id].name;
         delete participants[json._id];
         this.comments_app.setState({
-          participants: participants
+          participants: participants,
         });
         showNotification(
           "Comments Room: " + global.title,
@@ -234,7 +234,7 @@ class Comments extends Component {
         participants[json.browser_id].name = json.name;
         participants[json.browser_id].entered_message = json.entered_message;
         this.comments_app.setState({
-          participants: participants
+          participants: participants,
         });
         // console.log(
         //   "Client_changed_name.. browser_id: " +
@@ -257,15 +257,15 @@ class Comments extends Component {
         participants[json.browser_id].is_typing = true;
         participants[json.browser_id].entered_message = json.entered_message;
         this.comments_app.setState({
-          participants: participants
+          participants: participants,
         });
         // note: unccery because should recieve mesage: client_message_entered_ceased, ut anyway:
         this.comments_app.state.is_typing_timeout = setTimeout(
-          function(comments) {
+          function (comments) {
             participants = { ...comments.comments_app.state.participants };
             participants[json.browser_id].is_typing = false;
             comments.comments_app.setState({
-              participants: participants
+              participants: participants,
             });
           },
           5000,
@@ -282,10 +282,18 @@ class Comments extends Component {
         participants[json.browser_id].is_typing = false;
         participants[json.browser_id].entered_message = json.entered_message;
         this.comments_app.setState({
-          participants: participants
+          participants: participants,
         });
         return;
-        break;
+      case "client_disabled_report_typing":
+        clearInterval(this.comments_app.state.is_typing_timeout);
+        participants = { ...this.comments_app.state.participants };
+        participants[json.browser_id].is_typing = false;
+        participants[json.browser_id].entered_message = "";
+        this.comments_app.setState({
+          participants: participants,
+        });
+        return;
       case "comment_added":
       case "comment_updated":
         participants = { ...this.comments_app.state.participants };
@@ -296,7 +304,7 @@ class Comments extends Component {
           clearInterval(participant.just_wrote_a_message_timer);
         }
         participant.just_wrote_a_message_timer = setInterval(
-          function(comments, browser_id) {
+          function (comments, browser_id) {
             var participants = { ...comments.comments_app.state.participants };
             if (participants[browser_id] !== undefined) {
               participants[browser_id].just_wrote_a_message = false;
@@ -328,12 +336,12 @@ class Comments extends Component {
           comment = json.comment;
           comment.ref = React.createRef();
           this.comments_app.setState({
-            comments: [...this.comments_app.state.comments, json.comment]
+            comments: [...this.comments_app.state.comments, json.comment],
           });
         }
         comment.ref.current.scrollIntoView({
           block: "end",
-          behavior: "smooth"
+          behavior: "smooth",
         });
         username = json.comment.name;
         break;
@@ -372,7 +380,7 @@ class Comments extends Component {
 
   render() {
     var me_participating_style = {
-      backgroundColor: "chocolate"
+      backgroundColor: "chocolate",
     };
     if (this.props.main_app.state.my_name !== "") {
       me_participating_style.backgroundColor = "white";
@@ -380,7 +388,7 @@ class Comments extends Component {
     }
     var input_style = {
       borderRadius: "0.3rem",
-      paddingLeft: "6px"
+      paddingLeft: "6px",
     };
     if (this.props.main_app.state.my_name !== "") {
       input_style.backgroundColor = "pink";
@@ -436,7 +444,7 @@ class Comments extends Component {
           ) : (
             <span style={{ marginLeft: "4px" }}>
               <b>Participants: </b>
-              {Object.keys(this.state.participants).map(function(browser_id) {
+              {Object.keys(this.state.participants).map(function (browser_id) {
                 var participant = this.state.participants[browser_id];
                 var participant_span_className =
                   "participants_span_style" +

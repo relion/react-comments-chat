@@ -7,7 +7,7 @@ export default class CommentForm extends Component {
     super(props);
     this.state = {
       loading: false,
-      error: ""
+      error: "",
     };
 
     // bind context to methods
@@ -32,20 +32,23 @@ export default class CommentForm extends Component {
     comments_app.ws.send(
       JSON.stringify({
         op: op,
-        entered_message: entered_message
+        entered_message: entered_message,
       })
     );
     console.log("ws.send op: " + op + " entered_message: " + entered_message);
   }
 
-  handle_message_field_changed = event => {
+  handle_message_field_changed = (event) => {
     console.log("in handle_message_field_changed.");
     const { value, name } = event.target;
     this.props.comments_app.setState({
-      my_comment_message: value
+      my_comment_message: value,
     });
     if (name === "message") {
       var state = this.props.comments_app.state;
+      if (!this.props.comments_app.props.main_app.state.report_typing) {
+        return;
+      }
       var current_time = new Date().getTime();
       clearInterval(
         this.props.comments_app.state
@@ -56,14 +59,14 @@ export default class CommentForm extends Component {
         state.last_time_sent_message_changed < current_time - 2000
       ) {
         this.props.comments_app.setState({
-          last_time_sent_message_changed: current_time
+          last_time_sent_message_changed: current_time,
         });
         var op = "client_message_entered_changed";
         var entered_message = value;
         this.props.comments_app.ws.send(
           JSON.stringify({
             op: op,
-            entered_message: entered_message
+            entered_message: entered_message,
           })
         );
         console.log(
@@ -73,7 +76,7 @@ export default class CommentForm extends Component {
       }
       //
       this.props.comments_app.state.last_time_sent_message_changed_timeout_function = setTimeout(
-        function(form_app) {
+        function (form_app) {
           console.log("in last_time_sent_message_changed_timeout_function !!!");
           form_app.do_my_comment_ceased_message(
             form_app,
@@ -110,7 +113,7 @@ export default class CommentForm extends Component {
     let my_comment = {
       name: this.props.comments_app.props.main_app.state.my_name,
       message: this.props.comments_app.state.my_comment_message,
-      ref: undefined
+      ref: undefined,
     };
     fetch(
       global.server_url +
@@ -122,11 +125,11 @@ export default class CommentForm extends Component {
       {
         method: "post",
         headers: { "Content-Type": "text/html" },
-        body: JSON.stringify(my_comment)
+        body: JSON.stringify(my_comment),
       }
     )
-      .then(res => res.json())
-      .then(res => {
+      .then((res) => res.json())
+      .then((res) => {
         if (res.error) {
           this.setState({ loading: false, error: res.error });
         } else {
@@ -139,20 +142,20 @@ export default class CommentForm extends Component {
           this.setState({ loading: false });
           // clear the message box
           this.props.comments_app.setState({
-            my_comment_message: ""
+            my_comment_message: "",
           });
           this.do_my_comment_ceased_message(this, this.props.comments_app);
           //
           my_comment.ref.current.scrollIntoView({
             block: "end",
-            behavior: "smooth"
+            behavior: "smooth",
           });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           error: "Something went wrong while submitting form.",
-          loading: false
+          loading: false,
         });
       });
   }
@@ -190,7 +193,7 @@ export default class CommentForm extends Component {
                 margin: 0,
                 borderRadius: "0.3rem",
                 width: "100%",
-                paddingLeft: "6px"
+                paddingLeft: "6px",
               }}
               placeholder="♥️ Your Comment"
               name="message"

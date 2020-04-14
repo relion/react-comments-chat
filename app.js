@@ -15,7 +15,7 @@ const ws_port = 3030;
 const wss = new WebSocket.Server({ port: ws_port, pingTimeout: 60000 });
 console.log("WebSocket Server connected on port: " + ws_port);
 
-wss.on("error", error => {
+wss.on("error", (error) => {
   console.log("WebSocket.Server Error.");
 });
 
@@ -31,12 +31,12 @@ wss.on("connection", function connection(ws, req) {
   ws.browser_id = browser_id;
   var ws_connected_json_data = {
     op: "ws_connected",
-    browser_id: browser_id
+    browser_id: browser_id,
   };
   ws.send(JSON.stringify(ws_connected_json_data));
   ws_by_id[browser_id] = ws;
   all_participants[browser_id] = {};
-  ws.on("message", function(msg) {
+  ws.on("message", function (msg) {
     var json = JSON.parse(msg);
     switch (json.op) {
       case "client_changed_name":
@@ -44,7 +44,7 @@ wss.on("connection", function connection(ws, req) {
         broadcast(ws.page_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id,
-          name: json.name
+          name: json.name,
         });
         console.log(
           "got msg from browser_id: " +
@@ -63,14 +63,21 @@ wss.on("connection", function connection(ws, req) {
         broadcast(ws.page_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id,
-          entered_message: json.entered_message
+          entered_message: json.entered_message,
+        });
+        break;
+      case "client_disabled_report_typing":
+        all_participants[browser_id].entered_message = json.entered_message;
+        broadcast(ws.page_title, ws.browser_id, {
+          op: json.op,
+          browser_id: ws.browser_id,
         });
         break;
       default:
         throw "websocket received an unsupported message op: " + json.op;
     }
   });
-  ws.on("close", function() {
+  ws.on("close", function () {
     var name = all_participants[ws.browser_id].name;
     console.log(
       "page_title: " +
@@ -84,7 +91,7 @@ wss.on("connection", function connection(ws, req) {
     delete browsers_ids_by_title[ws.page_title][browser_id];
     broadcast(ws.page_title, browser_id, {
       op: "client_left",
-      _id: browser_id
+      _id: browser_id,
     });
   });
 });
@@ -99,7 +106,7 @@ scheme
   .createServer(
     {
       key: "",
-      cert: ""
+      cert: "",
     },
     app
   )
@@ -126,7 +133,7 @@ function broadcast(page_title, by_browser_id, data) {
   }
 }
 
-app.get("*", function(req, res, next) {
+app.get("*", function (req, res, next) {
   if (req.path == "/comments/" || req.path == "/comments/index.html") {
     const filePath = process.cwd() + "/src/comments/index.html"; // where the <div id="root"> is.
     var data = fs.readFileSync(filePath, "utf8");
@@ -189,7 +196,7 @@ function handle_request(req, res) {
     broadcast(page_title, browser_id, {
       op: op,
       browser_id: browser_id,
-      comment: comment_json
+      comment: comment_json,
     });
     //
     var data = fs.readFileSync(comment_file);
@@ -201,7 +208,7 @@ function handle_request(req, res) {
     handle_first_request(req);
     broadcast(page_title, browser_id, {
       op: "client_joined",
-      _id: browser_id
+      _id: browser_id,
     });
 
     var comments_json;
@@ -226,7 +233,7 @@ function handle_request(req, res) {
     }
     var to_send = JSON.stringify({
       comments: comments_json,
-      participants: participants
+      participants: participants,
     });
     res.write(to_send);
     res.end();
@@ -251,7 +258,7 @@ function handle_request(req, res) {
       res.write(comments_json_ar_str);
       broadcast(page_title, browser_id, {
         op: "comment_deleted",
-        _id: comment_id
+        _id: comment_id,
       });
     }
   } else if (op == "comment_updated") {
@@ -272,7 +279,7 @@ function handle_request(req, res) {
       broadcast(page_title, browser_id, {
         op: "comment_updated",
         browser_id: browser_id,
-        comment: comments_json_ar[found_i]
+        comment: comments_json_ar[found_i],
       });
     }
   } else if (op == "get_verses") {
@@ -292,7 +299,7 @@ function handle_request(req, res) {
       n_depth: 1,
       re_hash: {},
       last_update_time: new Date().getTime(),
-      last_reported_n_results: 0
+      last_reported_n_results: 0,
     });
     return;
   } else {

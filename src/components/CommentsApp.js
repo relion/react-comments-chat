@@ -20,9 +20,14 @@ class CommentsApp extends Component {
       //participants: {},
       //loading: false,
       show_permit_button: false,
-      my_name: undefined
+      my_name: undefined,
       //my_comment_message: ""
+      report_typing: true,
     };
+
+    this.handle_report_typing_checkbox_changed = this.handle_report_typing_checkbox_changed.bind(
+      this
+    );
   }
 
   componentDidMount() {
@@ -37,12 +42,12 @@ class CommentsApp extends Component {
     }
     this.setState({
       pre_set_name: name_query !== undefined,
-      my_name: name
+      my_name: name,
     });
     this.check_playAudio();
   }
 
-  handle_name_field_changed = event => {
+  handle_name_field_changed = (event) => {
     const { value, name } = event.target;
     if (name === "name") {
       // reset the timer, therefor only 5 seconds after the last key is pressed the name is published for each comments room to all it's participants.
@@ -52,7 +57,7 @@ class CommentsApp extends Component {
       }
       this.setState({
         name_changed_timer: setTimeout(
-          app_main => {
+          (app_main) => {
             for (var ref in app_main.refs) {
               if (ref.startsWith("CommentsApp_")) {
                 app_main.refs[ref].ws_send_user_changed_name(value);
@@ -61,7 +66,7 @@ class CommentsApp extends Component {
           },
           4000,
           this
-        )
+        ),
       });
     } else {
       throw "unrecognized name: " + name;
@@ -80,7 +85,7 @@ class CommentsApp extends Component {
     try {
       var audio = new Audio("/audio/chimes.mp3");
       audio.t = this;
-      audio.onerror = function() {
+      audio.onerror = function () {
         this.t.setState({ show_permit_button: true });
         console.log("Can't play audio");
       };
@@ -89,6 +94,28 @@ class CommentsApp extends Component {
     } catch (e) {
       this.t.setState({ show_permit_button: true });
       console.log("Can't play audio");
+    }
+  }
+
+  handle_report_typing_checkbox_changed(event) {
+    var report_typing = event.target.checked;
+    this.setState({ report_typing: report_typing });
+    for (var ref in this.refs) {
+      var comments_app = this.refs[ref];
+      if (ref.startsWith("CommentsApp_")) {
+        var json;
+        if (report_typing) {
+          json = JSON.stringify({
+            op: "client_message_entered_changed",
+            entered_message: comments_app.state.my_comment_message,
+          });
+        } else {
+          json = JSON.stringify({
+            op: "client_disabled_report_typing",
+          });
+        }
+        comments_app.ws.send(json);
+      }
     }
   }
 
@@ -111,7 +138,7 @@ class CommentsApp extends Component {
             style={{
               borderRadius: "5px",
               margin: "0 2px 0 2px",
-              display: "inline-block"
+              display: "inline-block",
             }}
           >
             {this.state.my_name !== "" ? (
@@ -131,8 +158,14 @@ class CommentsApp extends Component {
                 border: "3px solid lightcoral",
                 borderRadius: "0.3rem",
                 padding: "0",
-                margin: "4px 0"
+                margin: "4px 0",
               }}
+            />
+            {" show typing: "}
+            <input
+              type="checkbox"
+              checked={this.state.report_typing}
+              onChange={this.handle_report_typing_checkbox_changed}
             />
           </div>
         )}
