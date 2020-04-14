@@ -77,6 +77,9 @@ export default class CommentForm extends Component {
       //
       this.props.comments_app.state.last_time_sent_message_changed_timeout_function = setTimeout(
         function (form_app) {
+          if (!form_app.props.comments_app.state.report_typing) {
+            return;
+          }
           console.log("in last_time_sent_message_changed_timeout_function !!!");
           form_app.do_my_comment_ceased_message(
             form_app,
