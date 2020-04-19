@@ -46,6 +46,13 @@ export default class Comment extends Component {
         break;
       }
     }
+    var is_message_rtl = false;
+    var matches = message.match(/[א-ת\w]/);
+    if (matches != null) {
+      var char_ascii = matches[0].charCodeAt(0);
+      is_message_rtl = char_ascii >= 1488 && char_ascii <= 1514;
+    }
+    var direction = is_message_rtl ? "rtl" : "ltr";
     return (
       <div
         ref={this.props.ref_id}
@@ -94,14 +101,14 @@ export default class Comment extends Component {
               type="text" // textarea
               viewProps={{
                 className: "my-react-header",
-                style: { borderRadius: 3 }
+                style: { borderRadius: 3, direction: direction },
               }}
               buttonsAlign="before"
               value={message}
-              onSave={val => this.onEditSave(val, this)}
+              onSave={(val) => this.onEditSave(val, this)}
             />
           ) : (
-            message
+            <div style={{ direction: direction }}>{message}</div>
           )}
         </div>
       </div>
