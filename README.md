@@ -8,8 +8,8 @@ Comments can be added, removed and edited, all being reflected in real-time in a
 1.  Clone this repo and cd into it.
 2.  Run `node app.js`
 3.  Run `npm start`
-4.  Use the link with a title: http://localhost/comments/?title=test_room
-5.  or possibly for a pre set user: http://localhost/comments/?title=test_room&name=jonny
+4.  Use the link with a title: http://localhost/?page_type=comments&title=test_room
+5.  or possibly for a pre set user: http://localhost/?page_type=comments&title=test_room&name=jonny
 
 ## App snapshot
 
@@ -19,7 +19,7 @@ Comments can be added, removed and edited, all being reflected in real-time in a
 
 Aryeh Tuchfeld (relion)
 
-based on [QCode.in](https://www.qcode.in/learn-react-by-creating-a-comment-app) tutorial.
+initialy based on [QCode.in](https://www.qcode.in/learn-react-by-creating-a-comment-app) tutorial.
 
 ## Keywords
 
