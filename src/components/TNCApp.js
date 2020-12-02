@@ -1,19 +1,19 @@
 import React, { Component } from "react";
-import handle_win_title from "./global.js";
 //import "bootstrap/dist/css/bootstrap.css";
 import "./TNC.css";
+import handle_win_title from "./global.js";
 
 class TNCApp extends Component {
   constructor(props) {
     super(props);
     this.state = {
       verses: [],
-      search_str: "if what the may",
+      search_str: "my and to",
       max_distance: 6,
       min_words: 2,
       stop_less_words: false,
       stop_more_distance: true,
-      status: "connecting"
+      status: "connecting",
     };
     handle_win_title();
     this.onSubmit = this.onSubmit.bind(this);
@@ -41,9 +41,11 @@ class TNCApp extends Component {
       case "ws_connected":
         this.tnc_app.setState({
           status: "connected",
-          browser_id: json.browser_id
+          browser_id: json.browser_id,
         });
         break;
+      default:
+        throw "unexpected op: " + json.op;
     }
   }
 
@@ -53,10 +55,10 @@ class TNCApp extends Component {
     this.do_query(
       this.state.search_str
         .split(" ")
-        .map(function(word) {
+        .map(function (word) {
           return word.trim();
         })
-        .filter(word => word.length > 0), // clean spaces.
+        .filter((word) => word.length > 0), // clean spaces.
       this.state.max_distance,
       this.state.min_words,
       this.state.stop_less_words,
@@ -73,7 +75,7 @@ class TNCApp extends Component {
   ) {
     this.setState({
       status: "searching",
-      verses: []
+      verses: [],
     });
     var tnc_app = this;
     var start_time_ms = new Date().getTime();
@@ -92,12 +94,12 @@ class TNCApp extends Component {
           max_distance: max_distance,
           min_words: min_words,
           stop_less_words: stop_less_words,
-          stop_more_distance: stop_more_distance
-        })
+          stop_more_distance: stop_more_distance,
+        }),
       }
     )
-      .then(res => res.json())
-      .then(res => {
+      .then((res) => res.json())
+      .then((res) => {
         if (res.error) {
           tnc_app.setState({ status: "error", error: res.error });
         } else {
@@ -106,7 +108,7 @@ class TNCApp extends Component {
             verses: res,
             run_time_sec:
               Math.floor((new Date().getTime() - start_time_ms) / 100) / 10,
-            loading: false
+            loading: false,
           });
           // add time return from api and push comment to parent state
           // my_comment._id = res._id;
@@ -125,7 +127,7 @@ class TNCApp extends Component {
           // });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({ status: "error", error: err.message });
       });
   }
@@ -151,7 +153,13 @@ class TNCApp extends Component {
   render() {
     return (
       <React.Fragment>
-        <form method="post" onSubmit={this.onSubmit}>
+        <form
+          method="post"
+          onSubmit={this.onSubmit}
+          style={{
+            padding: "0 4px 0 0",
+          }}
+        >
           <div style={{ padding: "5px", backgroundColor: "#bae7c2" }}>
             <input
               name="search_str"
@@ -209,20 +217,20 @@ class TNCApp extends Component {
               </select>
             </div> */}
             <div style={{ margin: "8px 4px 4px 0" }}>
-              {this.state.status != "error" ? (
+              {this.state.status !== "error" ? (
                 <span
                   style={{
                     background: "limegreen",
-                    padding: "4px"
+                    padding: "4px",
                   }}
                 >
-                  {this.state.status == "connecting" ? (
+                  {this.state.status === "connecting" ? (
                     "Connecting..."
-                  ) : this.state.status == "connected" ? (
+                  ) : this.state.status === "connected" ? (
                     "Connected"
-                  ) : this.state.status == "searching" ? (
+                  ) : this.state.status === "searching" ? (
                     "Searching..."
-                  ) : this.state.status == "got_results" ? (
+                  ) : this.state.status === "got_results" ? (
                     <span>
                       <b>Found: {this.state.verses.length} verses</b> runtime:{" "}
                       {this.state.run_time_sec} seconds
@@ -246,7 +254,8 @@ class TNCApp extends Component {
             display: "block",
             background: "#fffeca",
             padding: "2px 4px 0 4px",
-            marginTop: "0"
+            marginTop: "0",
+            marginBottom: "4px",
           }}
         >
           {this.state.verses.map((verse, index) => {
@@ -257,7 +266,7 @@ class TNCApp extends Component {
                   style={{
                     color: "blue",
                     fontWeight: "bold",
-                    fontSize: "smaller"
+                    fontSize: "smaller",
                   }}
                 >
                   {key}

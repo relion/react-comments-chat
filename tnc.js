@@ -3,14 +3,15 @@ var mongo_url = "mongodb://localhost:27017/";
 
 var books_dbo;
 if (false) {
-  MongoClient.connect(mongo_url, { useUnifiedTopology: true }, function(
-    err,
-    db
-  ) {
-    if (err) throw "Failed to connect to mongoDB: " + err;
-    books_dbo = db.db("BOOKS");
-    console.log("Connected to " + mongo_url);
-  });
+  MongoClient.connect(
+    mongo_url,
+    { useUnifiedTopology: true },
+    function (err, db) {
+      if (err) throw "Failed to connect to mongoDB: " + err;
+      books_dbo = db.db("Books"); // BOOKS
+      console.log("Connected to " + mongo_url);
+    }
+  );
 }
 
 function search_sorted(words, distance, data) {
@@ -35,10 +36,11 @@ function search_sorted(words, distance, data) {
   //
   update_progress_log_line(words, distance, data);
   //
+  var lang = "eng"; // "heb";
   books_dbo
-    .collection("TNC_eng")
-    .find({ txt: { $in: re_ar } })
-    .toArray(function(err, result) {
+    .collection("TNC")
+    .find({ [lang]: { $in: re_ar } })
+    .toArray(function (err, result) {
       if (err) throw err;
       //res_ar = res_ar.concat(result);
       for (var i = 0; i < result.length; i++) {
@@ -47,18 +49,26 @@ function search_sorted(words, distance, data) {
         if (data.res_hash[key] == null) {
           data.res_hash[key] = 1;
 
-          verse.marked = verse.txt;
-          re_ar.forEach(_re1 => {
+          var is_heb = lang == "heb";
+          verse.marked = verse[is_heb ? "eng" : lang]; // "heb", "heb_puncd"
+          re_ar.forEach((_re1) => {
             verse.marked = verse.marked.replace(
               _re1,
               "<span class='fm'>AAA$1BBB</span>"
             );
           });
 
-          words.forEach(word => {
+          words.forEach((word) => {
+            var the_word = word;
+            if (is_heb) {
+              the_word = "";
+              Array.from(word).forEach((char) => {
+                the_word += char + "[ְֱֲֳִֵֶַָֹׁׂ]*";
+              });
+            }
             var re =
               "(AAA[\\w\\W<>']*?)((?<=(AAA|\\W))" +
-              word +
+              the_word +
               "(?=(\\W|BBB)))([\\w\\W<>'/]*?BBB)";
             verse.marked = verse.marked.replace(
               new RegExp(re, "g" + ignore_case),
@@ -209,4 +219,33 @@ function send_results(data) {
   data.res.end();
 }
 
-exports.search_sorted = search_sorted;
+function handle_tnc_query(res) {
+  // yishay
+  books_dbo
+    .collection("TNC")
+    .find({ b: 0, c: 0, v: 1 })
+    .toArray(function (err, result) {
+      if (err) throw err;
+      res.send("<b>" + result[0].eng + "</b>");
+    });
+}
+
+function handle_get_verses(req_json, res) {
+  search_sorted(req_json.words, 0, {
+    max_distance: req_json.max_distance,
+    min_words: req_json.min_words,
+    stop_more_distance: req_json.stop_more_distance,
+    stop_less_words: req_json.stop_less_words,
+    //
+    res: res,
+    res_ar: [],
+    res_hash: {},
+    n_depth: 1,
+    re_hash: {},
+    last_update_time: new Date().getTime(),
+    last_reported_n_results: 0,
+  });
+}
+
+exports.handle_get_verses = handle_get_verses;
+exports.handle_tnc_query = handle_tnc_query;

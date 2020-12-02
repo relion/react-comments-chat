@@ -1,8 +1,10 @@
+import Avatar from "react-avatar";
 import styled, { css } from "styled-components";
 import React, { Component } from "react";
 import { Button } from "reactstrap";
 import EdiText from "react-editext";
 const reactStringReplace = require("react-string-replace");
+const dateFormat = require("dateformat");
 
 const StyledEdiText = styled(EdiText)`
   button,
@@ -31,6 +33,8 @@ export default class Comment extends Component {
 
   render() {
     const { name, message, time, _id, user_ip } = this.props.comment;
+    var date_str = dateFormat(time, "dd-mmm-yyyy");
+    var time_str = dateFormat(time, "H:MM"); // :ss
     var message_with_br = reactStringReplace(
       message,
       "\n",
@@ -50,7 +54,7 @@ export default class Comment extends Component {
     var matches = message.match(/[א-ת\w]/);
     if (matches != null) {
       var char_ascii = matches[0].charCodeAt(0);
-      is_message_rtl = char_ascii >= 1488 && char_ascii <= 1514;
+      is_message_rtl = char_ascii >= 1488 && char_ascii <= 1514; // between א to ת.
     }
     var direction = is_message_rtl ? "rtl" : "ltr";
     return (
@@ -61,11 +65,9 @@ export default class Comment extends Component {
       >
         <div className="row">
           <div className="col-sm-3 mr-2">
-            <img
-              className="mr-0 bg-light rounded"
-              width="48"
-              height="48"
-              src={`https://api.adorable.io/avatars/48/${name.toLowerCase()}@adorable.io.png`}
+            <Avatar
+              name /* googleId, facebookId */={name.toLowerCase()}
+              size="48"
               alt={name}
             />
           </div>
@@ -83,7 +85,15 @@ export default class Comment extends Component {
           </div>
         )} */}
         <div className="media-body p-2 shadow-sm rounded bg-light border">
-          <small className="float-right text-muted">{time}</small>
+          <small className="float-right text-muted">
+            {date_str}{" "}
+            <span style={{ fontSize: "smaller", fontStyle: "lighter" }}>
+              {time_str}
+            </span>{" "}
+            <span style={{ fontStyle: "italic", fontWeight: "bold" }}>
+              ({this.props.comment.formatted_since})
+            </span>
+          </small>
           <h6 className="mt-0 mb-1 text-muted">{name}</h6>
           {is_owner ? (
             <Button

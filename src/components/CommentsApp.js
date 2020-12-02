@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "bootstrap/dist/css/bootstrap.css";
+//import "bootstrap/dist/css/bootstrap.css";
 import "./CommentsApp.css";
 import "./global.js";
 //import Websocket from "react-websocket";
@@ -28,6 +28,36 @@ class CommentsApp extends Component {
     this.handle_report_typing_checkbox_changed = this.handle_report_typing_checkbox_changed.bind(
       this
     );
+  }
+
+  get_time_since_now_formatted(time) {
+    const do_half = 2; // 1
+    var passed_time = new Date().getTime() - Date.parse(time);
+    var n_seconds_since_now =
+      Math.floor(passed_time / 1000 / global.time_sec_jump) *
+      global.time_sec_jump;
+    var n_minutes_since_now = Math.floor(passed_time / (1000 * 60));
+    var n_hours_since_now =
+      Math.floor((passed_time / (1000 * 60 * 60)) * do_half) / do_half;
+    var n_days_since_now = Math.floor(passed_time / (1000 * 60 * 60 * 24));
+    var res = null;
+    if (n_days_since_now >= 1) {
+      res = n_days_since_now + " days";
+    } else if (n_hours_since_now >= 1) {
+      res = n_hours_since_now + " hour" + (n_hours_since_now > 1 ? "s" : "");
+    } else if (n_minutes_since_now >= 1) {
+      res =
+        n_minutes_since_now + " minute" + (n_minutes_since_now > 1 ? "s" : "");
+    } else if (n_seconds_since_now >= 1) {
+      res =
+        n_seconds_since_now + " second" + (n_seconds_since_now > 1 ? "s" : "");
+    }
+    if (res != null) {
+      res = "about " + res + " ago";
+    } else {
+      res = global.formatted_since_just_added;
+    }
+    return res;
   }
 
   componentDidMount() {
@@ -150,7 +180,7 @@ class CommentsApp extends Component {
             )}
             <AutosizeInput
               onChange={this.handle_name_field_changed}
-              placeholder="👤 Please Enter Your Name"
+              placeholder="👤 Please Enter Your Full Name"
               name="name"
               type="text"
               value={this.state.my_name}
@@ -159,6 +189,7 @@ class CommentsApp extends Component {
                 borderRadius: "0.3rem",
                 padding: "0",
                 margin: "4px 0",
+                fontSize: "small",
               }}
             />
             {" show typing: "}

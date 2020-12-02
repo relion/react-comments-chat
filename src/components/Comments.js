@@ -47,8 +47,34 @@ class Comments extends Component {
       my_comment_message: "",
     };
 
+    setInterval(this.my_setInterval, global.time_sec_jump, this);
+
     this.addComment = this.addComment.bind(this);
     handle_win_title();
+  }
+
+  my_setInterval(comments_obj) {
+    var new_comments = [...comments_obj.state.comments];
+    var found_change = false;
+    for (var i = 0; i < new_comments.length; i++) {
+      new_comments[
+        i
+      ].formatted_since = comments_obj.props.main_app.get_time_since_now_formatted(
+        new_comments[i].time
+      );
+      // console.log(
+      //   "in Timeout get_time_since_now_formatted: " + comment.formatted_since
+      // );
+      // if (old_val != new_val)
+      // {
+      //   found_change = true;
+      // }
+    }
+    comments_obj.setState({
+      comments: new_comments,
+    });
+    // this.state.comments.forEach((comment) => {
+    // });
   }
 
   componentDidMount() {
@@ -64,6 +90,7 @@ class Comments extends Component {
 
   addComment(comment) {
     comment.ref = React.createRef();
+    comment.formatted_since = global.formatted_since_just_added;
     this.setState({
       loading: false,
       comments: [...this.state.comments, comment],
@@ -180,9 +207,15 @@ class Comments extends Component {
           .then((res) => {
             // console.log("my browser_id is: " + res.browser_id);
 
-            res.comments.forEach((c) => {
+            // res.comments.forEach((c) => {
+            // });
+            for (var i = 0; i < res.comments.length; i++) {
+              var c = res.comments[i];
               c.ref = React.createRef();
-            });
+              c.formatted_since = this.comments_app.props.main_app.get_time_since_now_formatted(
+                c.time
+              );
+            }
             this.comments_app.setState({
               comments: res.comments,
               loading: false,
@@ -190,11 +223,12 @@ class Comments extends Component {
               // browser_id: res.browser_id
             });
 
-            if (this.comments_app.props.main_app.state.my_name != undefined) {
+            var my_name = this.comments_app.props.main_app.state.my_name;
+            if (my_name != undefined && my_name.trim() != "") {
               this.send(
                 JSON.stringify({
                   op: "client_changed_name",
-                  name: this.comments_app.props.main_app.state.my_name,
+                  name: my_name,
                 })
               );
             }
@@ -218,6 +252,7 @@ class Comments extends Component {
       case "client_left":
         console.log("client_left: " + json._id);
         participants = { ...this.comments_app.state.participants };
+        if (participants[json._id] == undefined) return;
         var name = participants[json._id].name;
         delete participants[json._id];
         this.comments_app.setState({
@@ -231,6 +266,7 @@ class Comments extends Component {
         return;
       case "client_changed_name":
         participants = { ...this.comments_app.state.participants };
+        if (participants[json.browser_id] == undefined) return;
         participants[json.browser_id].name = json.name;
         participants[json.browser_id].entered_message = json.entered_message;
         this.comments_app.setState({
@@ -382,7 +418,8 @@ class Comments extends Component {
     var me_participating_style = {
       backgroundColor: "chocolate",
     };
-    if (this.props.main_app.state.my_name !== "") {
+    var my_name = this.props.main_app.state.my_name;
+    if (my_name !== "") {
       me_participating_style.backgroundColor = "white";
       me_participating_style.padding = 0;
     }
@@ -390,9 +427,11 @@ class Comments extends Component {
       borderRadius: "0.3rem",
       paddingLeft: "6px",
     };
-    if (this.props.main_app.state.my_name !== "") {
+    if (my_name !== "") {
       input_style.backgroundColor = "pink";
     }
+    var participants_keys = Object.keys(this.state.participants);
+
     return (
       <React.Fragment>
         <table className="App-header">
@@ -437,14 +476,17 @@ class Comments extends Component {
           className="participants_div_style"
           style={{ padding: "4px 6px 0 2px" }}
         >
-          {Object.keys(this.state.participants).length === 0 ? (
+          {participants_keys.length === 0 ? (
             <span style={{ marginLeft: "4px" }}>
-              <b>No Other Participants</b>
+              <b>No Other Online Participants</b>
             </span>
           ) : (
             <span style={{ marginLeft: "4px" }}>
-              <b>Participants: </b>
-              {Object.keys(this.state.participants).map(function (browser_id) {
+              <b>
+                {participants_keys.length} Participant
+                {participants_keys.length != 1 ? "s" : ""}:{" "}
+              </b>
+              {participants_keys.map(function (browser_id) {
                 var participant = this.state.participants[browser_id];
                 var participant_span_className =
                   "participants_span_style" +
@@ -459,7 +501,8 @@ class Comments extends Component {
                     className={participant_span_className}
                     style={{ display: "inline-block" }}
                   >
-                    {participant.name !== undefined
+                    {participant.name !== undefined &&
+                    participant.name.trim() != ""
                       ? participant.name
                       : "unknown"}
                     {participant.is_typing ? (
@@ -489,7 +532,7 @@ class Comments extends Component {
             comments_app={this}
           />
         </div>
-        {this.props.main_app.state.my_name == "" ? (
+        {my_name == undefined || my_name.trim() == "" ? (
           ""
         ) : (
           <div className="my_comment_form_style" style={{ flex: "none" }}>
