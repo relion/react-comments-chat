@@ -136,7 +136,11 @@ function broadcast(page_title, by_browser_id, data) {
 
 app.get("*", function (req, res, next) {
   var rel_url = req.params[0].toLowerCase();
-  res.header("aryeh_debug", "rel_url=" + rel_url);
+  //res.header("aryeh_debug", "rel_url=" + rel_url);
+  res.cookie("aryeh_debug", "rel_url=" + rel_url, {
+    maxAge: 900000,
+    httpOnly: true,
+  });
   if (/^\/(tnc|comments)?[\/]?$/i.test(rel_url)) {
     const filePath = process.cwd() + "/src/index.html"; // where the <div id="root"> is.
     var data = fs.readFileSync(filePath, "utf8");
