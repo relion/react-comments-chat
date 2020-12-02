@@ -136,7 +136,7 @@ function broadcast(page_title, by_browser_id, data) {
 
 app.get("*", function (req, res, next) {
   var rel_url = req.params[0].toLowerCase();
-  if (/^\/(tnc|comments)?[\/]?$/.test(rel_url)) {
+  if (/^\/(tnc|comments)?[\/]?$/i.test(rel_url)) {
     const filePath = process.cwd() + "/src/index.html"; // where the <div id="root"> is.
     var data = fs.readFileSync(filePath, "utf8");
     var result = data.replace(
