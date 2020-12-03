@@ -1,7 +1,7 @@
 const url = require("url");
 const express = require("express");
 const app = express();
-app.set("port", 80); // process.env.PORT || 80);
+app.set("port", 8080); // process.env.PORT || 80);
 const bodyParser = require("body-parser");
 app.use(bodyParser.text({ type: "text/html" }));
 const fs = require("fs");
