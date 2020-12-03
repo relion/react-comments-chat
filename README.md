@@ -41,4 +41,4 @@ or (when available) simpliy right click here:
 
 ## Live Demo
 
-[Click here](http://reactcommentstest01-env.eba-fcswhsfk.us-east-2.elasticbeanstalk.com/comments/?title=public_room)
+[Click here](http://testcomments201-env.eba-3362jxsm.us-west-2.elasticbeanstalk.com/comments/?title=public_room)
