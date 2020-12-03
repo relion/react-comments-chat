@@ -135,7 +135,7 @@ function broadcast(page_title, by_browser_id, data) {
 }
 
 app.get("*", function (req, res, next) {
-  //throw "get out";
+  throw "get out";
   var rel_url = req.params[0].toLowerCase();
   //res.header("aryeh_debug", "rel_url=" + rel_url);
   // res.cookie("aryeh_debug", "rel_url=" + rel_url, {
