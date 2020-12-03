@@ -13,7 +13,7 @@ Comments can be added, removed and edited, all being reflected in real-time in a
 
 ## App snapshot
 
-<img src="images/react_comments_room_snapshot.png" title="React Comments Room snapshot">
+<img src="readme_images/react_comments_room_snapshot.png" title="React Comments Room snapshot">
 
 ## Author
 
@@ -30,7 +30,7 @@ chat, room, comments, solved, working, full-stack, react, node.js, websocket.
 For testing the Notifications on real hostname, you can enable: Insecure origins treated as secure in chrome://flags/
 or (when available) simpliy right click here:
 
-<img src="images/enable_notifications_in_chrome.png" title="Enable Notifications in Chrome">
+<img src="readme_images/enable_notifications_in_chrome.png" title="Enable Notifications in Chrome">
 
 ### Configure on AWS WebSocekt
 

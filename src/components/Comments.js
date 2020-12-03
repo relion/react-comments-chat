@@ -474,7 +474,7 @@ class Comments extends Component {
         </table>
         <div
           className="participants_div_style"
-          style={{ padding: "4px 6px 0 2px" }}
+          style={{ padding: "4px 2px 0 2px" }}
         >
           {participants_keys.length === 0 ? (
             <span style={{ marginLeft: "4px" }}>

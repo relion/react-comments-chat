@@ -48,12 +48,12 @@ h6 {
 }
 
 .participants_span_style {
-  display: inline-block;
   margin: 0 4px 4px 2px;
-  padding: 0px 4px 0 4px;
+  padding: 2px 4px 2px 4px;
   background-color: pink;
   border: solid 1px gray;
   border-radius: 4px;
+  line-height: 12px;
 }
 
 .participants_span_unknown_style {
@@ -69,7 +69,7 @@ h6 {
   margin: 4px 0 4px 0;
   padding: 6px;
   border-radius: 0.3rem;
-  max-height: 72px;
+  max-height: 80px;
   overflow: auto;
   flex: none;
 }
