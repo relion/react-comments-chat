@@ -1741,8 +1741,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_query_string__ = __webpack_require__(61);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_query_string___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_query_string__);
 global.time_sec_jump=10;global.formatted_since_just_added="just added";global.host=window.location.hostname;// "testcomments5-env.vip8dhubmp.us-west-2.elasticbeanstalk.com";
-//alert(host);
-var port=":"+(global.host=="localhost"?"8080":"80");global.server_url="http://"+global.host+port+"/handle_comments/";// "http://www.thevcard.net/cms/cms_json.aspx";
+var port=":"+(true&&global.host=="localhost"?"8080":"80");global.server_url="http://"+global.host+port+"/handle_comments/";// "http://www.thevcard.net/cms/cms_json.aspx";
 function handle_win_title(){var title_arg=window.location.search;if(title_arg!=="")title_arg=title_arg.substr(1)+"&";window.location.title_arg=title_arg;global.title=__WEBPACK_IMPORTED_MODULE_0_query_string___default.a.parse(window.location.search).title;if(global.title===undefined||global.title===""){global.title="Root";}}/* harmony default export */ __webpack_exports__["a"] = (handle_win_title);
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(17)))
 
@@ -28430,4 +28429,4 @@ registerValidSW(swUrl);}}).catch(function(){console.log('No internet connection 
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=main.3150fbd0.js.map
+//# sourceMappingURL=main.23ff2181.js.map
