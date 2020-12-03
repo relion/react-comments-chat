@@ -13,7 +13,7 @@ Comments can be added, removed and edited, all being reflected in real-time in a
 
 ## App snapshot
 
-<img src="readme_images/react_comments_room_snapshot.png" title="React Comments Room snapshot">
+<img src="readme_images/react_comments_room_snapshot.png2" title="React Comments Room snapshot">
 
 ## Author
 
