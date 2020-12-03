@@ -92,7 +92,8 @@ wss.on("connection", function connection(ws, req) {
     );
     delete ws_by_id[browser_id];
     delete all_participants[browser_id];
-    delete browsers_ids_by_title[ws.page_title][browser_id];
+    if (browsers_ids_by_title[ws.page_title] != undefined)
+      delete browsers_ids_by_title[ws.page_title][browser_id];
     broadcast(ws.page_title, browser_id, {
       op: "client_left",
       _id: browser_id,
@@ -150,7 +151,9 @@ app.get("*", function (req, res, next) {
     var data = fs.readFileSync(filePath, "utf8");
     var result = data.replace(
       /\$OG_TITLE/g,
-      req.query.title + " Comments Room"
+      /^\/comments/i.test(rel_url)
+        ? req.query.title + " Comments Room"
+        : "Bible English Search"
     );
     result = result.replace(/\$OG_DESCRIPTION/g, "Please click this Link");
     result = result.replace(
