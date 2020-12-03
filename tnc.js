@@ -2,7 +2,7 @@ var MongoClient = require("mongodb").MongoClient;
 var mongo_url = "mongodb://localhost:27017/";
 
 var books_dbo;
-if (false) {
+if (process.execPath.startsWith("C:\\")) {
   MongoClient.connect(
     mongo_url,
     { useUnifiedTopology: true },

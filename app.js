@@ -1,7 +1,7 @@
 const url = require("url");
 const express = require("express");
 const app = express();
-app.set("port", 8080); // process.env.PORT || 80);
+app.set("port", process.execPath.startsWith("C:\\") ? 8080 : 80); // process.env.PORT || 80);
 const bodyParser = require("body-parser");
 app.use(bodyParser.text({ type: "text/html" }));
 const fs = require("fs");
@@ -135,6 +135,7 @@ function broadcast(page_title, by_browser_id, data) {
 }
 
 app.get("*", function (req, res, next) {
+  //throw "get out";
   var rel_url = req.params[0].toLowerCase();
   //res.header("aryeh_debug", "rel_url=" + rel_url);
   // res.cookie("aryeh_debug", "rel_url=" + rel_url, {
