@@ -1,3 +1,21 @@
+var tnc = require("./tnc.js");
+var MongoClient = require("mongodb").MongoClient;
+var mongo_url = "mongodb://localhost:27017/";
+
+var fb_dbo;
+// if (process.execPath.startsWith("C:\\")) {
+// }
+MongoClient.connect(
+  mongo_url,
+  { useUnifiedTopology: true },
+  function (err, db) {
+    if (err) throw "Failed to connect to mongoDB: " + err;
+    tnc.set_books_dbo(db.db("Books"));
+    fb_dbo = db.db("faithbit");
+    console.log("Connected to " + mongo_url);
+  }
+);
+
 const url = require("url");
 const express = require("express");
 const app = express();
@@ -9,8 +27,6 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.text({ type: "text/html" }));
 const fs = require("fs");
 const uuidv1 = require("uuid/v1");
-
-var tnc = require("./tnc.js");
 
 const WebSocket = require("ws");
 
@@ -51,14 +67,7 @@ wss.on("connection", function connection(ws, req) {
           name: json.name,
         });
         console.log(
-          "got msg from browser_id: " +
-            ws.browser_id +
-            " title: " +
-            ws.page_title +
-            " msg.op: " +
-            json.op +
-            " msg.name: " +
-            json.name
+          `got msg from browser_id: ${ws.browser_id} title: \`${ws.page_title}\` op: \`${json.op}\` name: \`${json.name}\``
         );
         break;
       case "client_message_entered_changed":
@@ -120,7 +129,6 @@ scheme
   });
 
 function broadcast(page_title, by_browser_id, data) {
-  console.log("in broadcast..");
   var bids = browsers_ids_by_title[page_title];
   for (id in bids) {
     var ws = ws_by_id[id];
@@ -131,11 +139,18 @@ function broadcast(page_title, by_browser_id, data) {
         ws.readyState === 1 &&
         ws.page_title == page_title
       ) {
-        console.log("broadcasting to..");
         ws.send(JSON.stringify(data)); // '{ "_id": -1, "message": "Hello World2" }'
       }
     }
   }
+  var n_other_peers = Object.keys(bids).length - 1;
+  console.log(
+    `in broadcast msg: \`${data.op}\` to page: \`${page_title}\` with ${
+      n_other_peers < 1 ? "no" : n_other_peers
+    }${n_other_peers == -1 ? "" : " other"} peer${
+      n_other_peers == 1 ? "" : "s"
+    }`
+  );
 }
 
 app.get("*", function (req, res, next) {
@@ -146,6 +161,7 @@ app.get("*", function (req, res, next) {
   //   maxAge: 900000,
   //   httpOnly: true,
   // });
+  //console.log("rel_url: " + rel_url);
   if (/^\/(tnc|comments)?[\/]?$/i.test(rel_url)) {
     const filePath = process.cwd() + "/src/index.html"; // where the <div id="root"> is.
     var data = fs.readFileSync(filePath, "utf8");
@@ -198,15 +214,15 @@ app.get("*", function (req, res, next) {
   });
 
   function handle_request(req, res) {
-    var dir = "/DATA/";
+    // var dir = "/DATA/";
     var op = req.query.op;
     var page_title = req.query.title;
     var browser_id = req.query.browser_id;
-    var comment_file =
-      process.cwd() +
-      dir +
-      (page_title != null ? page_title + "_" : "") +
-      "comment.json";
+    // var comment_file =
+    //   process.cwd() +
+    //   dir +
+    //   (page_title != null ? page_title + "_" : "") +
+    //   "comment.json";
 
     if (op == "comment_added") {
       var comment_json = JSON.parse(req.body);
@@ -215,17 +231,26 @@ app.get("*", function (req, res, next) {
       comment_json.user_ip = req.headers.host;
       comment_json.browser_id = browser_id;
       //
-      broadcast(page_title, browser_id, {
-        op: op,
-        browser_id: browser_id,
-        comment: comment_json,
-      });
-      //
-      var data = fs.readFileSync(comment_file);
-      var comments_json_ar = JSON.parse(data);
-      comments_json_ar.push(comment_json);
-      fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
-      res.write(JSON.stringify(comment_json));
+      //var data = fs.readFileSync(comment_file);
+      //var comments_json_ar = JSON.parse(data);
+      //comments_json_ar.push(comment_json);
+      fb_dbo.collection("comments").updateOne(
+        { page_title: page_title },
+        {
+          $push: { comments_ar: comment_json },
+        },
+        function (err, result) {
+          broadcast(page_title, browser_id, {
+            op: op,
+            browser_id: browser_id,
+            comment: comment_json,
+          });
+          res.write(JSON.stringify(comment_json));
+          res.end();
+        }
+      );
+      //fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
+      return;
     } else if (op == "get_all_comments") {
       handle_first_request(req);
       broadcast(page_title, browser_id, {
@@ -233,58 +258,106 @@ app.get("*", function (req, res, next) {
         _id: browser_id,
       });
 
-      var comments_json;
-      if (fs.existsSync(comment_file)) {
-        comments_json = JSON.parse(fs.readFileSync(comment_file));
-      } else {
-        fs.writeFileSync(comment_file, "[]");
-        comments_json = [];
-      }
       var participants = {};
       for (var _browser_id in browsers_ids_by_title[page_title]) {
         if (_browser_id == browser_id) continue;
         participants[_browser_id] = {};
         var all_participant = all_participants[_browser_id];
-        if (all_participant != undefined) {
-          if (all_participant.name != undefined) {
-            var participant = participants[_browser_id];
-            participant.name = all_participant.name;
-            participant.entered_message = all_participant.entered_message;
-          }
-        }
+        var participant = participants[_browser_id];
+        participant.name = all_participant.name;
+        participant.entered_message = all_participant.entered_message;
       }
-      var to_send = JSON.stringify({
-        comments: comments_json,
-        participants: participants,
-      });
-      res.write(to_send);
-      res.end();
+
+      fb_dbo.collection("comments").findOne(
+        { page_title: page_title },
+        function (err, result) {
+          if (result == null) {
+            var empty_comments_ar = [];
+            fb_dbo.collection("comments").insert(
+              {
+                "page_title": page_title,
+                "comments_ar": empty_comments_ar,
+              },
+              function (err, result) {
+                res.write(
+                  JSON.stringify({
+                    comments: empty_comments_ar,
+                    participants: this.participants,
+                  })
+                );
+                res.end();
+              }
+            );
+          } else {
+            res.write(
+              JSON.stringify({
+                comments: result.comments_ar,
+                participants: this.participants,
+              })
+            );
+            res.end();
+          }
+        }.bind({ participants: participants })
+      );
       return;
     } else if (op == "comment_deleted") {
       var comment_id = req.body;
-      var data = fs.readFileSync(comment_file);
-      var comments_json_ar = JSON.parse(data);
-      var found_i = -1;
-      for (var i = 0; i < comments_json_ar.length; i++) {
-        if (comments_json_ar[i]._id == comment_id) {
-          found_i = i;
-          break;
+      fb_dbo.collection("comments").updateOne(
+        { page_title: page_title },
+        {
+          $pull: { comments_ar: { _id: comment_id } },
+        },
+        function (err, result) {
+          res.end();
+          broadcast(page_title, browser_id, {
+            op: "comment_deleted",
+            _id: comment_id,
+          });
         }
-      }
-      if (found_i == -1) {
-        res.write('{ "error": "comment._id not found." }');
-      } else {
-        comments_json_ar.splice(found_i, 1);
-        var comments_json_ar_str = JSON.stringify(comments_json_ar);
-        fs.writeFileSync(comment_file, comments_json_ar_str);
-        res.write(comments_json_ar_str);
-        broadcast(page_title, browser_id, {
-          op: "comment_deleted",
-          _id: comment_id,
-        });
-      }
+      );
+      return;
+
+      // var data = fs.readFileSync(comment_file);
+      // var comments_json_ar = JSON.parse(data);
+      // var found_i = -1;
+      // for (var i = 0; i < comments_json_ar.length; i++) {
+      //   if (comments_json_ar[i]._id == comment_id) {
+      //     found_i = i;
+      //     break;
+      //   }
+      // }
+      // if (found_i == -1) {
+      //   res.write('{ "error": "comment._id not found." }');
+      // } else {
+      //   comments_json_ar.splice(found_i, 1);
+      //   var comments_json_ar_str = JSON.stringify(comments_json_ar);
+      //   fs.writeFileSync(comment_file, comments_json_ar_str);
+      //   res.write(comments_json_ar_str);
+      //   broadcast(page_title, browser_id, {
+      //     op: "comment_deleted",
+      //     _id: comment_id,
+      //   });
+      // }
     } else if (op == "comment_updated") {
       var updated_comment = JSON.parse(req.body);
+
+      fb_dbo.collection("comments").updateOne(
+        { page_title: page_title, "comments_ar._id": updated_comment._id },
+        {
+          $set: { "comments_ar.$.message": updated_comment.message },
+        },
+        function (err, result) {
+          //res.write(JSON.stringify(updated_comment));
+          res.end();
+          broadcast(page_title, browser_id, {
+            op: "comment_updated",
+            browser_id: browser_id,
+            comment: updated_comment,
+          });
+        }
+      );
+      return;
+
       var comments_json_ar = JSON.parse(fs.readFileSync(comment_file));
       var found_i = -1;
       for (var i = 0; i < comments_json_ar.length; i++) {
@@ -319,10 +392,7 @@ app.get("*", function (req, res, next) {
     var browser_id = req.query.browser_id;
     var page_title = req.query.title;
     console.log(
-      "got first request from page_title: " +
-        page_title +
-        " browser_id: " +
-        browser_id
+      `got first request from page_title: \`${page_title}\` browser_id: ${browser_id}`
     );
     if (ws_by_id[browser_id] != undefined) {
       ws_by_id[browser_id].page_title = page_title;

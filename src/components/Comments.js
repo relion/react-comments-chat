@@ -160,7 +160,7 @@ class Comments extends Component {
         body: comment._id,
       }
     )
-      .then((res) => res.json())
+      //.then((res) => res.json())
       .then((res) => {
         if (res.error) {
           this.setState({ loading: false, error: res.error });
@@ -268,7 +268,6 @@ class Comments extends Component {
         participants = { ...this.comments_app.state.participants };
         if (participants[json.browser_id] == undefined) return;
         participants[json.browser_id].name = json.name;
-        participants[json.browser_id].entered_message = json.entered_message;
         this.comments_app.setState({
           participants: participants,
         });

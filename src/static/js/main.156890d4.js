@@ -5388,13 +5388,15 @@ my_comment_message:""};setInterval(_this.my_setInterval,global.time_sec_jump,_th
 // });
 }},{key:"componentDidMount",value:function componentDidMount(){var ws_port=":3030";this.ws=new WebSocket("ws://"+global.host+ws_port+"/Comments/");console.log("opening WebSocket on port:"+ws_port);this.ws.comments_app=this;this.ws.onmessage=this.handleWebsocketReceivedData;this.ws.onopen=this.handleWebsocketEvent;this.ws.onclose=this.handleWebsocketEvent;this.ws.onerror=this.handleWebsocketEvent;}},{key:"addComment",value:function addComment(comment){comment.ref=__WEBPACK_IMPORTED_MODULE_0_react___default.a.createRef();comment.formatted_since=global.formatted_since_just_added;this.setState({loading:false,comments:[].concat(_toConsumableArray(this.state.comments),[comment])});}},{key:"editSaveComment",value:function editSaveComment(new_message,comment){var _this2=this;comment.message=new_message;var comment_to_send=Object.assign({},comment);delete comment_to_send.ref;// lilo: needless and cannot be sent anyway.
 var comment_str=JSON.stringify(comment_to_send);fetch(global.server_url+"?"+window.location.title_arg+"op=comment_updated&browser_id="+this.state.browser_id,{method:"post",headers:{"Content-Type":"text/html"},body:comment_str})//.then(res => res.json())
-.then(function(res){if(res.error){_this2.setState({loading:false,error:res.error});}else{var new_comments=[].concat(_toConsumableArray(_this2.state.comments));var found=false;for(var i=0;i<new_comments.length;i++){if(new_comments[i]._id===comment._id){new_comments[i].message=new_message;found=true;break;}}if(!found)throw"new_message not found.";_this2.setState({loading:false,comments:new_comments});}}).catch(function(err){_this2.setState({error:"Something went wrong in editSaveComment.",loading:false});});}},{key:"deleteComment",value:function deleteComment(comment){var _this3=this;var title_arg=window.location.search;if(title_arg!=="")title_arg+="&";fetch(global.server_url+"?"+window.location.title_arg+"op=comment_deleted"+"&browser_id="+this.state.browser_id,{method:"post",headers:{"Content-Type":"text/html"},body:comment._id}).then(function(res){return res.json();}).then(function(res){if(res.error){_this3.setState({loading:false,error:res.error});}else{_this3.setState({loading:false,error:"",comments:_this3.state.comments.filter(function(e){return e._id!==comment._id;})// res
+.then(function(res){if(res.error){_this2.setState({loading:false,error:res.error});}else{var new_comments=[].concat(_toConsumableArray(_this2.state.comments));var found=false;for(var i=0;i<new_comments.length;i++){if(new_comments[i]._id===comment._id){new_comments[i].message=new_message;found=true;break;}}if(!found)throw"new_message not found.";_this2.setState({loading:false,comments:new_comments});}}).catch(function(err){_this2.setState({error:"Something went wrong in editSaveComment.",loading:false});});}},{key:"deleteComment",value:function deleteComment(comment){var _this3=this;var title_arg=window.location.search;if(title_arg!=="")title_arg+="&";fetch(global.server_url+"?"+window.location.title_arg+"op=comment_deleted"+"&browser_id="+this.state.browser_id,{method:"post",headers:{"Content-Type":"text/html"},body:comment._id})//.then((res) => res.json())
+.then(function(res){if(res.error){_this3.setState({loading:false,error:res.error});}else{_this3.setState({loading:false,error:"",comments:_this3.state.comments.filter(function(e){return e._id!==comment._id;})// res
 });}}).catch(function(err){_this3.setState({error:"Something went wrong while deleting Comment.",loading:false});});}},{key:"handleWebsocketEvent",value:function handleWebsocketEvent(event){console.log("Websocket "+event.type+" event.");}},{key:"handleWebsocketReceivedData",value:function handleWebsocketReceivedData(msg){var _this4=this;console.log("in handleWebsocketReceivedData");var json=JSON.parse(msg.data);var username=null;switch(json.op){case"ws_connected":this.comments_app.setState({loading:true,browser_id:json.browser_id});fetch(global.server_url+"?"+window.location.title_arg+"op=get_all_comments"+"&browser_id="+this.comments_app.state.browser_id).then(function(res){return res.json();}).then(function(res){// console.log("my browser_id is: " + res.browser_id);
 // res.comments.forEach((c) => {
 // });
 for(var i=0;i<res.comments.length;i++){var c=res.comments[i];c.ref=__WEBPACK_IMPORTED_MODULE_0_react___default.a.createRef();c.formatted_since=_this4.comments_app.props.main_app.get_time_since_now_formatted(c.time);}_this4.comments_app.setState({comments:res.comments,loading:false,participants:res.participants// browser_id: res.browser_id
 });var my_name=_this4.comments_app.props.main_app.state.my_name;if(my_name!=undefined&&my_name.trim()!=""){_this4.send(JSON.stringify({op:"client_changed_name",name:my_name}));}}).catch(function(err){_this4.comments_app.setState({loading:false});});return;case"client_joined":var participants=Object.assign({},this.comments_app.state.participants);participants[json._id]={};// still has no name
-this.comments_app.setState({participants:participants});showNotification("Comments Room: "+global.title,"Client joined: "+json._id,"new_client.mp3");return;case"client_left":console.log("client_left: "+json._id);participants=Object.assign({},this.comments_app.state.participants);if(participants[json._id]==undefined)return;var name=participants[json._id].name;delete participants[json._id];this.comments_app.setState({participants:participants});showNotification("Comments Room: "+global.title,"Client left: "+(name!==undefined?name:json._id),"client_left.mp3");return;case"client_changed_name":participants=Object.assign({},this.comments_app.state.participants);if(participants[json.browser_id]==undefined)return;participants[json.browser_id].name=json.name;participants[json.browser_id].entered_message=json.entered_message;this.comments_app.setState({participants:participants});// console.log(
+this.comments_app.setState({participants:participants});showNotification("Comments Room: "+global.title,"Client joined: "+json._id,"new_client.mp3");return;case"client_left":console.log("client_left: "+json._id);participants=Object.assign({},this.comments_app.state.participants);if(participants[json._id]==undefined)return;var name=participants[json._id].name;delete participants[json._id];this.comments_app.setState({participants:participants});showNotification("Comments Room: "+global.title,"Client left: "+(name!==undefined?name:json._id),"client_left.mp3");return;case"client_changed_name":participants=Object.assign({},this.comments_app.state.participants);if(participants[json.browser_id]==undefined)return;participants[json.browser_id].name=json.name;//participants[json.browser_id].entered_message = json.entered_message;
+this.comments_app.setState({participants:participants});// console.log(
 //   "Client_changed_name.. browser_id: " +
 //     this.comments_app.state.browser_id +
 //     " name: " +
@@ -11030,10 +11032,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__index_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_CommentsApp__ = __webpack_require__(186);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_TNCApp__ = __webpack_require__(377);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__registerServiceWorker__ = __webpack_require__(379);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_query_string__ = __webpack_require__(61);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_query_string___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_query_string__);
-var root_el=document.getElementById("root");if(__WEBPACK_IMPORTED_MODULE_6_query_string___default.a.parse(window.location.search).page_type=="tnc"||/^\/tnc[\/]?$/.test(window.location.pathname)){__WEBPACK_IMPORTED_MODULE_1_react_dom___default.a.render(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__components_TNCApp__["a" /* default */],null),root_el);}else{__WEBPACK_IMPORTED_MODULE_1_react_dom___default.a.render(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__components_CommentsApp__["a" /* default */],null),root_el);}Object(__WEBPACK_IMPORTED_MODULE_5__registerServiceWorker__["a" /* default */])();
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_query_string__ = __webpack_require__(61);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_query_string___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_query_string__);
+//import registerServiceWorker from "./registerServiceWorker";
+var root_el=document.getElementById("root");if(__WEBPACK_IMPORTED_MODULE_5_query_string___default.a.parse(window.location.search).page_type=="tnc"||/^\/tnc[\/]?$/.test(window.location.pathname)){__WEBPACK_IMPORTED_MODULE_1_react_dom___default.a.render(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__components_TNCApp__["a" /* default */],null),root_el);}else{__WEBPACK_IMPORTED_MODULE_1_react_dom___default.a.render(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__components_CommentsApp__["a" /* default */],null),root_el);}//registerServiceWorker();
 
 /***/ }),
 /* 181 */
@@ -28390,43 +28392,6 @@ this.state.max_distance,this.state.min_words,this.state.stop_less_words,this.sta
 
 // removed by extract-text-webpack-plugin
 
-/***/ }),
-/* 379 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = register;
-/* unused harmony export unregister */
-// In production, we register a service worker to serve assets from local cache.
-// This lets the app load faster on subsequent visits in production, and gives
-// it offline capabilities. However, it also means that developers (and users)
-// will only see deployed updates on the "N+1" visit to a page, since previously
-// cached resources are updated in the background.
-// To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
-// This link also includes instructions on opting out of this behavior.
-var isLocalhost=Boolean(window.location.hostname==='localhost'||// [::1] is the IPv6 localhost address.
-window.location.hostname==='[::1]'||// 127.0.0.1/8 is considered localhost for IPv4.
-window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/));function register(){if("production"==='production'&&'serviceWorker'in navigator){// The URL constructor is available in all browsers that support SW.
-var publicUrl=new URL("",window.location);if(publicUrl.origin!==window.location.origin){// Our service worker won't work if PUBLIC_URL is on a different origin
-// from what our page is served on. This might happen if a CDN is used to
-// serve assets; see https://github.com/facebookincubator/create-react-app/issues/2374
-return;}window.addEventListener('load',function(){var swUrl=""+'/service-worker.js';if(isLocalhost){// This is running on localhost. Lets check if a service worker still exists or not.
-checkValidServiceWorker(swUrl);// Add some additional logging to localhost, pointing developers to the
-// service worker/PWA documentation.
-navigator.serviceWorker.ready.then(function(){console.log('This web app is being served cache-first by a service '+'worker. To learn more, visit https://goo.gl/SC7cgQ');});}else{// Is not local host. Just register service worker
-registerValidSW(swUrl);}});}}function registerValidSW(swUrl){navigator.serviceWorker.register(swUrl).then(function(registration){registration.onupdatefound=function(){var installingWorker=registration.installing;installingWorker.onstatechange=function(){if(installingWorker.state==='installed'){if(navigator.serviceWorker.controller){// At this point, the old content will have been purged and
-// the fresh content will have been added to the cache.
-// It's the perfect time to display a "New content is
-// available; please refresh." message in your web app.
-console.log('New content is available; please refresh.');}else{// At this point, everything has been precached.
-// It's the perfect time to display a
-// "Content is cached for offline use." message.
-console.log('Content is cached for offline use.');}}};};}).catch(function(error){console.error('Error during service worker registration:',error);});}function checkValidServiceWorker(swUrl){// Check if the service worker can be found. If it can't reload the page.
-fetch(swUrl).then(function(response){// Ensure service worker exists, and that we really are getting a JS file.
-if(response.status===404||response.headers.get('content-type').indexOf('javascript')===-1){// No service worker found. Probably a different app. Reload the page.
-navigator.serviceWorker.ready.then(function(registration){registration.unregister().then(function(){window.location.reload();});});}else{// Service worker found. Proceed as normal.
-registerValidSW(swUrl);}}).catch(function(){console.log('No internet connection found. App is running in offline mode.');});}function unregister(){if('serviceWorker'in navigator){navigator.serviceWorker.ready.then(function(registration){registration.unregister();});}}
-
 /***/ })
 /******/ ]);
-//# sourceMappingURL=main.ccbc55e9.js.map
+//# sourceMappingURL=main.156890d4.js.map

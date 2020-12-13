@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import CommentsApp from "./components/CommentsApp";
 import TNCApp from "./components/TNCApp";
-import registerServiceWorker from "./registerServiceWorker";
+//import registerServiceWorker from "./registerServiceWorker";
 import queryString from "query-string";
 
 var root_el = document.getElementById("root");
@@ -15,4 +15,4 @@ if (
 } else {
   ReactDOM.render(<CommentsApp />, root_el);
 }
-registerServiceWorker();
+//registerServiceWorker();

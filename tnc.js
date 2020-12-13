@@ -1,18 +1,4 @@
-var MongoClient = require("mongodb").MongoClient;
-var mongo_url = "mongodb://localhost:27017/";
-
 var books_dbo;
-if (process.execPath.startsWith("C:\\")) {
-  MongoClient.connect(
-    mongo_url,
-    { useUnifiedTopology: true },
-    function (err, db) {
-      if (err) throw "Failed to connect to mongoDB: " + err;
-      books_dbo = db.db("Books"); // BOOKS
-      console.log("Connected to " + mongo_url);
-    }
-  );
-}
 
 function search_sorted(words, distance, data) {
   if (words.length == 0) {
@@ -247,5 +233,10 @@ function handle_get_verses(req_json, res) {
   });
 }
 
+function set_books_dbo(_books_dbo) {
+  books_dbo = _books_dbo;
+}
+
 exports.handle_get_verses = handle_get_verses;
 exports.handle_tnc_query = handle_tnc_query;
+exports.set_books_dbo = set_books_dbo;
