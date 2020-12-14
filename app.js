@@ -93,9 +93,9 @@ wss.on("connection", function connection(ws, req) {
   ws.on("close", function () {
     var name = all_participants[ws.browser_id].name;
     console.log(
-      "page_title: " +
+      "page_title: `" +
         ws.page_title +
-        " WebSocket Client disconnected: " +
+        "` WebSocket Client disconnected. id: " +
         ws.browser_id +
         (name != undefined ? " (" + name + ") " : "")
     );

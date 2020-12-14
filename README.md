@@ -42,4 +42,4 @@ or (when available) simpliy right click here:
 
 ## Live Demo
 
-[Click here](http://testcomments201-env.eba-3362jxsm.us-west-2.elasticbeanstalk.com/comments/?title=public_room)
+[Click here](http://watchcast.live/comments?title=public_room)
