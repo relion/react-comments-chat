@@ -1,4 +1,6 @@
+console.log("WatchCast Server has started...");
 var tnc = require("./tnc.js");
+const path = require("path");
 var MongoClient = require("mongodb").MongoClient;
 var mongo_url = "mongodb://localhost:27017/";
 
@@ -12,7 +14,7 @@ MongoClient.connect(
     if (err) throw "Failed to connect to mongoDB: " + err;
     tnc.set_books_dbo(db.db("Books"));
     fb_dbo = db.db("faithbit");
-    console.log("Connected to " + mongo_url);
+    console.log("MongoDB is connected on: " + mongo_url);
   }
 );
 
@@ -32,7 +34,7 @@ const WebSocket = require("ws");
 
 const ws_port = 3030;
 const wss = new WebSocket.Server({ port: ws_port, pingTimeout: 60000 });
-console.log("WebSocket Server connected on port: " + ws_port);
+console.log("WebSocket Server is listening on port: " + ws_port);
 
 wss.on("error", (error) => {
   console.log("WebSocket.Server Error.");
@@ -61,19 +63,19 @@ wss.on("connection", function connection(ws, req) {
     switch (json.op) {
       case "client_changed_name":
         all_participants[browser_id].name = json.name;
-        broadcast(ws.page_title, ws.browser_id, {
+        broadcast(ws.room_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id,
           name: json.name,
         });
         console.log(
-          `got msg from browser_id: ${ws.browser_id} title: \`${ws.page_title}\` op: \`${json.op}\` name: \`${json.name}\``
+          `got msg from browser_id: ${ws.browser_id} room: \`${ws.room_title}\` op: \`${json.op}\` name: \`${json.name}\``
         );
         break;
       case "client_message_entered_changed":
       case "client_message_entered_ceased":
         all_participants[browser_id].entered_message = json.entered_message;
-        broadcast(ws.page_title, ws.browser_id, {
+        broadcast(ws.room_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id,
           entered_message: json.entered_message,
@@ -81,29 +83,29 @@ wss.on("connection", function connection(ws, req) {
         break;
       case "client_disabled_report_typing":
         all_participants[browser_id].entered_message = json.entered_message;
-        broadcast(ws.page_title, ws.browser_id, {
+        broadcast(ws.room_title, ws.browser_id, {
           op: json.op,
           browser_id: ws.browser_id,
         });
         break;
       default:
-        throw "websocket received an unsupported message op: " + json.op;
+        throw "websocket received an unsupported message op: `" + json.op + "`";
     }
   });
   ws.on("close", function () {
     var name = all_participants[ws.browser_id].name;
     console.log(
-      "page_title: `" +
-        ws.page_title +
+      "room_title: `" +
+        ws.room_title +
         "` WebSocket Client disconnected. id: " +
         ws.browser_id +
-        (name != undefined ? " (" + name + ") " : "")
+        (name != undefined ? " name: `" + name + "`" : "")
     );
     delete ws_by_id[browser_id];
     delete all_participants[browser_id];
-    if (browsers_ids_by_title[ws.page_title] != undefined)
-      delete browsers_ids_by_title[ws.page_title][browser_id];
-    broadcast(ws.page_title, browser_id, {
+    if (browsers_ids_by_title[ws.room_title] != undefined)
+      delete browsers_ids_by_title[ws.room_title][browser_id];
+    broadcast(ws.room_title, browser_id, {
       op: "client_left",
       _id: browser_id,
     });
@@ -125,11 +127,19 @@ scheme
     app
   )
   .listen(app.get("port"), () => {
-    console.log("Server running at: http://localhost" + `:${app.get("port")}/`);
+    console.log(
+      `Http Server is running at: http://localhost:${app.get("port")}/`
+    );
   });
 
-function broadcast(page_title, by_browser_id, data) {
-  var bids = browsers_ids_by_title[page_title];
+function broadcast(room_title, by_browser_id, data) {
+  var bids = browsers_ids_by_title[room_title];
+  if (bids == undefined) {
+    console.log(
+      `in broadcast. room: \`${room_title}\` is Empty. probably because the server restarted. todo...`
+    );
+    return;
+  }
   for (id in bids) {
     var ws = ws_by_id[id];
     if (id != undefined && id != by_browser_id) {
@@ -137,7 +147,7 @@ function broadcast(page_title, by_browser_id, data) {
       if (
         ws != undefined &&
         ws.readyState === 1 &&
-        ws.page_title == page_title
+        ws.room_title == room_title
       ) {
         ws.send(JSON.stringify(data)); // '{ "_id": -1, "message": "Hello World2" }'
       }
@@ -145,7 +155,7 @@ function broadcast(page_title, by_browser_id, data) {
   }
   var n_other_peers = Object.keys(bids).length - 1;
   console.log(
-    `in broadcast msg: \`${data.op}\` to page: \`${page_title}\` with ${
+    `in broadcast msg: \`${data.op}\` to room: \`${room_title}\` with ${
       n_other_peers < 1 ? "no" : n_other_peers
     }${n_other_peers == -1 ? "" : " other"} peer${
       n_other_peers == 1 ? "" : "s"
@@ -155,14 +165,36 @@ function broadcast(page_title, by_browser_id, data) {
 
 app.get("*", function (req, res, next) {
   //throw "get out";
-  var rel_url = req.params[0].toLowerCase();
+  var rel_url = req.params[0];
   //res.header("aryeh_debug", "rel_url=" + rel_url);
   // res.cookie("aryeh_debug", "rel_url=" + rel_url, {
   //   maxAge: 900000,
   //   httpOnly: true,
   // });
   //console.log("rel_url: " + rel_url);
-  if (/^\/(tnc|comments)?[\/]?$/i.test(rel_url)) {
+
+  // lilo: code too complex?
+  var tmp =
+    process.cwd() +
+    path.sep +
+    "src" +
+    rel_url.replace(/\/$/, "").replace(/\//g, path.sep); // lilo: is it needed?..
+  //tmp = tmp.replace(/\\/g, path.sep);
+  var is_file = false;
+  try {
+    var stats = fs.lstatSync(tmp);
+    is_file = stats.isFile();
+  } catch (ex) {}
+  //var is_file_or_dir = fs.existsSync(tmp);
+  // if (!is_file_or_dir && ) {
+  //   try {
+  //     is_file_or_dir = fs.statSync(tmp).isDirectory();
+  //   } catch (ex) {}
+  // }
+
+  if (rel_url == "/handle_comments/") {
+    handle_request(req, res);
+  } else if (/^\/(tnc|comments)[\/]?$/i.test(rel_url)) {
     const filePath = process.cwd() + "/src/index.html"; // where the <div id="root"> is.
     var data = fs.readFileSync(filePath, "utf8");
     var result = data.replace(
@@ -171,10 +203,13 @@ app.get("*", function (req, res, next) {
         ? req.query.title + " Comments Room"
         : "Bible English Search"
     );
-    result = result.replace(/\$OG_DESCRIPTION/g, "Please click this Link");
+    result = result.replace(
+      /\$OG_DESCRIPTION/g,
+      "Click here to Enter the Chat Room"
+    );
     result = result.replace(
       /\$OG_IMAGE/g,
-      "http://www.thevcard.net/DATA/VCard_Logo.png"
+      `http://${req.headers.host}/VCard_Logo.png`
     );
     res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
     res.header("Expires", "-1");
@@ -182,9 +217,15 @@ app.get("*", function (req, res, next) {
     res.send(result);
     res.end();
     return;
+  } else if (rel_url == "/" || !is_file) {
+    const filePath = process.cwd() + "/src/pages/default-page.html";
+    var data = fs
+      .readFileSync(filePath, "utf8")
+      .replace(/\$LOCALHOST/g, req.headers.host);
+    res.send(data);
+    res.end();
+    return;
   } else {
-    // if (req.path == "/TNC/") {
-    // }
     next();
   }
 
@@ -209,19 +250,19 @@ app.get("*", function (req, res, next) {
     handle_request(req, res);
   });
 
-  app.get("/handle_comments", (req, res) => {
-    handle_request(req, res);
-  });
+  // app.get("/handle_comments", (req, res) => {
+  //   handle_request(req, res);
+  // });
 
   function handle_request(req, res) {
     // var dir = "/DATA/";
     var op = req.query.op;
-    var page_title = req.query.title;
+    var room_title = req.query.title;
     var browser_id = req.query.browser_id;
     // var comment_file =
     //   process.cwd() +
     //   dir +
-    //   (page_title != null ? page_title + "_" : "") +
+    //   (room_title != null ? room_title + "_" : "") +
     //   "comment.json";
 
     if (op == "comment_added") {
@@ -235,12 +276,12 @@ app.get("*", function (req, res, next) {
       //var comments_json_ar = JSON.parse(data);
       //comments_json_ar.push(comment_json);
       fb_dbo.collection("comments").updateOne(
-        { page_title: page_title },
+        { room_title: room_title },
         {
           $push: { comments_ar: comment_json },
         },
         function (err, result) {
-          broadcast(page_title, browser_id, {
+          broadcast(room_title, browser_id, {
             op: op,
             browser_id: browser_id,
             comment: comment_json,
@@ -253,13 +294,13 @@ app.get("*", function (req, res, next) {
       return;
     } else if (op == "get_all_comments") {
       handle_first_request(req);
-      broadcast(page_title, browser_id, {
+      broadcast(room_title, browser_id, {
         op: "client_joined",
         _id: browser_id,
       });
 
       var participants = {};
-      for (var _browser_id in browsers_ids_by_title[page_title]) {
+      for (var _browser_id in browsers_ids_by_title[room_title]) {
         if (_browser_id == browser_id) continue;
         participants[_browser_id] = {};
         var all_participant = all_participants[_browser_id];
@@ -269,13 +310,13 @@ app.get("*", function (req, res, next) {
       }
 
       fb_dbo.collection("comments").findOne(
-        { page_title: page_title },
+        { room_title: room_title },
         function (err, result) {
           if (result == null) {
             var empty_comments_ar = [];
             fb_dbo.collection("comments").insert(
               {
-                "page_title": page_title,
+                "room_title": room_title,
                 "comments_ar": empty_comments_ar,
               },
               function (err, result) {
@@ -303,13 +344,13 @@ app.get("*", function (req, res, next) {
     } else if (op == "comment_deleted") {
       var comment_id = req.body;
       fb_dbo.collection("comments").updateOne(
-        { page_title: page_title },
+        { room_title: room_title },
         {
           $pull: { comments_ar: { _id: comment_id } },
         },
         function (err, result) {
           res.end();
-          broadcast(page_title, browser_id, {
+          broadcast(room_title, browser_id, {
             op: "comment_deleted",
             _id: comment_id,
           });
@@ -333,7 +374,7 @@ app.get("*", function (req, res, next) {
       //   var comments_json_ar_str = JSON.stringify(comments_json_ar);
       //   fs.writeFileSync(comment_file, comments_json_ar_str);
       //   res.write(comments_json_ar_str);
-      //   broadcast(page_title, browser_id, {
+      //   broadcast(room_title, browser_id, {
       //     op: "comment_deleted",
       //     _id: comment_id,
       //   });
@@ -342,14 +383,14 @@ app.get("*", function (req, res, next) {
       var updated_comment = JSON.parse(req.body);
 
       fb_dbo.collection("comments").updateOne(
-        { page_title: page_title, "comments_ar._id": updated_comment._id },
+        { room_title: room_title, "comments_ar._id": updated_comment._id },
         {
           $set: { "comments_ar.$.message": updated_comment.message },
         },
         function (err, result) {
           //res.write(JSON.stringify(updated_comment));
           res.end();
-          broadcast(page_title, browser_id, {
+          broadcast(room_title, browser_id, {
             op: "comment_updated",
             browser_id: browser_id,
             comment: updated_comment,
@@ -371,7 +412,7 @@ app.get("*", function (req, res, next) {
       } else {
         comments_json_ar[found_i].message = updated_comment.message;
         fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
-        broadcast(page_title, browser_id, {
+        broadcast(room_title, browser_id, {
           op: "comment_updated",
           browser_id: browser_id,
           comment: comments_json_ar[found_i],
@@ -390,15 +431,15 @@ app.get("*", function (req, res, next) {
 
   function handle_first_request(req) {
     var browser_id = req.query.browser_id;
-    var page_title = req.query.title;
+    var room_title = req.query.title;
     console.log(
-      `got first request from page_title: \`${page_title}\` browser_id: ${browser_id}`
+      `got first request from room_title: \`${room_title}\` browser_id: ${browser_id}`
     );
     if (ws_by_id[browser_id] != undefined) {
-      ws_by_id[browser_id].page_title = page_title;
-      if (browsers_ids_by_title[page_title] == undefined)
-        browsers_ids_by_title[page_title] = {};
-      browsers_ids_by_title[page_title][browser_id] = null;
+      ws_by_id[browser_id].room_title = room_title;
+      if (browsers_ids_by_title[room_title] == undefined)
+        browsers_ids_by_title[room_title] = {};
+      browsers_ids_by_title[room_title][browser_id] = null;
     } else {
       // lilo: Warning..
     }
