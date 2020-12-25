@@ -196,33 +196,28 @@ app.get("*", function (req, res, next) {
     handle_request(req, res);
   } else if (/^\/(tnc|comments)[\/]?$/i.test(rel_url)) {
     const filePath = process.cwd() + "/src/index.html"; // where the <div id="root"> is.
-    var data = fs.readFileSync(filePath, "utf8");
-    var result = data.replace(
-      /\$OG_TITLE/g,
+    var html = fs.readFileSync(filePath, "utf8");
+
+    var html = replace_html(
+      req,
+      html,
       /^\/comments/i.test(rel_url)
         ? req.query.title + " Comments Room"
-        : "Bible English Search"
-    );
-    result = result.replace(
-      /\$OG_DESCRIPTION/g,
+        : "Bible English Search",
       "Click here to Enter the Chat Room"
     );
-    result = result.replace(
-      /\$OG_IMAGE/g,
-      `http://${req.headers.host}/VCard_Logo.png`
-    );
+
     res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
     res.header("Expires", "-1");
     res.header("Pragma", "no-cache");
-    res.send(result);
+    res.send(html);
     res.end();
     return;
   } else if (rel_url == "/" || !is_file) {
     const filePath = process.cwd() + "/src/pages/default-page.html";
-    var data = fs
-      .readFileSync(filePath, "utf8")
-      .replace(/\$LOCALHOST/g, req.headers.host);
-    res.send(data);
+    var html = fs.readFileSync(filePath, "utf8");
+    html = replace_html(req, html, "WatchCast default page", "");
+    res.send(html);
     res.end();
     return;
   } else {
@@ -445,3 +440,10 @@ app.get("*", function (req, res, next) {
     }
   }
 });
+function replace_html(req, data, title, description) {
+  var html = data.replace(/\$OG_TITLE/g, title);
+  html = html.replace(/\$OG_DESCRIPTION/g, description);
+  html = html.replace(/\$OG_IMAGE/g, "/VCard_Logo.png");
+  html = html.replace(/\$LOCALHOST/g, req.headers.host);
+  return html;
+}
