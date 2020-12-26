@@ -181,7 +181,15 @@ class Comments extends Component {
   }
 
   handleWebsocketEvent(event) {
-    console.log("Websocket " + event.type + " event.");
+    switch (event.type) {
+      case "close":
+        // TODO: Reconnect
+        console.log("Websocket closed, TODO: Reconnect...");
+        break;
+      case "error":
+      default:
+        console.log("Websocket " + event.type + " event.");
+    }
   }
 
   handleWebsocketReceivedData(msg) {
