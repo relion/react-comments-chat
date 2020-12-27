@@ -60,6 +60,9 @@ wss.on("connection", function connection(ws, req) {
   all_participants[browser_id] = {};
   ws.on("message", function (msg) {
     var json = JSON.parse(msg);
+    console.log(
+      `got msg from browser_id: ${ws.browser_id} room: \`${ws.room_title}\` op: \`${json.op}\` name: \`${json.name}\``
+    );
     switch (json.op) {
       case "client_changed_name":
         all_participants[browser_id].name = json.name;
@@ -68,9 +71,6 @@ wss.on("connection", function connection(ws, req) {
           browser_id: ws.browser_id,
           name: json.name,
         });
-        console.log(
-          `got msg from browser_id: ${ws.browser_id} room: \`${ws.room_title}\` op: \`${json.op}\` name: \`${json.name}\``
-        );
         break;
       case "client_message_entered_changed":
       case "client_message_entered_ceased":
@@ -107,7 +107,7 @@ wss.on("connection", function connection(ws, req) {
       delete browsers_ids_by_title[ws.room_title][browser_id];
     broadcast(ws.room_title, browser_id, {
       op: "client_left",
-      _id: browser_id,
+      browser_id: browser_id,
     });
   });
 });
@@ -195,7 +195,7 @@ app.get("*", function (req, res, next) {
   if (rel_url == "/handle_comments/") {
     handle_request(req, res);
   } else if (/^\/(tnc|comments)[\/]?$/i.test(rel_url)) {
-    const filePath = process.cwd() + "/src/index.html"; // where the <div id="root"> is.
+    const filePath = process.cwd() + "/src/comments/index.html"; // where the <div id="root"> is.
     var html = fs.readFileSync(filePath, "utf8");
 
     var html = replace_html(
@@ -291,7 +291,8 @@ app.get("*", function (req, res, next) {
       handle_first_request(req);
       broadcast(room_title, browser_id, {
         op: "client_joined",
-        _id: browser_id,
+        browser_id: browser_id,
+        name: req.query.name,
       });
 
       var participants = {};

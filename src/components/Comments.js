@@ -38,15 +38,6 @@ class Comments extends Component {
 
     //props.main_app.setState({ my_name: "" });
 
-    this.init_aaa();
-
-    setInterval(this.my_setInterval, global.time_sec_jump, this);
-
-    this.addComment = this.addComment.bind(this);
-    handle_win_title();
-  }
-
-  init_aaa() {
     this.state = {
       comments: [],
       participants: {},
@@ -55,6 +46,11 @@ class Comments extends Component {
       //my_name: "",
       my_comment_message: "",
     };
+
+    setInterval(this.my_setInterval, global.time_sec_jump, this);
+
+    this.addComment = this.addComment.bind(this);
+    handle_win_title();
   }
 
   my_setInterval(comments_obj) {
@@ -203,6 +199,7 @@ class Comments extends Component {
         this.setState({
           status_txt: "Disconnected",
           status_color: "red",
+          participants: {},
         });
         setTimeout(this.connect_ws, 4000, this);
         break;
@@ -241,7 +238,9 @@ class Comments extends Component {
             window.location.title_arg +
             "op=get_all_comments" +
             "&browser_id=" +
-            this.comments_app.state.browser_id
+            this.comments_app.state.browser_id +
+            "&name=" +
+            this.comments_app.props.main_app.state.my_name
         )
           .then((res) => res.json())
           .then((res) => {
@@ -265,11 +264,15 @@ class Comments extends Component {
 
             var my_name = this.comments_app.props.main_app.state.my_name;
             if (my_name != undefined && my_name.trim() != "") {
-              this.send(
-                JSON.stringify({
-                  op: "client_changed_name",
-                  name: my_name,
-                })
+              setTimeout(
+                () =>
+                  this.send(
+                    JSON.stringify({
+                      op: "client_changed_name",
+                      name: my_name,
+                    })
+                  ),
+                2000
               );
             }
           })
@@ -278,45 +281,38 @@ class Comments extends Component {
           });
         return;
       case "client_joined":
-        var participants = { ...this.comments_app.state.participants };
-        participants[json._id] = {}; // still has no name
-        this.comments_app.setState({
-          participants: participants,
-        });
-        showNotification(
-          "Comments Room: " + global.title,
-          "Client joined: " + json._id,
-          "new_client.mp3"
-        );
+        this.comments_app.handle_client_joined(this.comments_app, json);
         return;
       case "client_left":
-        console.log("client_left: " + json._id);
-        participants = { ...this.comments_app.state.participants };
-        if (participants[json._id] == undefined) return;
-        var name = participants[json._id].name;
-        delete participants[json._id];
+        console.log("client_left: " + json.browser_id);
+        var participants = { ...this.comments_app.state.participants };
+        if (participants[json.browser_id] == undefined) return;
+        var name = participants[json.browser_id].name;
+        delete participants[json.browser_id];
         this.comments_app.setState({
           participants: participants,
         });
         showNotification(
           "Comments Room: " + global.title,
-          "Client left: " + (name !== undefined ? name : json._id),
+          "Client left: " + (name !== undefined ? name : json.browser_id),
           "client_left.mp3"
         );
         return;
       case "client_changed_name":
-        participants = { ...this.comments_app.state.participants };
-        if (participants[json.browser_id] == undefined) return;
+        if (this.comments_app.state.participants[json.browser_id] != null) {
+          participants = { ...this.comments_app.state.participants };
+        } else {
+          participants = this.comments_app.handle_client_joined(
+            this.comments_app,
+            json
+          );
+          participants[json.browser_id] = {};
+        }
         participants[json.browser_id].name = json.name;
         this.comments_app.setState({
           participants: participants,
         });
-        // console.log(
-        //   "Client_changed_name.. browser_id: " +
-        //     this.comments_app.state.browser_id +
-        //     " name: " +
-        //     json.name
-        // );
+        //
         showNotification(
           "Comments Room: " + global.title,
           "Client changed his name to: " + json.name,
@@ -446,6 +442,20 @@ class Comments extends Component {
       username + " " + json.op,
       "message.mp3"
     );
+  }
+
+  handle_client_joined(comments_app, json) {
+    var participants = { ...comments_app.state.participants };
+    participants[json.browser_id] = {}; // still has no name
+    comments_app.setState({
+      participants: participants,
+    });
+    showNotification(
+      "Comments Room: " + global.title,
+      "Client joined: " + json.browser_id,
+      "new_client.mp3"
+    );
+    return participants;
   }
 
   ws_send_user_changed_name(name) {
