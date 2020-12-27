@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import logo from "../images/logo.svg";
+import logo_blue from "../images/logo-blue.svg";
+import logo_red from "../images/logo-red.svg";
 import edit_image from "../images/edit.gif";
 import "bootstrap/dist/css/bootstrap.css";
 import handle_win_title from "./global.js";
@@ -487,8 +488,14 @@ class Comments extends Component {
           <tr>
             <td>
               <img
-                src={logo}
-                className={this.state.loading ? "App-logo Spin" : "App-logo"}
+                src={
+                  this.state.status_txt == "Connected" ? logo_blue : logo_red
+                }
+                className={
+                  this.state.loading || this.state.status_txt == "Connecting..."
+                    ? "App-logo Spin"
+                    : "App-logo"
+                }
                 alt="logo"
               />
             </td>

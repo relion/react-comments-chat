@@ -180,6 +180,7 @@ export default class CommentForm extends Component {
   }
 
   render() {
+    var is_connected = this.props.comments_app.state.status_txt != "Connected";
     return (
       <React.Fragment>
         {/* <h5 className="text-muted mb-3">
@@ -200,11 +201,12 @@ export default class CommentForm extends Component {
               }}
               placeholder="♥️ Your Comment"
               name="message"
+              disabled={is_connected}
             />
             <button
               style={{ marginLeft: "8px", padding: "0 5px 0 6px" }}
               className="btn btn-primary"
-              disabled={this.state.loading}
+              disabled={this.state.loading || is_connected}
             >
               &#10148;
             </button>
