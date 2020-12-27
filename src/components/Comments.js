@@ -38,6 +38,15 @@ class Comments extends Component {
 
     //props.main_app.setState({ my_name: "" });
 
+    this.init_aaa();
+
+    setInterval(this.my_setInterval, global.time_sec_jump, this);
+
+    this.addComment = this.addComment.bind(this);
+    handle_win_title();
+  }
+
+  init_aaa() {
     this.state = {
       comments: [],
       participants: {},
@@ -46,11 +55,6 @@ class Comments extends Component {
       //my_name: "",
       my_comment_message: "",
     };
-
-    setInterval(this.my_setInterval, global.time_sec_jump, this);
-
-    this.addComment = this.addComment.bind(this);
-    handle_win_title();
   }
 
   my_setInterval(comments_obj) {
@@ -78,14 +82,27 @@ class Comments extends Component {
   }
 
   componentDidMount() {
-    const ws_port = ":3030";
-    this.ws = new WebSocket("ws://" + global.host + ws_port + "/Comments/");
-    console.log("opening WebSocket on port:" + ws_port);
-    this.ws.comments_app = this;
-    this.ws.onmessage = this.handleWebsocketReceivedData;
-    this.ws.onopen = this.handleWebsocketEvent;
-    this.ws.onclose = this.handleWebsocketEvent;
-    this.ws.onerror = this.handleWebsocketEvent;
+    this.connect_ws(this);
+  }
+
+  connect_ws(comments_obj) {
+    comments_obj.state.status_txt = "Connecting...";
+    comments_obj.state.status_color = "green";
+    comments_obj.ws = new WebSocket(
+      "ws://" + global.host + ":" + global.ws_port + "/Comments/"
+    );
+    console.log("opening WebSocket on port:" + global.ws_port);
+    comments_obj.ws.comments_app = comments_obj;
+    comments_obj.ws.onmessage = comments_obj.handleWebsocketReceivedData;
+    comments_obj.ws.onopen = comments_obj.handleWebsocketEvent.bind(
+      comments_obj
+    );
+    comments_obj.ws.onclose = comments_obj.handleWebsocketEvent.bind(
+      comments_obj
+    );
+    comments_obj.ws.onerror = comments_obj.handleWebsocketEvent.bind(
+      comments_obj
+    );
   }
 
   addComment(comment) {
@@ -183,12 +200,27 @@ class Comments extends Component {
   handleWebsocketEvent(event) {
     switch (event.type) {
       case "close":
-        // TODO: Reconnect
-        console.log("Websocket closed, TODO: Reconnect...");
+        this.setState({
+          status_txt: "Disconnected",
+          status_color: "red",
+        });
+        setTimeout(this.connect_ws, 4000, this);
+        break;
+      case "open":
+        this.setState({
+          status_txt: "Connected",
+          status_color: "black",
+        });
         break;
       case "error":
+        this.setState({
+          status_txt: "WS Error!",
+          status_color: "red",
+        });
+        break;
       default:
         console.log("Websocket " + event.type + " event.");
+        break;
     }
   }
 
@@ -465,14 +497,25 @@ class Comments extends Component {
                     </h1>
                   </td>
                 </tr>
-                <tr>
+                <tr align="left">
                   <td>
-                    <h5>
+                    <span>
                       <span className="badge badge-success">
                         {this.state.comments.length}
                       </span>{" "}
                       Comment{this.state.comments.length !== 1 ? "s" : ""}
-                    </h5>
+                    </span>{" "}
+                    <span style={{ color: "black" }}>
+                      status:{" "}
+                      <span
+                        style={{
+                          color: this.state.status_color,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {this.state.status_txt}
+                      </span>
+                    </span>
                   </td>
                 </tr>
               </table>
