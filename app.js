@@ -1,9 +1,37 @@
 console.log("WatchCast Server has started...");
 var tnc = require("./tnc.js");
+const fs = require("fs");
 const path = require("path");
 const dns = require("dns");
 var MongoClient = require("mongodb").MongoClient;
 var mongo_url = "mongodb://localhost:27017/";
+var nodemailer = require("nodemailer");
+var smtpTransport = require("nodemailer-smtp-transport");
+
+let transporter = nodemailer.createTransport(
+  smtpTransport({
+    service: "gmail",
+    auth: {
+      user: "watchcast.project@gmail.com",
+      pass: fs.readFileSync(process.cwd() + path.sep + "pwd.txt", "utf8"),
+    },
+  })
+);
+
+const mailOptions = {
+  from: "WatchCast Sever <watchcast.project@gmail.com>",
+  to: "Aryeh Tuchfeld <aryeh.tuchfeld@gmail.com>",
+  subject: "WatchCast Server Has Started",
+  text: "",
+};
+
+transporter.sendMail(mailOptions, function (error, info) {
+  if (error) {
+    console.log(error);
+  } else {
+    console.log("Email sent: " + info.response);
+  }
+});
 
 var fb_dbo;
 // if (process.execPath.startsWith("C:\\")) {
@@ -28,7 +56,6 @@ app.set(
 );
 const bodyParser = require("body-parser");
 app.use(bodyParser.text({ type: "text/html" }));
-const fs = require("fs");
 const uuidv1 = require("uuid/v1");
 
 const WebSocket = require("ws");
@@ -96,9 +123,9 @@ wss.on("connection", function connection(ws, req) {
   ws.on("close", function () {
     var name = all_participants[ws.browser_id].name;
     console.log(
-      "room_title: `" +
+      "Client disconnected from room_title: `" +
         ws.room_title +
-        "` WebSocket Client disconnected. id: " +
+        "` browser_id: " +
         ws.browser_id +
         (name != undefined ? " name: `" + name + "`" : "")
     );
@@ -219,20 +246,20 @@ app.get("*", function (req, res, next) {
     // console.log(`ignoring request. path: ${rel_url} from: ${req.ip}`);
     next();
   } else if (rel_url == "/" || !is_file) {
-    const filePath = process.cwd() + "/src/pages/default-page.html";
-    var html = fs.readFileSync(filePath, "utf8");
-    html = replace_html(req, html, "WatchCast default page", "");
+    var html;
     if (rel_url == "/") {
-      html = html.replace(/\$COMMENT/g, "Homepage is under construction.");
-      html = html.replace(
-        /\$BOTTOM_IMG/g,
-        "<img style='width: 120px' src='/images/Construction_site.gif'>"
+      var html = fs.readFileSync(
+        process.cwd() + "/src/pages/home-page.html",
+        "utf8"
       );
+      html = replace_html(req, html, "WatchCast Homepage", "");
     } else {
-      html = html.replace(/\$COMMENT/g, "Page Doesn't Exist.");
-      html = html.replace(/\$BOTTOM_IMG/g, "");
+      var html = fs.readFileSync(
+        process.cwd() + "/src/pages/default-page.html",
+        "utf8"
+      );
+      replace_html(req, html, "WatchCast Default page", "");
     }
-
     res.send(html);
     res.end();
 
