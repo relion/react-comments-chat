@@ -10,6 +10,7 @@
     "mongodb": "^3.5.5",
     "nodemailer": "^6.4.17",
     "nodemailer-smtp-transport": "^2.7.4",
+    "os": "^0.1.1",
     "process": "^0.11.10",
     "prop-types": "^15.7.2",
     "query-string": "^6.12.1",

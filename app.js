@@ -1,4 +1,5 @@
-console.log("WatchCast Server has started...");
+var os = require("os");
+console.log(`WatchCast Server has Started on ${os.hostname()} ...`);
 var tnc = require("./tnc.js");
 const fs = require("fs");
 const path = require("path");
@@ -18,19 +19,35 @@ let transporter = nodemailer.createTransport(
   })
 );
 
-const mailOptions = {
-  from: "WatchCast Sever <watchcast.project@gmail.com>",
-  to: "Aryeh Tuchfeld <aryeh.tuchfeld@gmail.com>",
-  subject: "WatchCast Server Has Started",
-  text: "",
-};
+function sendmail(from, to, subject, text) {
+  const mailOptions = {
+    from: from,
+    to: to,
+    subject: subject,
+    text: text,
+  };
+  transporter.mailOptions = mailOptions;
+  transporter.sendMail(
+    mailOptions,
+    function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent. Subject: " + this.subject);
+        console.debug("Email sent. " + info.response);
+      }
+    }.bind(mailOptions)
+  );
+}
 
-transporter.sendMail(mailOptions, function (error, info) {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log("Email sent: " + info.response);
-  }
+dns.lookup(os.hostname(), function (err, local_host_ip, fam) {
+  // console.log(`WatchCast Server has Started on ${local_host_ip} ...`);
+  sendmail(
+    "WatchCast Sever <watchcast.project@gmail.com>",
+    "Aryeh Tuchfeld <watchcast.project@gmail.com>",
+    "WatchCast Server has Started",
+    "Server hostname: " + local_host_ip
+  );
 });
 
 var fb_dbo;
@@ -49,13 +66,13 @@ MongoClient.connect(
 
 const url = require("url");
 const express = require("express");
-const app = express();
-app.set(
+const http_server = express();
+http_server.set(
   "port",
   process.execPath.startsWith("C:\\") ? 8080 : process.env.PORT || 80
 );
 const bodyParser = require("body-parser");
-app.use(bodyParser.text({ type: "text/html" }));
+http_server.use(bodyParser.text({ type: "text/html" }));
 const uuidv1 = require("uuid/v1");
 
 const WebSocket = require("ws");
@@ -75,7 +92,9 @@ var browsers_ids_by_title = {};
 wss.on("connection", function connection(ws, req) {
   var app_name = req.url;
   console.log(
-    `got connection from: ${ws._socket.remoteAddress}:${ws._socket.remotePort} ${app_name}`
+    `got WS connection from: ${rAddr_to_ip(ws._socket.remoteAddress)}:${
+      ws._socket.remotePort
+    } ${app_name}`
   );
   var browser_id = uuidv1();
   ws.browser_id = browser_id;
@@ -123,7 +142,7 @@ wss.on("connection", function connection(ws, req) {
   ws.on("close", function () {
     var name = all_participants[ws.browser_id].name;
     console.log(
-      "Client disconnected from room_title: `" +
+      "Client disconnected from room: `" +
         ws.room_title +
         "` browser_id: " +
         ws.browser_id +
@@ -152,11 +171,11 @@ scheme
       key: "",
       cert: "",
     },
-    app
+    http_server
   )
-  .listen(app.get("port"), () => {
+  .listen(http_server.get("port"), () => {
     console.log(
-      `Http Server is running at: http://localhost:${app.get("port")}/`
+      `Http Server is running at: http://localhost:${http_server.get("port")}/`
     );
   });
 
@@ -191,37 +210,21 @@ function broadcast(room_title, by_browser_id, data) {
   );
 }
 
-app.get("*", function (req, res, next) {
-  //throw "get out";
+http_server.get("*", function (req, res, next) {
   var rel_url = req.params[0];
-  //res.header("aryeh_debug", "rel_url=" + rel_url);
-  // res.cookie("aryeh_debug", "rel_url=" + rel_url, {
-  //   maxAge: 900000,
-  //   httpOnly: true,
-  // });
-  //console.log("rel_url: " + rel_url);
-
-  // lilo: code too complex?
   var tmp =
     process.cwd() +
     path.sep +
     "src" +
     rel_url.replace(/\/$/, "").replace(/\//g, path.sep); // lilo: is it needed?..
-  //tmp = tmp.replace(/\\/g, path.sep);
   var is_file = false;
   try {
     var stats = fs.lstatSync(tmp);
     is_file = stats.isFile();
   } catch (ex) {}
-  //var is_file_or_dir = fs.existsSync(tmp);
-  // if (!is_file_or_dir && ) {
-  //   try {
-  //     is_file_or_dir = fs.statSync(tmp).isDirectory();
-  //   } catch (ex) {}
-  // }
 
   if (rel_url == "/handle_comments/") {
-    handle_request(req, res);
+    handle_http_request(req, res);
   } else if (/^\/(tnc|comments)[\/]?$/i.test(rel_url)) {
     const filePath = process.cwd() + "/src/comments/index.html"; // where the <div id="root"> is.
     var html = fs.readFileSync(filePath, "utf8");
@@ -263,15 +266,7 @@ app.get("*", function (req, res, next) {
     res.send(html);
     res.end();
 
-    var ip_res = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g.exec(
-      req.connection.remoteAddress
-    );
-    var ip;
-    if (ip_res != null) {
-      ip = ip_res[0];
-    } else {
-      ip = "127.0.0.1";
-    }
+    var ip = rAddr_to_ip(req.connection.remoteAddress);
 
     dns.reverse(ip, (err, hostnames) => {
       var hostnames_str = "";
@@ -287,41 +282,21 @@ app.get("*", function (req, res, next) {
     next();
   }
 
-  // usefull for running React Debugger in port 3000 to access the running Node.js:
-  // app.use(function(req, res, next) {
-  //   res.header("Access-Control-Allow-Origin", "*");
-  //   res.header(
-  //     "Access-Control-Allow-Headers",
-  //     "Origin, X-Requested-With, Content-Type, Accept"
-  //   );
-  //   next();
-  // });
+  http_server.use(express.static("/"), express.static("src"));
 
-  app.use(express.static("/"), express.static("src"));
-
-  app.get("/tnc_query", (req, res) => {
+  http_server.get("/tnc_query", (req, res) => {
     // yishay
     tnc.handle_tnc_query(res);
   });
 
-  app.post("/handle_comments", (req, res) => {
-    handle_request(req, res);
+  http_server.post("/handle_comments", (req, res) => {
+    handle_http_request(req, res);
   });
 
-  // app.get("/handle_comments", (req, res) => {
-  //   handle_request(req, res);
-  // });
-
-  function handle_request(req, res) {
-    // var dir = "/DATA/";
+  function handle_http_request(req, res) {
     var op = req.query.op;
     var room_title = req.query.title;
     var browser_id = req.query.browser_id;
-    // var comment_file =
-    //   process.cwd() +
-    //   dir +
-    //   (room_title != null ? room_title + "_" : "") +
-    //   "comment.json";
 
     if (op == "comment_added") {
       var comment_json = JSON.parse(req.body);
@@ -330,9 +305,6 @@ app.get("*", function (req, res, next) {
       comment_json.user_ip = req.headers.host;
       comment_json.browser_id = browser_id;
       //
-      //var data = fs.readFileSync(comment_file);
-      //var comments_json_ar = JSON.parse(data);
-      //comments_json_ar.push(comment_json);
       fb_dbo.collection("comments").updateOne(
         { room_title: room_title },
         {
@@ -348,10 +320,9 @@ app.get("*", function (req, res, next) {
           res.end();
         }
       );
-      //fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
       return;
     } else if (op == "get_all_comments") {
-      handle_first_request(req);
+      handle_first_http_request(req);
       broadcast(room_title, browser_id, {
         op: "client_joined",
         browser_id: browser_id,
@@ -416,28 +387,6 @@ app.get("*", function (req, res, next) {
         }
       );
       return;
-
-      // var data = fs.readFileSync(comment_file);
-      // var comments_json_ar = JSON.parse(data);
-      // var found_i = -1;
-      // for (var i = 0; i < comments_json_ar.length; i++) {
-      //   if (comments_json_ar[i]._id == comment_id) {
-      //     found_i = i;
-      //     break;
-      //   }
-      // }
-      // if (found_i == -1) {
-      //   res.write('{ "error": "comment._id not found." }');
-      // } else {
-      //   comments_json_ar.splice(found_i, 1);
-      //   var comments_json_ar_str = JSON.stringify(comments_json_ar);
-      //   fs.writeFileSync(comment_file, comments_json_ar_str);
-      //   res.write(comments_json_ar_str);
-      //   broadcast(room_title, browser_id, {
-      //     op: "comment_deleted",
-      //     _id: comment_id,
-      //   });
-      // }
     } else if (op == "comment_updated") {
       var updated_comment = JSON.parse(req.body);
 
@@ -457,31 +406,11 @@ app.get("*", function (req, res, next) {
         }
       );
       return;
-
-      var comments_json_ar = JSON.parse(fs.readFileSync(comment_file));
-      var found_i = -1;
-      for (var i = 0; i < comments_json_ar.length; i++) {
-        if (comments_json_ar[i]._id == updated_comment._id) {
-          found_i = i;
-          break;
-        }
-      }
-      if (found_i == -1) {
-        res.write('{ "error": "comment._id not found." }');
-      } else {
-        comments_json_ar[found_i].message = updated_comment.message;
-        fs.writeFileSync(comment_file, JSON.stringify(comments_json_ar));
-        broadcast(room_title, browser_id, {
-          op: "comment_updated",
-          browser_id: browser_id,
-          comment: comments_json_ar[found_i],
-        });
-      }
     } else if (op == "get_verses") {
       tnc.handle_get_verses(JSON.parse(req.body), res);
       return;
     } else if (op == "first_request") {
-      handle_first_request(req);
+      handle_first_http_request(req);
     } else {
       throw "op (" + op + ") not recognized.";
     }
@@ -489,11 +418,13 @@ app.get("*", function (req, res, next) {
     res.end();
   }
 
-  function handle_first_request(req) {
+  function handle_first_http_request(req) {
     var browser_id = req.query.browser_id;
     var room_title = req.query.title;
     console.log(
-      `got first request from room_title: \`${room_title}\` browser_id: ${browser_id}`
+      `got first Http request from room: \`${room_title}\` ${rAddr_to_ip(
+        req.connection.remoteAddress
+      )}:${req.connection.remotePort} browser_id: ${browser_id}`
     );
     if (ws_by_id[browser_id] != undefined) {
       ws_by_id[browser_id].room_title = room_title;
@@ -505,6 +436,17 @@ app.get("*", function (req, res, next) {
     }
   }
 });
+function rAddr_to_ip(ip_long) {
+  var ip;
+  var ip_res = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g.exec(ip_long);
+  if (ip_res != null) {
+    ip = ip_res[0];
+  } else {
+    ip = "127.0.0.1";
+  }
+  return ip;
+}
+
 function replace_html(req, data, title, description) {
   var html = data.replace(/\$OG_TITLE/g, title);
   html = html.replace(/\$OG_DESCRIPTION/g, description);
