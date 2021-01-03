@@ -25,7 +25,7 @@ get_notifications_permission();
 function showNotification(title, txt, audio) {
   new Notification(title, {
     body: txt,
-    icon: "/images/notification.png",
+    icon: "/images/WC_Logo.png",
     sound: "/audio/" + audio, // get more here: https://www.zedge.net/find/notification
     vibrate: [200, 100, 200, 100, 200, 100, 200],
   });

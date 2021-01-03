@@ -1,6 +1,7 @@
 console.log("WatchCast Server has started...");
 var tnc = require("./tnc.js");
 const path = require("path");
+const dns = require("dns");
 var MongoClient = require("mongodb").MongoClient;
 var mongo_url = "mongodb://localhost:27017/";
 
@@ -213,12 +214,47 @@ app.get("*", function (req, res, next) {
     res.send(html);
     res.end();
     return;
+  } else if (/127\.0\.0\.1$/i.test(req.ip) && rel_url == "/whm-server-status") {
+    // lilo: what's that?
+    // console.log(`ignoring request. path: ${rel_url} from: ${req.ip}`);
+    next();
   } else if (rel_url == "/" || !is_file) {
     const filePath = process.cwd() + "/src/pages/default-page.html";
     var html = fs.readFileSync(filePath, "utf8");
     html = replace_html(req, html, "WatchCast default page", "");
+    if (rel_url == "/") {
+      html = html.replace(/\$COMMENT/g, "Homepage is under construction.");
+      html = html.replace(
+        /\$BOTTOM_IMG/g,
+        "<img style='width: 120px' src='/images/Construction_site.gif'>"
+      );
+    } else {
+      html = html.replace(/\$COMMENT/g, "Page Doesn't Exist.");
+      html = html.replace(/\$BOTTOM_IMG/g, "");
+    }
+
     res.send(html);
     res.end();
+
+    var ip_res = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g.exec(
+      req.connection.remoteAddress
+    );
+    var ip;
+    if (ip_res != null) {
+      ip = ip_res[0];
+    } else {
+      ip = "127.0.0.1";
+    }
+
+    dns.reverse(ip, (err, hostnames) => {
+      var hostnames_str = "";
+      if (!err) {
+        hostnames_str = " hostname: " + hostnames;
+      }
+      console.log(
+        `default request. path: ${rel_url} from: ${ip}` + hostnames_str
+      );
+    });
     return;
   } else {
     next();
@@ -415,9 +451,10 @@ app.get("*", function (req, res, next) {
         });
       }
     } else if (op == "get_verses") {
-      handle_first_request(req);
       tnc.handle_get_verses(JSON.parse(req.body), res);
       return;
+    } else if (op == "first_request") {
+      handle_first_request(req);
     } else {
       throw "op (" + op + ") not recognized.";
     }
@@ -444,7 +481,7 @@ app.get("*", function (req, res, next) {
 function replace_html(req, data, title, description) {
   var html = data.replace(/\$OG_TITLE/g, title);
   html = html.replace(/\$OG_DESCRIPTION/g, description);
-  html = html.replace(/\$OG_IMAGE/g, "/VCard_Logo.png");
+  html = html.replace(/\$OG_IMAGE/g, "/images/WC_Logo.png");
   html = html.replace(/\$LOCALHOST/g, req.headers.host);
   return html;
 }

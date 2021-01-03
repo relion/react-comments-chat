@@ -24,6 +24,7 @@ class TNCApp extends Component {
     const ws_port = ":3030";
     this.ws = new WebSocket("ws://" + global.host + ws_port + "/TNC/");
     this.ws.tnc_app = this;
+    this.ws.onopen = () => {};
     this.ws.onmessage = this.handleWebsocketReceivedData;
     this.ws.onerror = this.handleWebsocketError;
     //this.ws.onopen = function() {};
@@ -43,6 +44,18 @@ class TNCApp extends Component {
           status: "connected",
           browser_id: json.browser_id,
         });
+        fetch(
+          global.server_url +
+            "?" +
+            "title=Proximity_Search" +
+            "&op=first_request" +
+            "&browser_id=" +
+            json.browser_id,
+          {
+            method: "post",
+            headers: { "Content-Type": "text/html" },
+          }
+        );
         break;
       default:
         throw "unexpected op: " + json.op;
