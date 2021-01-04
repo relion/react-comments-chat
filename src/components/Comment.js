@@ -5,6 +5,7 @@ import { Button } from "reactstrap";
 import EdiText from "react-editext";
 const reactStringReplace = require("react-string-replace");
 const dateFormat = require("dateformat");
+var parse = require("html-react-parser");
 
 const StyledEdiText = styled(EdiText)`
   button,
@@ -119,7 +120,9 @@ export default class Comment extends Component {
               onSave={(val) => this.onEditSave(val, this)}
             />
           ) : (
-            <div style={{ direction: direction }}>{message}</div>
+            <div style={{ direction: direction }}>
+              {parse(message.replace(/\*([^\*]+)\*/gi, "<b>$1</b>"))}
+            </div>
           )}
         </div>
       </div>
