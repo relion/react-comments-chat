@@ -121,7 +121,14 @@ export default class Comment extends Component {
             />
           ) : (
             <div style={{ direction: direction }}>
-              {parse(message.replace(/\*([^\*]+)\*/gi, "<b>$1</b>"))}
+              {parse(
+                message
+                  .replace(/\*([^\*]+)\*/, "<b>$1</b>")
+                  .replace(
+                    /(^|\s)((https?:\/\/)?[\w]+\.[\w]+(\.[\w]+|\/)[^\s]+)(\s|$)/i,
+                    "$1<a href='$2' target='_blank'>$2</a>$5"
+                  )
+              )}
             </div>
           )}
         </div>
