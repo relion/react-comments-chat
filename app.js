@@ -107,9 +107,16 @@ wss.on("connection", function connection(ws, req) {
   all_participants[browser_id] = {};
   ws.on("message", function (msg) {
     var json = JSON.parse(msg);
+    //
+    var sender_name = undefined;
+    var p = all_participants[ws.browser_id];
+    if (p != undefined) {
+      sender_name = p.name;
+    }
     console.log(
-      `got msg from browser_id: ${ws.browser_id} room: \`${ws.room_title}\` op: \`${json.op}\` name: \`${json.name}\``
+      `got msg from browser_id: ${ws.browser_id} room: \`${ws.room_title}\` op: \`${json.op}\` name: \`${sender_name}\``
     );
+    //
     switch (json.op) {
       case "client_changed_name":
         all_participants[browser_id].name = json.name;

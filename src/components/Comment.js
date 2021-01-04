@@ -43,6 +43,8 @@ export default class Comment extends Component {
     );
     var is_owner =
       name === this.props.comments_app.props.main_app.state.my_name;
+    var is_editable =
+      is_owner && this.props.comments_app.props.main_app.state.edit_mode;
     var participants = this.props.comments_app.state.participants;
     var div_container_style = {};
     for (var participant in participants) {
@@ -97,7 +99,7 @@ export default class Comment extends Component {
             </span>
           </small>
           <h6 className="mt-0 mb-1 text-muted">{name}</h6>
-          {is_owner ? (
+          {is_editable ? (
             <Button
               className="btn btn-dark float-right"
               comment={this}
@@ -108,7 +110,7 @@ export default class Comment extends Component {
           ) : (
             ""
           )}
-          {is_owner ? (
+          {is_editable ? (
             <StyledEdiText
               type="text" // textarea
               viewProps={{

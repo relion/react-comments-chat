@@ -23,11 +23,15 @@ class CommentsApp extends Component {
       my_name: undefined,
       //my_comment_message: ""
       report_typing: true,
+      edit_mode: false,
     };
 
     this.handle_report_typing_checkbox_changed = this.handle_report_typing_checkbox_changed.bind(
       this
     );
+    this.handle_edit_mode_checkbox_changed = (event) => {
+      this.setState({ edit_mode: event.target.checked });
+    };
   }
 
   get_time_since_now_formatted(time) {
@@ -198,11 +202,17 @@ class CommentsApp extends Component {
                 fontSize: "small",
               }}
             />
-            {" show typing: "}
+            {" Show typing: "}
             <input
               type="checkbox"
               checked={this.state.report_typing}
               onChange={this.handle_report_typing_checkbox_changed}
+            />
+            {" Edit mode: "}
+            <input
+              type="checkbox"
+              checked={this.state.edit_mode}
+              onChange={this.handle_edit_mode_checkbox_changed}
             />
           </div>
         )}
