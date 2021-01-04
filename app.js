@@ -40,19 +40,19 @@ function sendmail(from, to, subject, text) {
   );
 }
 
-dns.lookup(os.hostname(), function (err, local_host_ip, fam) {
-  // console.log(`WatchCast Server has Started on ${local_host_ip} ...`);
-  sendmail(
-    "WatchCast Sever <watchcast.project@gmail.com>",
-    "Aryeh Tuchfeld <watchcast.project@gmail.com>",
-    "WatchCast Server has Started",
-    "Server hostname: " + local_host_ip
-  );
-});
+if (!process.execPath.startsWith("C:\\")) {
+  dns.lookup(os.hostname(), function (err, local_host_ip, fam) {
+    // console.log(`WatchCast Server has Started on ${local_host_ip} ...`);
+    sendmail(
+      "WatchCast Sever <watchcast.project@gmail.com>",
+      "Aryeh Tuchfeld <watchcast.project@gmail.com>",
+      "WatchCast Server has Started",
+      "Server at IP: " + local_host_ip + " hostname: " + os.hostname()
+    );
+  });
+}
 
 var fb_dbo;
-// if (process.execPath.startsWith("C:\\")) {
-// }
 MongoClient.connect(
   mongo_url,
   { useUnifiedTopology: true },
@@ -92,9 +92,9 @@ var browsers_ids_by_title = {};
 wss.on("connection", function connection(ws, req) {
   var app_name = req.url;
   console.log(
-    `got WS connection from: ${rAddr_to_ip(ws._socket.remoteAddress)}:${
-      ws._socket.remotePort
-    } ${app_name}`
+    `got WS connection from: ${rAddr_to_ip(
+      ws._socket.remoteAddress
+    )} ${app_name}`
   );
   var browser_id = uuidv1();
   ws.browser_id = browser_id;
@@ -202,7 +202,7 @@ function broadcast(room_title, by_browser_id, data) {
   }
   var n_other_peers = Object.keys(bids).length - 1;
   console.log(
-    `in broadcast msg: \`${data.op}\` to room: \`${room_title}\` with ${
+    `Broadcasting msg: \`${data.op}\` to room: \`${room_title}\` with ${
       n_other_peers < 1 ? "no" : n_other_peers
     }${n_other_peers == -1 ? "" : " other"} peer${
       n_other_peers == 1 ? "" : "s"
@@ -424,7 +424,7 @@ http_server.get("*", function (req, res, next) {
     console.log(
       `got first Http request from room: \`${room_title}\` ${rAddr_to_ip(
         req.connection.remoteAddress
-      )}:${req.connection.remotePort} browser_id: ${browser_id}`
+      )} browser_id: ${browser_id}`
     );
     if (ws_by_id[browser_id] != undefined) {
       ws_by_id[browser_id].room_title = room_title;

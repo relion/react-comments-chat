@@ -62,6 +62,7 @@ export default class Comment extends Component {
         ref={this.props.ref_id}
         className="media mb-1"
         style={div_container_style}
+        disabled={this.props.comments_app.state.status_txt != "Connected"}
       >
         <div className="row">
           <div className="col-sm-3 mr-2">

@@ -9,10 +9,10 @@ class TNCApp extends Component {
     this.state = {
       verses: [],
       search_str: "my and to",
-      max_distance: 6,
+      max_distance: 5,
       min_words: 2,
-      stop_less_words: false,
-      stop_more_distance: true,
+      stop_less_words: true,
+      stop_more_distance: false,
       status: "connecting",
     };
     handle_win_title();
@@ -166,13 +166,7 @@ class TNCApp extends Component {
   render() {
     return (
       <React.Fragment>
-        <form
-          method="post"
-          onSubmit={this.onSubmit}
-          style={{
-            padding: "0 4px 0 0",
-          }}
-        >
+        <form method="post" onSubmit={this.onSubmit}>
           <div style={{ padding: "5px", backgroundColor: "#bae7c2" }}>
             <input
               name="search_str"
