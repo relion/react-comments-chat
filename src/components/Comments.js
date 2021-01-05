@@ -220,6 +220,9 @@ class Comments extends Component {
         console.log("Websocket " + event.type + " event.");
         break;
     }
+    this.props.main_app.setState({
+      status_txt: this.state.status_txt,
+    });
   }
 
   handleWebsocketReceivedData(msg) {

@@ -154,14 +154,8 @@ class CommentsApp extends Component {
   }
 
   render() {
-    var ref = "CommentsApp_" + React.createRef();
     return (
-      <div
-        className="App d-flex flex-column h-100 container bg-light shadow"
-        disabled={
-          this[ref] != null && this[ref].state.status_txt != "Connected"
-        }
-      >
+      <div className="App d-flex flex-column h-100 container bg-light shadow">
         {this.state.show_permit_button ? (
           <button onClick={this.handleUserPermitClick.bind(this)}>
             click here to anable Audio Notifications from this page
@@ -180,6 +174,7 @@ class CommentsApp extends Component {
               margin: "0 2px 0 2px",
               display: "inline-block",
             }}
+            disabled={this.state.status_txt != "Connected"}
           >
             {this.state.my_name !== "" ? (
               <span style={{ marginLeft: "4px" }}>
@@ -216,7 +211,10 @@ class CommentsApp extends Component {
             />
           </div>
         )}
-        <Comments main_app={this} ref={ref}></Comments>
+        <Comments
+          main_app={this}
+          ref={"CommentsApp_" + React.createRef()}
+        ></Comments>
         {/* <br></br>
         <Comments
           main_app={this}

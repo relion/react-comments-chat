@@ -309,7 +309,7 @@ http_server.get("*", function (req, res, next) {
       var comment_json = JSON.parse(req.body);
       comment_json._id = uuidv1();
       comment_json.time = new Date().toUTCString();
-      comment_json.user_ip = req.headers.host;
+      comment_json.user_ip = rAddr_to_ip(req.connection.remoteAddress);
       comment_json.browser_id = browser_id;
       //
       fb_dbo.collection("comments").updateOne(

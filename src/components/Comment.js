@@ -122,24 +122,28 @@ export default class Comment extends Component {
               onSave={(val) => this.onEditSave(val, this)}
             />
           ) : (
-            <div style={{ direction: direction, overflowWrap: "anywhere" }}>
+            <div style={{ direction: direction }}>
               {parse(
                 message
-                  .replace(/\s/g, "&nbsp") // note: this should be the first replace.
+                  .replace(/\s/g, "$SPACE$") // note: this should be the first replace.
                   .replace(
-                    /(^|&nbsp)((https?:\/\/)?[\w]+\.[\w]+(\.[\w]+|\/)[^\s]+?)(&nbsp|$)/gi,
+                    /(^|\$SPACE\$)((https?:\/\/)?[\w]+\.[\w]+(\.[\w]+|\/)[^\s\$]+?)(\$SPACE\$|$)/gi,
                     "$1<a href='$2' target='_blank'>$2</a>$5"
                   )
-                  .replace(/\*([^\*]+)\*/g, "<b>$1</b>")
+                  .replace(/\*([^\*#\^\|]+)\*/g, "<b>$1</b>")
                   .replace(
-                    /#([^\#]+)#/gi,
+                    /#([^\*#\^\|]+)#/gi,
                     "<span style='background: aquamarine;'>$1</span>"
                   )
                   .replace(
-                    /\^([^\^]+)\^/gi,
+                    /\^([^\*#\^\|]+)\^/gi,
                     "<span style='background: darksalmon;'>$1</span>"
                   )
-                  .replace(/&nbsp/g, "&#32;") // replace to regular space.
+                  .replace(
+                    /\|([^\*#\^\|]+)\|/gi,
+                    "<span style='background: yellow;'>$1</span>"
+                  )
+                  .replace(/\$SPACE\$/g, "&#32;") // replace to regular space.
               )}
             </div>
           )}
