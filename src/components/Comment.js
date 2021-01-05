@@ -122,18 +122,22 @@ export default class Comment extends Component {
               onSave={(val) => this.onEditSave(val, this)}
             />
           ) : (
-            <div style={{ direction: direction }}>
+            <div style={{ direction: direction, overflowWrap: "anywhere" }}>
               {parse(
                 message
                   .replace(/\s/g, "&nbsp") // note: this should be the first replace.
                   .replace(
-                    /(^|\s)((https?:\/\/)?[\w]+\.[\w]+(\.[\w]+|\/)[^\s]+)(\s|$)/gi,
+                    /(^|&nbsp)((https?:\/\/)?[\w]+\.[\w]+(\.[\w]+|\/)[^\s]+?)(&nbsp|$)/gi,
                     "$1<a href='$2' target='_blank'>$2</a>$5"
                   )
                   .replace(/\*([^\*]+)\*/g, "<b>$1</b>")
                   .replace(
                     /#([^\#]+)#/gi,
                     "<span style='background: aquamarine;'>$1</span>"
+                  )
+                  .replace(
+                    /\^([^\^]+)\^/gi,
+                    "<span style='background: darksalmon;'>$1</span>"
                   )
               )}
             </div>
