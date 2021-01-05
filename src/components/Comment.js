@@ -139,6 +139,7 @@ export default class Comment extends Component {
                     /\^([^\^]+)\^/gi,
                     "<span style='background: darksalmon;'>$1</span>"
                   )
+                  .replace(/&nbsp/g, "&#32;") // replace to regular space.
               )}
             </div>
           )}
