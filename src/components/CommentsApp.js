@@ -92,11 +92,7 @@ class CommentsApp extends Component {
       this.setState({
         name_changed_timer: setTimeout(
           (app_main) => {
-            for (var ref in app_main.refs) {
-              if (ref.startsWith("CommentsApp_")) {
-                app_main.refs[ref].ws_send_user_changed_name(value);
-              }
-            }
+            app_main.refs["comments_obj"].ws_send_user_changed_name(value);
           },
           4000,
           this
@@ -135,20 +131,20 @@ class CommentsApp extends Component {
     var report_typing = event.target.checked;
     this.setState({ report_typing: report_typing });
     for (var ref in this.refs) {
-      var comments_app = this.refs[ref];
+      var comments_obj = this.refs["comments_obj"];
       if (ref.startsWith("CommentsApp_")) {
         var json;
         if (report_typing) {
           json = JSON.stringify({
             op: "client_message_entered_changed",
-            entered_message: comments_app.state.my_comment_message,
+            entered_message: comments_obj.state.my_comment_message,
           });
         } else {
           json = JSON.stringify({
             op: "client_disabled_report_typing",
           });
         }
-        comments_app.ws.send(json);
+        comments_obj.ws.send(json);
       }
     }
   }
@@ -211,10 +207,7 @@ class CommentsApp extends Component {
             />
           </div>
         )}
-        <Comments
-          main_app={this}
-          ref={"CommentsApp_" + React.createRef()}
-        ></Comments>
+        <Comments main_app={this} ref={"comments_obj"}></Comments>
         {/* <br></br>
         <Comments
           main_app={this}
