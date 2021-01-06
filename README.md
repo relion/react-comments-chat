@@ -12,7 +12,7 @@ Also, the pre-typed text is (optionally) previewed in real-time in all other par
 4.  Use the link with a title: http://localhost/comments/?title=test_room
 5.  or possibly for a pre set user: http://localhost/comments/?title=test_room&name=jonny
 
-## App snapshot
+## App snapshots
 
 <img src="readme_images/react_comments_room_snapshot2.png" title="React Comments Room snapshot">
 
@@ -26,7 +26,7 @@ based on [QCode.in](https://www.qcode.in/learn-react-by-creating-a-comment-app) 
 
 ## Keywords
 
-chat, room, comments, solved, working, full-stack, react, node.js, websocket.
+chat, comments, solved, working, full-stack, react, node.js, websocket.
 
 ### Enabling Browser Notifications
 
