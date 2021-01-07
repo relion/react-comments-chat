@@ -130,17 +130,17 @@ export default class Comment extends Component {
                     /(^|\$SPACE\$)((https?:\/\/)?[\w]+\.[\w]+(\.[\w]+|\/)[^\s\$]+?)(\$SPACE\$|$)/gi,
                     "$1<a href='$2' target='_blank'>$2</a>$5"
                   )
-                  .replace(/\*([^\*#\^\|]+)\*/g, "<b>$1</b>")
+                  .replace(/\*([^\*]+)\*/g, "<b>$1</b>")
                   .replace(
-                    /#([^\*#\^\|]+)#/gi,
+                    /#([^#]+)#/gi,
                     "<span style='background: aquamarine;'>$1</span>"
                   )
                   .replace(
-                    /\^([^\*#\^\|]+)\^/gi,
+                    /\^([^\^]+)\^/gi,
                     "<span style='background: darksalmon;'>$1</span>"
                   )
                   .replace(
-                    /\|([^\*#\^\|]+)\|/gi,
+                    /\|([^\|]+)\|/gi,
                     "<span style='background: yellow;'>$1</span>"
                   )
                   .replace(/\$SPACE\$/g, "&#32;") // replace to regular space.

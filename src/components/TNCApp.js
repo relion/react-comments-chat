@@ -9,7 +9,7 @@ class TNCApp extends Component {
     this.state = {
       verses: [],
       search_str: "my and to",
-      max_distance: 5,
+      max_distance: 3,
       min_words: 2,
       stop_less_words: true,
       stop_more_distance: false,
