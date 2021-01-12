@@ -8,6 +8,7 @@ var MongoClient = require("mongodb").MongoClient;
 var mongo_url = "mongodb://localhost:27017/";
 var nodemailer = require("nodemailer");
 var smtpTransport = require("nodemailer-smtp-transport");
+const dateFormat = require("dateformat");
 
 let transporter = nodemailer.createTransport(
   smtpTransport({
@@ -218,6 +219,17 @@ function broadcast(room_title, by_browser_id, data) {
 }
 
 http_server.get("*", function (req, res, next) {
+  // if (/(?<![0-9])(84\.228\.233\.54)$/i.test(req.ip)) {
+  //   console.log("Hi, it's me..." + req.ip);
+  // }
+
+  if (/(?<![0-9])(180\.123\.81\.87)$/i.test(req.ip)) {
+    res.body = "Please don't bother my site. Thanks.";
+    res.send();
+    res.end();
+    console.log("Rejected: " + req.ip);
+    return;
+  }
   var rel_url = req.params[0];
   var tmp =
     process.cwd() +
@@ -255,6 +267,7 @@ http_server.get("*", function (req, res, next) {
     // lilo: what's that?
     // console.log(`ignoring request. path: ${rel_url} from: ${req.ip}`);
     next();
+    return;
   } else if (rel_url == "/" || !is_file) {
     var html;
     if (rel_url == "/") {
@@ -262,7 +275,16 @@ http_server.get("*", function (req, res, next) {
         process.cwd() + "/src/pages/home-page.html",
         "utf8"
       );
-      html = replace_html(req, html, "WatchCast Homepage", "");
+      html = replace_html(
+        req,
+        html,
+        "WatchCast",
+        "This site is meant to serve discussions..."
+      );
+      html = html.replace(
+        /\$DATE/g,
+        dateFormat(new Date().toUTCString(), "dd-mmm-yyyy")
+      );
     } else {
       var html = fs.readFileSync(
         process.cwd() + "/src/pages/default-page.html",
@@ -284,165 +306,165 @@ http_server.get("*", function (req, res, next) {
         `default request. path: ${rel_url} from: ${ip}` + hostnames_str
       );
     });
-    return;
   } else {
     next();
   }
-
-  http_server.use(express.static("/"), express.static("src"));
-
-  http_server.get("/tnc_query", (req, res) => {
-    // yishay
-    tnc.handle_tnc_query(res);
-  });
-
-  http_server.post("/handle_comments", (req, res) => {
-    handle_http_request(req, res);
-  });
-
-  function handle_http_request(req, res) {
-    var op = req.query.op;
-    var room_title = req.query.title;
-    var browser_id = req.query.browser_id;
-
-    if (op == "comment_added") {
-      var comment_json = JSON.parse(req.body);
-      comment_json._id = uuidv1();
-      comment_json.time = new Date().toUTCString();
-      comment_json.user_ip = rAddr_to_ip(req.connection.remoteAddress);
-      comment_json.browser_id = browser_id;
-      //
-      fb_dbo.collection("comments").updateOne(
-        { room_title: room_title },
-        {
-          $push: { comments_ar: comment_json },
-        },
-        function (err, result) {
-          broadcast(room_title, browser_id, {
-            op: op,
-            browser_id: browser_id,
-            comment: comment_json,
-          });
-          res.write(JSON.stringify(comment_json));
-          res.end();
-        }
-      );
-      return;
-    } else if (op == "get_all_comments") {
-      handle_first_http_request(req);
-      broadcast(room_title, browser_id, {
-        op: "client_joined",
-        browser_id: browser_id,
-        name: req.query.name,
-      });
-
-      var participants = {};
-      for (var _browser_id in browsers_ids_by_title[room_title]) {
-        if (_browser_id == browser_id) continue;
-        participants[_browser_id] = {};
-        var all_participant = all_participants[_browser_id];
-        var participant = participants[_browser_id];
-        participant.name = all_participant.name;
-        participant.entered_message = all_participant.entered_message;
-      }
-
-      fb_dbo.collection("comments").findOne(
-        { room_title: room_title },
-        function (err, result) {
-          if (result == null) {
-            var empty_comments_ar = [];
-            fb_dbo.collection("comments").insert(
-              {
-                "room_title": room_title,
-                "comments_ar": empty_comments_ar,
-              },
-              function (err, result) {
-                res.write(
-                  JSON.stringify({
-                    comments: empty_comments_ar,
-                    participants: this.participants,
-                  })
-                );
-                res.end();
-              }
-            );
-          } else {
-            res.write(
-              JSON.stringify({
-                comments: result.comments_ar,
-                participants: this.participants,
-              })
-            );
-            res.end();
-          }
-        }.bind({ participants: participants })
-      );
-      return;
-    } else if (op == "comment_deleted") {
-      var comment_id = req.body;
-      fb_dbo.collection("comments").updateOne(
-        { room_title: room_title },
-        {
-          $pull: { comments_ar: { _id: comment_id } },
-        },
-        function (err, result) {
-          res.end();
-          broadcast(room_title, browser_id, {
-            op: "comment_deleted",
-            _id: comment_id,
-          });
-        }
-      );
-      return;
-    } else if (op == "comment_updated") {
-      var updated_comment = JSON.parse(req.body);
-
-      fb_dbo.collection("comments").updateOne(
-        { room_title: room_title, "comments_ar._id": updated_comment._id },
-        {
-          $set: { "comments_ar.$.message": updated_comment.message },
-        },
-        function (err, result) {
-          //res.write(JSON.stringify(updated_comment));
-          res.end();
-          broadcast(room_title, browser_id, {
-            op: "comment_updated",
-            browser_id: browser_id,
-            comment: updated_comment,
-          });
-        }
-      );
-      return;
-    } else if (op == "get_verses") {
-      tnc.handle_get_verses(JSON.parse(req.body), res);
-      return;
-    } else if (op == "first_request") {
-      handle_first_http_request(req);
-    } else {
-      throw "op (" + op + ") not recognized.";
-    }
-    //
-    res.end();
-  }
-
-  function handle_first_http_request(req) {
-    var browser_id = req.query.browser_id;
-    var room_title = req.query.title;
-    console.log(
-      `got first Http request from room: \`${room_title}\` ${rAddr_to_ip(
-        req.connection.remoteAddress
-      )} browser_id: ${browser_id}`
-    );
-    if (ws_by_id[browser_id] != undefined) {
-      ws_by_id[browser_id].room_title = room_title;
-      if (browsers_ids_by_title[room_title] == undefined)
-        browsers_ids_by_title[room_title] = {};
-      browsers_ids_by_title[room_title][browser_id] = null;
-    } else {
-      // lilo: Warning..
-    }
-  }
 });
+
+http_server.use(express.static("/"), express.static("src"));
+
+http_server.get("/tnc_query", (req, res) => {
+  // yishay
+  tnc.handle_tnc_query(res);
+});
+
+http_server.post("/handle_comments", (req, res) => {
+  handle_http_request(req, res);
+});
+
+function handle_http_request(req, res) {
+  var op = req.query.op;
+  var room_title = req.query.title;
+  var browser_id = req.query.browser_id;
+
+  if (op == "comment_added") {
+    var comment_json = JSON.parse(req.body);
+    comment_json._id = uuidv1();
+    comment_json.time = new Date().toUTCString();
+    comment_json.user_ip = rAddr_to_ip(req.connection.remoteAddress);
+    comment_json.browser_id = browser_id;
+    //
+    fb_dbo.collection("comments").updateOne(
+      { room_title: room_title },
+      {
+        $push: { comments_ar: comment_json },
+      },
+      function (err, result) {
+        broadcast(room_title, browser_id, {
+          op: op,
+          browser_id: browser_id,
+          comment: comment_json,
+        });
+        res.write(JSON.stringify(comment_json));
+        res.end();
+      }
+    );
+    return;
+  } else if (op == "get_all_comments") {
+    handle_first_http_request(req);
+    broadcast(room_title, browser_id, {
+      op: "client_joined",
+      browser_id: browser_id,
+      name: req.query.name,
+    });
+
+    var participants = {};
+    for (var _browser_id in browsers_ids_by_title[room_title]) {
+      if (_browser_id == browser_id) continue;
+      participants[_browser_id] = {};
+      var all_participant = all_participants[_browser_id];
+      var participant = participants[_browser_id];
+      participant.name = all_participant.name;
+      participant.entered_message = all_participant.entered_message;
+    }
+
+    fb_dbo.collection("comments").findOne(
+      { room_title: room_title },
+      function (err, result) {
+        if (result == null) {
+          var empty_comments_ar = [];
+          fb_dbo.collection("comments").insert(
+            {
+              "room_title": room_title,
+              "comments_ar": empty_comments_ar,
+            },
+            function (err, result) {
+              res.write(
+                JSON.stringify({
+                  comments: empty_comments_ar,
+                  participants: this.participants,
+                })
+              );
+              res.end();
+            }
+          );
+        } else {
+          res.write(
+            JSON.stringify({
+              comments: result.comments_ar,
+              participants: this.participants,
+            })
+          );
+          res.end();
+        }
+      }.bind({ participants: participants })
+    );
+    return;
+  } else if (op == "comment_deleted") {
+    var comment_id = req.body;
+    fb_dbo.collection("comments").updateOne(
+      { room_title: room_title },
+      {
+        $pull: { comments_ar: { _id: comment_id } },
+      },
+      function (err, result) {
+        res.end();
+        broadcast(room_title, browser_id, {
+          op: "comment_deleted",
+          _id: comment_id,
+        });
+      }
+    );
+    return;
+  } else if (op == "comment_updated") {
+    var updated_comment = JSON.parse(req.body);
+
+    fb_dbo.collection("comments").updateOne(
+      { room_title: room_title, "comments_ar._id": updated_comment._id },
+      {
+        $set: { "comments_ar.$.message": updated_comment.message },
+      },
+      function (err, result) {
+        //res.write(JSON.stringify(updated_comment));
+        res.end();
+        broadcast(room_title, browser_id, {
+          op: "comment_updated",
+          browser_id: browser_id,
+          comment: updated_comment,
+        });
+      }
+    );
+    return;
+  } else if (op == "get_verses") {
+    tnc.handle_get_verses(JSON.parse(req.body), res);
+    return;
+  } else if (op == "first_request") {
+    handle_first_http_request(req);
+  } else {
+    throw "op (" + op + ") not recognized.";
+  }
+  //
+  res.end();
+}
+
+function handle_first_http_request(req) {
+  var browser_id = req.query.browser_id;
+  var room_title = req.query.title;
+  console.log(
+    `got first Http request from room: \`${room_title}\` ${rAddr_to_ip(
+      req.connection.remoteAddress
+    )} browser_id: ${browser_id}`
+  );
+  if (ws_by_id[browser_id] != undefined) {
+    ws_by_id[browser_id].room_title = room_title;
+    if (browsers_ids_by_title[room_title] == undefined)
+      browsers_ids_by_title[room_title] = {};
+    browsers_ids_by_title[room_title][browser_id] = null;
+  } else {
+    // lilo: Warning..
+  }
+}
+
 function rAddr_to_ip(ip_long) {
   var ip;
   var ip_res = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g.exec(ip_long);

@@ -510,7 +510,7 @@ class Comments extends Component {
                       <span className="px-2" role="img" aria-label="Chat">
                         💬
                       </span>
-                      Title: <b>{global.title}</b>
+                      <b>{global.title.replace(/_/g, " ")}</b>
                       <span className="px-2" role="img" aria-label="Chat">
                         💬
                       </span>
