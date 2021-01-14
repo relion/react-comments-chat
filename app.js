@@ -90,6 +90,21 @@ var ws_by_id = {};
 var all_participants = {};
 var browsers_ids_by_title = {};
 
+var last_rooms_status = undefined;
+function check_rooms_status() {
+  var current_rooms_status_str = JSON.stringify([
+    browsers_ids_by_title,
+    all_participants,
+  ]);
+  if (last_rooms_status != current_rooms_status_str) {
+    last_rooms_status = current_rooms_status_str;
+    console.log("Rooms Status Changed: " + last_rooms_status);
+    // todo: ws.send(current_rooms_status_str);
+  }
+  setTimeout(check_rooms_status, 2000);
+}
+setTimeout(check_rooms_status, 2000);
+
 wss.on("connection", function connection(ws, req) {
   var app_name = req.url;
   console.log(
@@ -168,6 +183,8 @@ wss.on("connection", function connection(ws, req) {
 });
 
 var scheme = require("http"); // later: https
+const { default: Avatar } = require("react-avatar");
+const { Console } = require("console");
 
 // for https, use listen to port: 443
 // var privateKey = fs.readFileSync('privatekey.pem').toString();
@@ -252,7 +269,7 @@ http_server.get("*", function (req, res, next) {
       req,
       html,
       /^\/comments/i.test(rel_url)
-        ? req.query.title + " Comments Room"
+        ? req.query.title.replace(/_/g, " ") + " | Watchcast"
         : "Bible English Search",
       "Click here to Enter the Chat Room"
     );

@@ -80,6 +80,10 @@ class Comments extends Component {
 
   componentDidMount() {
     this.connect_ws(this);
+    // preload images:
+    [logo_red].forEach((image) => {
+      new Image().src = image;
+    });
   }
 
   connect_ws(comments_obj) {
