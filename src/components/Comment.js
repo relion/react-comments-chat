@@ -25,11 +25,11 @@ const StyledEdiText = styled(EdiText)`
 
 export default class Comment extends Component {
   onClickDelete(e) {
-    this.comment.props.comments_app.deleteComment(this.comment.props.comment);
+    this.comment.props.primary_app.deleteComment(this.comment.props.comment);
   }
 
   onEditSave(new_val, comment) {
-    comment.props.comments_app.editSaveComment(new_val, comment.props.comment);
+    comment.props.primary_app.editSaveComment(new_val, comment.props.comment);
   }
 
   render() {
@@ -41,11 +41,10 @@ export default class Comment extends Component {
       "\n",
       (match, i) => "<br />"
     );
-    var is_owner =
-      name === this.props.comments_app.props.main_app.state.my_name;
+    var is_owner = name === this.props.primary_app.props.main_app.state.my_name;
     var is_editable =
-      is_owner && this.props.comments_app.props.main_app.state.edit_mode;
-    var participants = this.props.comments_app.state.participants;
+      is_owner && this.props.primary_app.props.main_app.state.edit_mode;
+    var participants = this.props.primary_app.state.participants;
     var div_container_style = {};
     for (var participant in participants) {
       if (participants[participant].name === name) {
@@ -65,7 +64,7 @@ export default class Comment extends Component {
         ref={this.props.ref_id}
         className="media mb-1"
         style={div_container_style}
-        disabled={this.props.comments_app.state.status_txt != "Connected"}
+        disabled={this.props.primary_app.state.status_txt != "Connected"}
       >
         <div className="row">
           <div className="col-sm-3 mr-2">

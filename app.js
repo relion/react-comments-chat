@@ -89,18 +89,37 @@ wss.on("error", (error) => {
 var ws_by_id = {};
 var all_participants = {};
 var browsers_ids_by_title = {};
+browsers_ids_by_title["/Monitor/"] = {};
+var last_updated_browsers_ids_by_title = {};
 
 var last_rooms_status = undefined;
+
 function check_rooms_status() {
-  var current_rooms_status_str = JSON.stringify([
-    browsers_ids_by_title,
-    all_participants,
-  ]);
-  if (last_rooms_status != current_rooms_status_str) {
-    last_rooms_status = current_rooms_status_str;
-    console.log("Rooms Status Changed: " + last_rooms_status);
-    // todo: ws.send(current_rooms_status_str);
+  var res = {};
+  var rooms_titles = Object.keys(browsers_ids_by_title);
+  for (var i = 0; i < rooms_titles.length; i++) {
+    var room_title = rooms_titles[i];
+    res[room_title] = [];
+    var room_browsers_ids = Object.keys(browsers_ids_by_title[room_title]);
+    for (j = 0; j < room_browsers_ids.length; j++) {
+      var x = all_participants[room_browsers_ids[j]];
+      if (x != null) {
+        res[room_title].push(x);
+      }
+    }
   }
+
+  var current_rooms_status = JSON.stringify(res);
+
+  if (last_rooms_status != current_rooms_status) {
+    last_rooms_status = current_rooms_status;
+    console.log(`Rooms Status Changed: ${current_rooms_status}`);
+    broadcast("/Monitor/", null, {
+      op: "rooms_status_changed",
+      rooms_status: current_rooms_status,
+    });
+  }
+
   setTimeout(check_rooms_status, 2000);
 }
 setTimeout(check_rooms_status, 2000);
@@ -121,6 +140,12 @@ wss.on("connection", function connection(ws, req) {
   ws.send(JSON.stringify(ws_connected_json_data));
   ws_by_id[browser_id] = ws;
   all_participants[browser_id] = {};
+
+  if (app_name == "/Monitor/") {
+    ws_by_id[browser_id].room_title = app_name;
+    browsers_ids_by_title[app_name][browser_id] = ws;
+  }
+
   ws.on("message", function (msg) {
     var json = JSON.parse(msg);
     //
@@ -173,8 +198,8 @@ wss.on("connection", function connection(ws, req) {
     );
     delete ws_by_id[browser_id];
     delete all_participants[browser_id];
-    if (browsers_ids_by_title[ws.room_title] != undefined)
-      delete browsers_ids_by_title[ws.room_title][browser_id];
+    if (browsers_ids_by_title["/Monitor/"][browser_id] != undefined)
+      delete browsers_ids_by_title["/Monitor/"][browser_id];
     broadcast(ws.room_title, browser_id, {
       op: "client_left",
       browser_id: browser_id,
@@ -219,7 +244,7 @@ function broadcast(room_title, by_browser_id, data) {
       if (
         ws != undefined &&
         ws.readyState === 1 &&
-        ws.room_title == room_title
+        (ws.room_title == room_title || room_title == "/Monitor/")
       ) {
         ws.send(JSON.stringify(data)); // '{ "_id": -1, "message": "Hello World2" }'
       }
@@ -261,16 +286,20 @@ http_server.get("*", function (req, res, next) {
 
   if (rel_url == "/handle_comments/") {
     handle_http_request(req, res);
-  } else if (/^\/(tnc|comments)[\/]?$/i.test(rel_url)) {
+  } else if (/^\/(tnc|comments|monitor)[\/]?$/i.test(rel_url)) {
     const filePath = process.cwd() + "/src/comments/index.html"; // where the <div id="root"> is.
     var html = fs.readFileSync(filePath, "utf8");
 
     var html = replace_html(
       req,
       html,
-      /^\/comments/i.test(rel_url)
-        ? req.query.title.replace(/_/g, " ") + " | Watchcast"
-        : "Bible English Search",
+      (/^\/comments/i.test(rel_url)
+        ? req.query.title.replace(/_/g, " ")
+        : /^\/monitor/i.test(rel_url)
+        ? "Monitor"
+        : /^\/tnc/i.test(rel_url)
+        ? "Bible English Search"
+        : "undefined") + " | Watchcast",
       "Click here to Enter the Chat Room"
     );
 
@@ -378,8 +407,9 @@ function handle_http_request(req, res) {
     var participants = {};
     for (var _browser_id in browsers_ids_by_title[room_title]) {
       if (_browser_id == browser_id) continue;
-      participants[_browser_id] = {};
       var all_participant = all_participants[_browser_id];
+      if (all_participant == undefined) continue;
+      participants[_browser_id] = {};
       var participant = participants[_browser_id];
       participant.name = all_participant.name;
       participant.entered_message = all_participant.entered_message;
@@ -466,7 +496,7 @@ function handle_http_request(req, res) {
 
 function handle_first_http_request(req) {
   var browser_id = req.query.browser_id;
-  var room_title = req.query.title;
+  var room_title = req.query.title; // req.url == "/Monitor/" ? req.url :
   console.log(
     `got first Http request from room: \`${room_title}\` ${rAddr_to_ip(
       req.connection.remoteAddress

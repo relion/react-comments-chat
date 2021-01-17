@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PlayAudio from "./PlayAudio.js";
 //import "bootstrap/dist/css/bootstrap.css";
 import "./CommentsApp.css";
 import "./global.js";
@@ -19,7 +20,7 @@ class CommentsApp extends Component {
       //comments: [],
       //participants: {},
       //loading: false,
-      show_permit_button: false,
+      show_permit_button: true,
       my_name: undefined,
       //my_comment_message: ""
       report_typing: true,
@@ -78,7 +79,9 @@ class CommentsApp extends Component {
       pre_set_name: name_query !== undefined,
       my_name: name,
     });
-    this.check_playAudio();
+    this.playAudio = new PlayAudio(this);
+    this.playAudio.check_playAudio();
+    this.playAudio.get_notifications_permission();
   }
 
   handle_name_field_changed = (event) => {
@@ -106,27 +109,6 @@ class CommentsApp extends Component {
     cookie.save("my_name", value, { path: "/" });
   };
 
-  handleUserPermitClick() {
-    new Audio("/audio/chimes.mp3").play();
-    this.setState({ show_permit_button: false });
-  }
-
-  check_playAudio() {
-    try {
-      var audio = new Audio("/audio/chimes.mp3");
-      audio.t = this;
-      audio.onerror = function () {
-        this.t.setState({ show_permit_button: true });
-        console.log("Can't play audio");
-      };
-      audio.play();
-      console.log("Can play audio");
-    } catch (e) {
-      this.t.setState({ show_permit_button: true });
-      console.log("Can't play audio");
-    }
-  }
-
   handle_report_typing_checkbox_changed(event) {
     var report_typing = event.target.checked;
     this.setState({ report_typing: report_typing });
@@ -147,6 +129,12 @@ class CommentsApp extends Component {
         comments_obj.ws.send(json);
       }
     }
+  }
+
+  handleUserPermitClick() {
+    //this.playAudio.handleUserPermitClick();
+    var promise = new Audio("/audio/" + "chimes.mp3").play();
+    this.setState({ show_permit_button: false });
   }
 
   render() {

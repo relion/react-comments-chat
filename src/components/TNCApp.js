@@ -2,6 +2,7 @@ import React, { Component } from "react";
 //import "bootstrap/dist/css/bootstrap.css";
 import "./TNC.css";
 import handle_win_title from "./global.js";
+import WSUtils from "./WebSocketsUtils.js";
 
 class TNCApp extends Component {
   constructor(props) {
@@ -13,53 +14,31 @@ class TNCApp extends Component {
       min_words: 2,
       stop_less_words: true,
       stop_more_distance: false,
-      status: "connecting",
     };
     handle_win_title();
     this.onSubmit = this.onSubmit.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
+  ws_utils = new WSUtils(this, "/TNC/");
+
   componentDidMount() {
-    const ws_port = ":3030";
-    this.ws = new WebSocket("ws://" + global.host + ws_port + "/TNC/");
-    this.ws.tnc_app = this;
-    this.ws.onopen = () => {};
-    this.ws.onmessage = this.handleWebsocketReceivedData;
-    this.ws.onerror = this.handleWebsocketError;
-    //this.ws.onopen = function() {};
+    this.ws_utils.connect_ws(this.ws_utils);
   }
 
-  handleWebsocketError(err) {
-    console.log();
-    this.tnc_app.setState({ status: "error", error: "Websocket Failed." });
-  }
-
-  handleWebsocketReceivedData(msg) {
-    console.log("in handleWebsocketReceivedData");
-    var json = JSON.parse(msg.data);
-    switch (json.op) {
-      case "ws_connected":
-        this.tnc_app.setState({
-          status: "connected",
-          browser_id: json.browser_id,
-        });
-        fetch(
-          global.server_url +
-            "?" +
-            "title=Proximity_Search" +
-            "&op=first_request" +
-            "&browser_id=" +
-            json.browser_id,
-          {
-            method: "post",
-            headers: { "Content-Type": "text/html" },
-          }
-        );
-        break;
-      default:
-        throw "unexpected op: " + json.op;
-    }
+  do_on_connect(json_browser_id) {
+    fetch(
+      global.server_url +
+        "?" +
+        "title=Proximity_Search" +
+        "&op=first_request" +
+        "&browser_id=" +
+        json_browser_id,
+      {
+        method: "post",
+        headers: { "Content-Type": "text/html" },
+      }
+    );
   }
 
   onSubmit(e) {
@@ -87,7 +66,7 @@ class TNCApp extends Component {
     stop_more_distance
   ) {
     this.setState({
-      status: "searching",
+      status_txt: "Searching",
       verses: [],
     });
     var tnc_app = this;
@@ -114,10 +93,10 @@ class TNCApp extends Component {
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
-          tnc_app.setState({ status: "error", error: res.error });
+          tnc_app.setState({ status_txt: "error", error: res.error });
         } else {
           tnc_app.setState({
-            status: "got_results",
+            status_txt: "got_results",
             verses: res,
             run_time_sec:
               Math.floor((new Date().getTime() - start_time_ms) / 100) / 10,
@@ -141,7 +120,7 @@ class TNCApp extends Component {
         }
       })
       .catch((err) => {
-        this.setState({ status: "error", error: err.message });
+        this.setState({ status_txt: "error", error: err.message });
       });
   }
 
@@ -162,6 +141,8 @@ class TNCApp extends Component {
         throw "unhandled: " + target.name;
     }
   }
+
+  x9 = { "Connected": "green" };
 
   render() {
     return (
@@ -224,26 +205,20 @@ class TNCApp extends Component {
               </select>
             </div> */}
             <div style={{ margin: "8px 4px 4px 0" }}>
-              {this.state.status !== "error" ? (
+              {this.state.status_txt !== "error" ? (
                 <span
                   style={{
-                    background: "limegreen",
+                    background: this.state.status_color,
                     padding: "4px",
                   }}
                 >
-                  {this.state.status === "connecting" ? (
-                    "Connecting..."
-                  ) : this.state.status === "connected" ? (
-                    "Connected"
-                  ) : this.state.status === "searching" ? (
-                    "Searching..."
-                  ) : this.state.status === "got_results" ? (
+                  {this.state.status_txt === "got_results" ? (
                     <span>
                       <b>Found: {this.state.verses.length} verses</b> runtime:{" "}
                       {this.state.run_time_sec} seconds
                     </span>
                   ) : (
-                    "Error: undetected status:" + this.state.status
+                    this.state.status_txt
                   )}
                 </span>
               ) : (

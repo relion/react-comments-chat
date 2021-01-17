@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./global.js";
-import Comments from "./Comments.js";
+//import Comments from "./Comments.js";
 
 export default class CommentForm extends Component {
   constructor(props) {
@@ -41,29 +41,29 @@ export default class CommentForm extends Component {
   handle_message_field_changed = (event) => {
     console.log("in handle_message_field_changed.");
     const { value, name } = event.target;
-    this.props.comments_app.setState({
+    this.props.primary_app.setState({
       my_comment_message: value,
     });
     if (name === "message") {
-      var state = this.props.comments_app.state;
-      if (!this.props.comments_app.props.main_app.state.report_typing) {
+      var state = this.props.primary_app.state;
+      if (!this.props.primary_app.props.main_app.state.report_typing) {
         return;
       }
       var current_time = new Date().getTime();
       clearInterval(
-        this.props.comments_app.state
+        this.props.primary_app.state
           .last_time_sent_message_changed_timeout_function
       );
       if (
         state.last_time_sent_message_changed === undefined ||
         state.last_time_sent_message_changed < current_time - 2000
       ) {
-        this.props.comments_app.setState({
+        this.props.primary_app.setState({
           last_time_sent_message_changed: current_time,
         });
         var op = "client_message_entered_changed";
         var entered_message = value;
-        this.props.comments_app.ws.send(
+        this.props.primary_app.ws.send(
           JSON.stringify({
             op: op,
             entered_message: entered_message,
@@ -75,15 +75,15 @@ export default class CommentForm extends Component {
         //
       }
       //
-      this.props.comments_app.state.last_time_sent_message_changed_timeout_function = setTimeout(
+      this.props.primary_app.state.last_time_sent_message_changed_timeout_function = setTimeout(
         function (form_app) {
-          if (!form_app.props.comments_app.props.main_app.state.report_typing) {
+          if (!form_app.props.primary_app.props.main_app.state.report_typing) {
             return;
           }
           console.log("in last_time_sent_message_changed_timeout_function !!!");
           form_app.do_my_comment_ceased_message(
             form_app,
-            form_app.props.comments_app
+            form_app.props.primary_app
           );
         },
         value != "" ? 4000 : 1000,
@@ -114,8 +114,8 @@ export default class CommentForm extends Component {
 
     // persist the comments on server
     let my_comment = {
-      name: this.props.comments_app.props.main_app.state.my_name,
-      message: this.props.comments_app.state.my_comment_message,
+      name: this.props.primary_app.props.main_app.state.my_name,
+      message: this.props.primary_app.state.my_comment_message,
       ref: undefined,
     };
     fetch(
@@ -144,10 +144,10 @@ export default class CommentForm extends Component {
           //
           this.setState({ loading: false });
           // clear the message box
-          this.props.comments_app.setState({
+          this.props.primary_app.setState({
             my_comment_message: "",
           });
-          this.do_my_comment_ceased_message(this, this.props.comments_app);
+          this.do_my_comment_ceased_message(this, this.props.primary_app);
           //
           my_comment.ref.current.scrollIntoView({
             block: "end",
@@ -168,8 +168,8 @@ export default class CommentForm extends Component {
    */
   isFormValid() {
     return (
-      this.props.comments_app.props.main_app.state.my_name !== "" &&
-      this.props.comments_app.state.my_comment_message !== ""
+      this.props.primary_app.props.main_app.state.my_name !== "" &&
+      this.props.primary_app.state.my_comment_message !== ""
     );
   }
 
@@ -180,7 +180,7 @@ export default class CommentForm extends Component {
   }
 
   render() {
-    var is_connected = this.props.comments_app.state.status_txt != "Connected";
+    var is_connected = this.props.primary_app.state.status_txt != "Connected";
     return (
       <React.Fragment>
         {/* <h5 className="text-muted mb-3">
@@ -191,7 +191,7 @@ export default class CommentForm extends Component {
           <div className="d-flex flex-row">
             <input
               className=""
-              value={this.props.comments_app.state.my_comment_message}
+              value={this.props.primary_app.state.my_comment_message}
               onChange={this.handle_message_field_changed}
               style={{
                 margin: 0,

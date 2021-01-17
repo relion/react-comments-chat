@@ -14,7 +14,7 @@ export default function CommentList(props) {
             <Comment
               key={index}
               comment={comment}
-              comments_app={props.comments_app}
+              primary_app={props.primary_app}
               ref_id={comment.ref}
             />
           ))
