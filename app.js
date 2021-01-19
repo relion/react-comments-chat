@@ -5,7 +5,9 @@ const fs = require("fs");
 const path = require("path");
 const dns = require("dns");
 var MongoClient = require("mongodb").MongoClient;
-var mongo_url = "mongodb://localhost:27017/";
+var mongo_url = `mongodb://${fs.readFileSync(
+  process.cwd() + path.sep + "mongo-auth.txt"
+)}localhost:27017/`;
 var nodemailer = require("nodemailer");
 var smtpTransport = require("nodemailer-smtp-transport");
 const dateFormat = require("dateformat");
@@ -90,7 +92,6 @@ var ws_by_id = {};
 var all_participants = {};
 var browsers_ids_by_title = {};
 browsers_ids_by_title["/Monitor/"] = {};
-var last_updated_browsers_ids_by_title = {};
 
 var last_rooms_status = undefined;
 
