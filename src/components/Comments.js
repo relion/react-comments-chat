@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import logo_blue from "../images/logo-blue.svg";
 import logo_red from "../images/logo-red.svg";
 import edit_image from "../images/edit.gif";
+import "./Comments.css";
 import "bootstrap/dist/css/bootstrap.css";
 import handle_win_title from "./global.js";
 
@@ -251,17 +252,57 @@ class Comments extends Component {
         <table className="App-header">
           <tr>
             <td>
-              <img
-                src={
-                  this.state.status_txt == "Connected" ? logo_blue : logo_red
-                }
-                className={
-                  this.state.loading || this.state.status_txt == "Connecting..."
-                    ? "App-logo Spin"
-                    : "App-logo"
-                }
-                alt="logo"
-              />
+              <table style={{ align: "center", width: "65px" }}>
+                <tr>
+                  <td>
+                    <img
+                      src={
+                        this.state.status_txt == "Connected"
+                          ? logo_blue
+                          : logo_red
+                      }
+                      className={
+                        this.state.loading ||
+                        this.state.status_txt == "Connecting..."
+                          ? "App-logo Spin"
+                          : "App-logo"
+                      }
+                      alt="logo"
+                    />
+                  </td>
+                </tr>
+                <tr style={{ lineHeight: "8px" }}>
+                  <td
+                    style={{
+                      color: this.state.status_color,
+                      fontWeight: "bold",
+                      fontSize: "x-small",
+                    }}
+                  >
+                    {this.state.status_txt}
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style={{
+                      fontSize: "small",
+                    }}
+                  >
+                    <span className="badge badge-success">
+                      {this.state.comments.length}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style={{
+                      fontSize: "x-small",
+                    }}
+                  >
+                    Comment{this.state.comments.length !== 1 ? "s" : ""}
+                  </td>
+                </tr>
+              </table>
             </td>
             <td style={{ width: "100%" }}>
               <table>
@@ -276,27 +317,6 @@ class Comments extends Component {
                         💬
                       </span>
                     </h1>
-                  </td>
-                </tr>
-                <tr align="left">
-                  <td>
-                    <span>
-                      <span className="badge badge-success">
-                        {this.state.comments.length}
-                      </span>{" "}
-                      Comment{this.state.comments.length !== 1 ? "s" : ""}
-                    </span>{" "}
-                    <span style={{ color: "black" }}>
-                      status:{" "}
-                      <span
-                        style={{
-                          color: this.state.status_color,
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {this.state.status_txt}
-                      </span>
-                    </span>
                   </td>
                 </tr>
               </table>

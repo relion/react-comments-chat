@@ -11,6 +11,7 @@ Also, the pre-typed text is (optionally) previewed in real-time in all other par
 3.  Run `npm start`
 4.  Use the link with a title: http://localhost/comments/?title=test_room
 5.  or possibly for a pre set user: http://localhost/comments/?title=test_room&name=jonny
+6.  also browse : http://localhost/monitor
 
 ## App snapshots
 

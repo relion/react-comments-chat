@@ -274,6 +274,13 @@ http_server.get("*", function (req, res, next) {
     return;
   }
   var rel_url = req.params[0];
+
+  if (/^\/MM\//.test(rel_url)) {
+    console.log(`get ${rel_url}`);
+    next();
+    return;
+  }
+
   var tmp =
     process.cwd() +
     path.sep +
@@ -358,7 +365,9 @@ http_server.get("*", function (req, res, next) {
   }
 });
 
+//http_server.use(express.static("/MM/"), express.static("MM"));
 http_server.use(express.static("/"), express.static("src"));
+http_server.use("/MM", express.static(path.join(__dirname, "MM")));
 
 http_server.get("/tnc_query", (req, res) => {
   // yishay
