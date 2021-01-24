@@ -49,6 +49,13 @@ export default class Comment extends Component {
     for (var participant in participants) {
       if (participants[participant].name === name) {
         div_container_style = { borderWidth: "4px", borderStyle: "dashed" };
+      }
+      if (participants[participant].name === name) {
+        div_container_style = { borderWidth: "4px", borderStyle: "dashed" };
+        if (participants[participant].is_checked) {
+          div_container_style.background = "orange";
+          div_container_style.borderStyle = "dotted";
+        }
         break;
       }
     }
