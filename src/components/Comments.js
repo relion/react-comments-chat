@@ -28,6 +28,9 @@ class Comments extends Component {
     setInterval(this.my_setInterval, global.time_sec_jump, this);
 
     this.addComment = this.addComment.bind(this);
+    this.handle_participant_checkbox = this.handle_participant_checkbox.bind(
+      this
+    );
     handle_win_title();
   }
 
@@ -226,6 +229,14 @@ class Comments extends Component {
       });
   }
 
+  handle_participant_checkbox(event) {
+    for (var participant_browser_id in this.state.participants) {
+      this.state.participants[participant_browser_id].is_checked =
+        participant_browser_id == event.target.dataset.browser_id &&
+        event.target.checked;
+    }
+  }
+
   render() {
     var me_participating_style = {
       backgroundColor: "chocolate",
@@ -350,12 +361,23 @@ class Comments extends Component {
                 return (
                   <div
                     className={participant_span_className}
-                    style={{ display: "inline-block" }}
+                    style={{
+                      display: "inline-block",
+                      backgroundColor: participant.is_checked
+                        ? "orange"
+                        : "pink", // lilo: duplicated in CommentsApp.css
+                    }}
                   >
                     {participant.name !== undefined &&
                     participant.name.trim() != ""
                       ? participant.name
-                      : "unknown"}
+                      : "unknown"}{" "}
+                    <input
+                      type="checkbox"
+                      checked={participant.is_checked}
+                      data-browser_id={browser_id}
+                      onChange={this.handle_participant_checkbox}
+                    />
                     {participant.is_typing ? (
                       <span>
                         <img
