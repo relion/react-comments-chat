@@ -1,5 +1,3 @@
-import React, { Component } from "react";
-
 class PlayAudio {
   constructor(app) {
     this.app = app;
@@ -18,30 +16,16 @@ class PlayAudio {
   }
 
   check_playAudio() {
-    try {
-      var audio = new Audio("/audio/chimes.mp3");
-      audio.app = this.app;
-      audio.onerror = function () {
-        console.log("Can't play audio");
-      };
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(function () {
-            this.app.setState({ show_permit_button: false });
-          })
-          .catch(function (error) {
-            // need to click a button to enable audio.
-          });
-      }
-    } catch (e) {
+    var audio = new Audio("/audio/chimes.mp3");
+    audio.app = this.app;
+    audio.onerror = function () {
       console.log("Can't play audio");
-    }
-  }
-
-  handleUserPermitClick() {
-    new Audio("/audio/chimes.mp3").play();
-    this.setState({ show_permit_button: true });
+    };
+    audio.onplay = () => {
+      console.log("Audio notifications are available.");
+      this.app.setState({ show_permit_button: false });
+    };
+    audio.play();
   }
 }
 

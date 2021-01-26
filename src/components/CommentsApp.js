@@ -10,12 +10,9 @@ import cookie from "react-cookies";
 
 import Comments from "./Comments";
 
-import ReactDOM from "react-dom";
-
 class CommentsApp extends Component {
   constructor(props) {
     super(props);
-    // props.main_app = this;
     this.state = {
       //comments: [],
       //participants: {},
@@ -25,6 +22,7 @@ class CommentsApp extends Component {
       //my_comment_message: ""
       report_typing: true,
       edit_mode: false,
+      txt_bg_color: "green",
     };
 
     this.handle_report_typing_checkbox_changed = this.handle_report_typing_checkbox_changed.bind(
@@ -80,8 +78,10 @@ class CommentsApp extends Component {
       my_name: name,
     });
     this.playAudio = new PlayAudio(this);
+    this.playAudio.app = this;
     this.playAudio.check_playAudio();
     this.playAudio.get_notifications_permission();
+    setInterval(this.blinking_timer, 1000, this);
   }
 
   handle_name_field_changed = (event) => {
@@ -132,9 +132,15 @@ class CommentsApp extends Component {
   }
 
   handleUserPermitClick() {
-    //this.playAudio.handleUserPermitClick();
-    var promise = new Audio("/audio/" + "chimes.mp3").play();
-    this.setState({ show_permit_button: false });
+    this.playAudio.check_playAudio();
+    // var promise = new Audio("/audio/" + "chimes.mp3").play();
+    // this.setState({ show_permit_button: false });
+  }
+
+  blinking_timer(app) {
+    app.setState({
+      txt_bg_color: app.state.txt_bg_color == "green" ? "orange" : "green",
+    });
   }
 
   render() {
@@ -142,7 +148,12 @@ class CommentsApp extends Component {
       <div className="App d-flex flex-column h-100 container bg-light shadow">
         {this.state.show_permit_button ? (
           <button onClick={this.handleUserPermitClick.bind(this)}>
-            click here to anable Audio Notifications from this page
+            click here to anable
+            <b style={{ background: this.state.txt_bg_color }}>
+              {" "}
+              Audio Notifications{" "}
+            </b>
+            from this page
           </button>
         ) : (
           ""

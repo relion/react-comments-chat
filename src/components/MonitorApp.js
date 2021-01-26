@@ -11,6 +11,7 @@ class MonitorApp extends Component {
       status: "connecting",
       rooms_status: {},
       show_permit_button: true,
+      txt_bg_color: "green",
     };
   }
 
@@ -19,30 +20,22 @@ class MonitorApp extends Component {
   componentDidMount() {
     this.ws_utils.connect_ws(this.ws_utils);
     this.playAudio = new PlayAudio(this);
+    this.playAudio.app = this;
     this.playAudio.check_playAudio();
     this.playAudio.get_notifications_permission();
+    setInterval(this.blinking_timer, 1000, this);
   }
 
   do_on_connect() {}
 
   handleUserPermitClick(event) {
-    var a = new Audio("/audio/" + "chimes.mp3");
-    var playPromise = a.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(function () {
-          // Automatic playback started!
-        })
-        .catch(function (error) {
-          // Automatic playback failed.
-          // Show a UI element to let the user manually start playback.
-          console.log(
-            "EEEEEEEEERRRRRRRRRRRRRRROOOOOOOOOOOOOOOOOORRRRRRRRRRRRRRRRRRR"
-          );
-        });
-    }
-    //this.playAudio.handleUserPermitClick();
-    this.setState({ show_permit_button: false });
+    this.playAudio.check_playAudio();
+  }
+
+  blinking_timer(app) {
+    app.setState({
+      txt_bg_color: app.state.txt_bg_color == "green" ? "orange" : "green",
+    });
   }
 
   render() {
@@ -50,7 +43,12 @@ class MonitorApp extends Component {
       <React.Fragment>
         {this.state.show_permit_button ? (
           <button onClick={this.handleUserPermitClick.bind(this)}>
-            click here to anable Audio Notifications from this page
+            Enable
+            <b style={{ background: this.state.txt_bg_color }}>
+              {" "}
+              Audio Notifications{" "}
+            </b>
+            from this page
           </button>
         ) : (
           ""
