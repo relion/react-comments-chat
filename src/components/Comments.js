@@ -58,7 +58,7 @@ class Comments extends Component {
     // });
   }
 
-  ws_utils = new WSUtils(this, "/Comments/");
+  ws_utils = new WSUtils(this.props.main_app, this, "/Comments/");
 
   componentDidMount() {
     this.ws_utils.connect_ws(this.ws_utils);

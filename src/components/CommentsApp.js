@@ -19,12 +19,12 @@ class CommentsApp extends Component {
       //comments: [],
       //participants: {},
       //loading: false,
-      show_permit_button: true,
+      //show_permit_button: true,
       my_name: undefined,
       //my_comment_message: ""
       report_typing: true,
       edit_mode: false,
-      txt_bg_color: "green",
+      //txt_bg_color: "green",
     };
 
     this.handle_report_typing_checkbox_changed = this.handle_report_typing_checkbox_changed.bind(

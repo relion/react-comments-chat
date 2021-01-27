@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import Notifications from "./Notifications.js";
 import EnableAudio from "./EnableAudio.js";
-//import Comments from "./Comments.js";
 //import handle_win_title from "./global.js";
 import WSUtils from "./WebSocketsUtils.js";
 
@@ -17,7 +16,7 @@ class MonitorApp extends Component {
     };
   }
 
-  ws_utils = new WSUtils(this, "/Monitor/");
+  ws_utils = new WSUtils(this, this, "/Monitor/");
 
   componentDidMount() {
     this.ws_utils.connect_ws(this.ws_utils);

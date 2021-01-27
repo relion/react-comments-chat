@@ -20,7 +20,7 @@ class TNCApp extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  ws_utils = new WSUtils(this, "/TNC/");
+  ws_utils = new WSUtils(this, this, "/TNC/");
 
   componentDidMount() {
     this.ws_utils.connect_ws(this.ws_utils);

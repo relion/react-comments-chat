@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 
 class WSUtils {
-  constructor(app, app_str) {
+  constructor(main_app, app, app_str) {
     this.app = app;
+    this.main_app = main_app;
     this.app_str = app_str;
+    this.showNotification.bind(this.app);
   }
 
   connect_ws(ws_obj) {
@@ -17,9 +19,9 @@ class WSUtils {
     console.log("opening WebSocket on port:" + global.ws_port);
     ws_obj.app.ws.primary_app = ws_obj.app;
     ws_obj.app.ws.onmessage = ws_obj.handleWebsocketReceivedData.bind(ws_obj);
-    ws_obj.app.ws.onopen = ws_obj.handleWebsocketEvent.bind(ws_obj);
-    ws_obj.app.ws.onclose = ws_obj.handleWebsocketEvent.bind(ws_obj);
-    ws_obj.app.ws.onerror = ws_obj.handleWebsocketEvent.bind(ws_obj);
+    ws_obj.app.ws.onopen = ws_obj.app.ws.onclose = ws_obj.app.ws.onerror = ws_obj.handleWebsocketEvent.bind(
+      ws_obj
+    );
   }
 
   handleWebsocketReceivedData(msg) {
@@ -230,26 +232,17 @@ class WSUtils {
         console.log("Websocket " + event.type + " event.");
         break;
     }
-    if (this.app.props.main_app != undefined) {
-      this.app.props.main_app.setState({
+    if (this.main_app != undefined) {
+      // lilo??
+      this.main_app.setState({
         status_txt: this.app.state.status_txt,
       });
     }
   }
 
   showNotification(title, txt, audio) {
-    var do_audio = !this.app.enable_audio_ref.current.state.show_permit_button;
-    if (do_audio) {
-      new Audio("/audio/" + audio).play();
-    }
-    new Notification(title, {
-      body: txt,
-      icon: "/images/WC_Logo.png",
-      silent: do_audio,
-      //sound: "/audio/" + audio, // get more here: https://www.zedge.net/find/notification
-      //vibrate: [200, 100, 200, 100, 200, 100, 200],
-    });
-    console.log("showNotification done..");
+    this.main_app.Notifications.showNotification(title, txt, audio);
   }
 }
+
 export default WSUtils;
