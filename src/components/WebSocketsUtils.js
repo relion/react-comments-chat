@@ -238,7 +238,7 @@ class WSUtils {
   }
 
   showNotification(title, txt, audio) {
-    var do_audio = !this.app.state.show_permit_button;
+    var do_audio = !this.app.enable_audio_ref.current.state.show_permit_button;
     if (do_audio) {
       new Audio("/audio/" + audio).play();
     }

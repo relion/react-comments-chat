@@ -1,12 +1,14 @@
 import React, { Component } from "react";
-import PlayAudio from "./PlayAudio.js";
-import Comments from "./Comments.js";
-import handle_win_title from "./global.js";
+import Notifications from "./Notifications.js";
+import EnableAudio from "./EnableAudio.js";
+//import Comments from "./Comments.js";
+//import handle_win_title from "./global.js";
 import WSUtils from "./WebSocketsUtils.js";
 
 class MonitorApp extends Component {
   constructor(props) {
     super(props);
+    this.enable_audio_ref = React.createRef();
     this.state = {
       status: "connecting",
       rooms_status: {},
@@ -19,41 +21,18 @@ class MonitorApp extends Component {
 
   componentDidMount() {
     this.ws_utils.connect_ws(this.ws_utils);
-    this.playAudio = new PlayAudio(this);
-    this.playAudio.app = this;
-    this.playAudio.check_playAudio();
-    this.playAudio.get_notifications_permission();
-    setInterval(this.blinking_timer, 1000, this);
+    this.Notifications = new Notifications(this);
+    this.Notifications.app = this;
+    this.Notifications.check_playAudio(this.enable_audio_ref.current);
+    this.Notifications.get_notifications_permission();
   }
 
   do_on_connect() {}
 
-  handleUserPermitClick(event) {
-    this.playAudio.check_playAudio();
-  }
-
-  blinking_timer(app) {
-    app.setState({
-      txt_bg_color: app.state.txt_bg_color == "green" ? "orange" : "green",
-    });
-  }
-
   render() {
     return (
       <React.Fragment>
-        {this.state.show_permit_button ? (
-          <button onClick={this.handleUserPermitClick.bind(this)}>
-            Enable
-            <b style={{ background: this.state.txt_bg_color }}>
-              {" "}
-              Audio Notifications{" "}
-            </b>
-            from this page
-          </button>
-        ) : (
-          ""
-        )}
-
+        <EnableAudio ref={this.enable_audio_ref} main_app={this} />
         <div style={{ color: "black" }}>
           status:{" "}
           <span

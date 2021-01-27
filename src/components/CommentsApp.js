@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import PlayAudio from "./PlayAudio.js";
+import Notifications from "./Notifications.js";
+import EnableAudio from "./EnableAudio.js";
 //import "bootstrap/dist/css/bootstrap.css";
 import "./CommentsApp.css";
 import "./global.js";
@@ -13,6 +14,7 @@ import Comments from "./Comments";
 class CommentsApp extends Component {
   constructor(props) {
     super(props);
+    this.enable_audio_ref = React.createRef();
     this.state = {
       //comments: [],
       //participants: {},
@@ -77,11 +79,10 @@ class CommentsApp extends Component {
       pre_set_name: name_query !== undefined,
       my_name: name,
     });
-    this.playAudio = new PlayAudio(this);
-    this.playAudio.app = this;
-    this.playAudio.check_playAudio();
-    this.playAudio.get_notifications_permission();
-    setInterval(this.blinking_timer, 1000, this);
+    this.Notifications = new Notifications(this);
+    this.Notifications.app = this;
+    this.Notifications.check_playAudio(this.enable_audio_ref.current);
+    this.Notifications.get_notifications_permission();
   }
 
   handle_name_field_changed = (event) => {
@@ -131,33 +132,10 @@ class CommentsApp extends Component {
     }
   }
 
-  handleUserPermitClick() {
-    this.playAudio.check_playAudio();
-    // var promise = new Audio("/audio/" + "chimes.mp3").play();
-    // this.setState({ show_permit_button: false });
-  }
-
-  blinking_timer(app) {
-    app.setState({
-      txt_bg_color: app.state.txt_bg_color == "green" ? "orange" : "green",
-    });
-  }
-
   render() {
     return (
       <div className="App d-flex flex-column h-100 container bg-light shadow">
-        {this.state.show_permit_button ? (
-          <button onClick={this.handleUserPermitClick.bind(this)}>
-            click here to anable
-            <b style={{ background: this.state.txt_bg_color }}>
-              {" "}
-              Audio Notifications{" "}
-            </b>
-            from this page
-          </button>
-        ) : (
-          ""
-        )}
+        <EnableAudio ref={this.enable_audio_ref} main_app={this} />
         {this.state.pre_set_name ? (
           <span style={{ marginLeft: "4px" }}>
             <b>Hi {this.state.my_name}, </b>
