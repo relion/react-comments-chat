@@ -65,7 +65,7 @@ class MonitorApp extends Component {
                 <span>
                   {i === 0 ? "" : " "}
                   <span style={{ background: "pink" }}>
-                    {u.name == "" || u.name == undefined ? "unset" : u.name}
+                    {u.name == "" || u.name == undefined ? u.ip : u.name}
                   </span>
                 </span>
               ))}

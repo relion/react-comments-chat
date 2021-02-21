@@ -140,7 +140,9 @@ wss.on("connection", function connection(ws, req) {
   };
   ws.send(JSON.stringify(ws_connected_json_data));
   ws_by_id[browser_id] = ws;
-  all_participants[browser_id] = {};
+  all_participants[browser_id] = {
+    ip: rAddr_to_ip(ws._socket.remoteAddress),
+  };
 
   if (app_name == "/Monitor/") {
     ws_by_id[browser_id].room_title = app_name;
@@ -166,6 +168,7 @@ wss.on("connection", function connection(ws, req) {
           op: json.op,
           browser_id: ws.browser_id,
           name: json.name,
+          ip: all_participants[browser_id].ip,
         });
         break;
       case "client_message_entered_changed":
@@ -276,7 +279,14 @@ http_server.get("*", function (req, res, next) {
   var rel_url = req.params[0];
 
   if (/^\/MM\//.test(rel_url)) {
-    console.log(`get ${rel_url}`);
+    var ip = rAddr_to_ip(req.connection.remoteAddress);
+    dns.reverse(ip, (err, hostnames) => {
+      var hostnames_str = "";
+      if (!err && hostnames.length > 0) {
+        hostnames_str = " hostname: " + hostnames;
+      }
+      console.log(`get: ${rel_url} from: ${ip}` + hostnames_str);
+    });
     next();
     return;
   }
@@ -419,7 +429,7 @@ function handle_http_request(req, res) {
       if (_browser_id == browser_id) continue;
       var all_participant = all_participants[_browser_id];
       if (all_participant == undefined) continue;
-      participants[_browser_id] = {};
+      participants[_browser_id] = {}; // ip: req.ip
       var participant = participants[_browser_id];
       participant.name = all_participant.name;
       participant.entered_message = all_participant.entered_message;
