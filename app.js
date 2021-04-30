@@ -63,7 +63,10 @@ MongoClient.connect(
     if (err) throw "Failed to connect to mongoDB: " + err;
     tnc.set_books_dbo(db.db("Books"));
     fb_dbo = db.db("faithbit");
-    console.log("MongoDB is connected on: " + mongo_url);
+    console.log(
+      `MongoDB is connected on: ` +
+        mongo_url.replace(/(?<=:\/\/.+:).+?(?=@)/, "xx") // hide the password
+    );
   }
 );
 
@@ -76,6 +79,8 @@ http_server.set(
 );
 const bodyParser = require("body-parser");
 http_server.use(bodyParser.text({ type: "text/html" }));
+http_server.use(express.json());
+http_server.use(bodyParser.urlencoded({ extended: false }));
 const uuidv1 = require("uuid/v1");
 
 const WebSocket = require("ws");
@@ -291,14 +296,14 @@ http_server.get("*", function (req, res, next) {
     return;
   }
 
-  var tmp =
+  var url_file_path =
     process.cwd() +
     path.sep +
     "src" +
     rel_url.replace(/\/$/, "").replace(/\//g, path.sep); // lilo: is it needed?..
   var is_file = false;
   try {
-    var stats = fs.lstatSync(tmp);
+    var stats = fs.lstatSync(url_file_path);
     is_file = stats.isFile();
   } catch (ex) {}
 
@@ -382,6 +387,11 @@ http_server.use("/MM", express.static(path.join(__dirname, "MM")));
 http_server.get("/tnc_query", (req, res) => {
   // yishay
   tnc.handle_tnc_query(res);
+});
+
+http_server.post("/twilio", (req, res) => {
+  console.log("got message from twilio: " + JSON.stringify(req.body));
+  res.end();
 });
 
 http_server.post("/handle_comments", (req, res) => {
