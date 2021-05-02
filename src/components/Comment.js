@@ -62,10 +62,12 @@ export default class Comment extends Component {
     var is_message_rtl = false;
     var matches = message.match(/[א-ת\w]/);
     if (matches != null) {
-      var char_ascii = matches[0].charCodeAt(0);
-      is_message_rtl = char_ascii >= 1488 && char_ascii <= 1514; // between א to ת.
+      // var char_ascii = matches[0].charCodeAt(0);
+      // is_message_rtl = char_ascii >= 1488 && char_ascii <= 1514; // between א to ת.
+      is_message_rtl = /^[^a-z]*(?=[א-ת])/i.test(message);
     }
     var direction = is_message_rtl ? "rtl" : "ltr";
+    var text_align = is_message_rtl ? "right" : "left";
     return (
       <div
         ref={this.props.ref_id}
@@ -121,14 +123,18 @@ export default class Comment extends Component {
               type="text" // textarea
               viewProps={{
                 className: "my-react-header",
-                style: { borderRadius: 3, direction: direction },
+                style: {
+                  borderRadius: 3,
+                  direction: direction,
+                  textAlign: text_align,
+                },
               }}
               buttonsAlign="before"
               value={message}
               onSave={(val) => this.onEditSave(val, this)}
             />
           ) : (
-            <div style={{ direction: direction }}>
+            <div style={{ direction: direction, textAlign: text_align }}>
               {parse(
                 message
                   .replace(/\s/g, "$SPACE$") // note: this should be the first replace.
