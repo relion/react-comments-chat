@@ -23,23 +23,20 @@ let transporter = nodemailer.createTransport(
 );
 
 function sendmail(from, to, subject, text) {
-  const mailOptions = {
-    from: from,
-    to: to,
-    subject: subject,
-    text: text,
-  };
-  transporter.mailOptions = mailOptions;
   transporter.sendMail(
-    mailOptions,
+    {
+      from: from,
+      to: to,
+      subject: subject,
+      text: text,
+    },
     function (error, info) {
       if (error) {
-        console.log(error);
+        console.err("Failed to send mail: " + error);
       } else {
-        console.log("Email sent. Subject: " + this.subject);
-        console.debug("Email sent. " + info.response);
+        console.log("Email sent. " + info.response);
       }
-    }.bind(mailOptions)
+    }
   );
 }
 
@@ -64,8 +61,7 @@ MongoClient.connect(
     tnc.set_books_dbo(db.db("Books"));
     fb_dbo = db.db("faithbit");
     console.log(
-      `MongoDB is connected on: ` +
-        mongo_url.replace(/(?<=:\/\/.+:).+?(?=@)/, "xx") // hide the password
+      `MongoDB is connected on: ` + mongo_url.replace(/(?<=:)[^:]+(?=@)/, "xx") // hide the password
     );
   }
 );
