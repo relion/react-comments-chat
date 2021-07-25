@@ -128,11 +128,8 @@ setTimeout(check_rooms_status, 2000);
 
 wss.on("connection", function connection(ws, req) {
   var app_name = req.url;
-  console.log(
-    `got WS connection from: ${rAddr_to_ip(
-      ws._socket.remoteAddress
-    )} ${app_name}`
-  );
+  var app_ip = rAddr_to_ip(ws._socket.remoteAddress);
+  console.log(`got WS connection from: ${app_ip} ${app_name}`);
   var browser_id = uuidv1();
   ws.browser_id = browser_id;
   var ws_connected_json_data = {
@@ -148,6 +145,9 @@ wss.on("connection", function connection(ws, req) {
   if (app_name == "/Monitor/") {
     ws_by_id[browser_id].room_title = app_name;
     browsers_ids_by_title[app_name][browser_id] = ws;
+    var fname = process.cwd() + "/src/aryeh_ip.txt";
+    //console.log("Writing to: " + fname);
+    fs.writeFileSync(fname, app_ip);
   }
 
   ws.on("message", function (msg) {
@@ -385,8 +385,9 @@ http_server.get("/tnc_query", (req, res) => {
   tnc.handle_tnc_query(res);
 });
 
-http_server.post("/twilio", (req, res) => {
-  console.log("got message from twilio: " + JSON.stringify(req.body));
+http_server.post("/webhooks", (req, res) => {
+  console.log("got webhook message: " + JSON.stringify(req.body));
+  // res.redirect("http://84.228.238.88:1300/webhooks");
   res.end();
 });
 
@@ -404,7 +405,7 @@ function handle_http_request(req, res) {
     comment_json._id = uuidv1();
     comment_json.time = new Date().toUTCString();
     comment_json.user_ip = rAddr_to_ip(req.connection.remoteAddress);
-    comment_json.browser_id = browser_id;
+    // comment_json.browser_id = browser_id;
     //
     fb_dbo.collection("comments").updateOne(
       { room_title: room_title },
