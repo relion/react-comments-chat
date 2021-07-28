@@ -1,3 +1,4 @@
+require("dotenv").config();
 var os = require("os");
 console.log(`WatchCast Server has Started on ${os.hostname()} ...`);
 var tnc = require("./tnc.js");
@@ -5,9 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const dns = require("dns");
 var MongoClient = require("mongodb").MongoClient;
-var mongo_url = `mongodb://${fs.readFileSync(
-  process.cwd() + path.sep + "mongo-auth.txt"
-)}localhost:27017/`;
+var mongo_url = `mongodb://${process.env.DB_MONGO_AUTH}localhost:27017/`;
 var nodemailer = require("nodemailer");
 var smtpTransport = require("nodemailer-smtp-transport");
 const dateFormat = require("dateformat");
@@ -16,8 +15,8 @@ let transporter = nodemailer.createTransport(
   smtpTransport({
     service: "gmail",
     auth: {
-      user: "watchcast.project@gmail.com",
-      pass: fs.readFileSync(process.cwd() + path.sep + "pwd.txt", "utf8"),
+      user: process.env.ADMIN_EMAIL,
+      pass: process.env.ADMIN_EMAIL_PWD,
     },
   })
 );
